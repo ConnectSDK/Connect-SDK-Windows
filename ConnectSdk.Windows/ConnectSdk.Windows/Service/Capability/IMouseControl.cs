@@ -1,6 +1,6 @@
 ﻿using Windows.Foundation;
 
-namespace MyRemote.ConnectSDK.Service.Capability
+namespace ConnectSdk.Windows.Service.Capability
 {
     public interface IMouseControl
     {

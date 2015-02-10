@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Windows.Data.Json;
 using ConnectSdk.Windows.Core.Upnp.Ssdp;
-using MyRemote.ConnectSDK.Service.Config;
+using ConnectSdk.Windows.Service.Config;
 
-namespace MyRemote.ConnectSDK.Discovery.Provider
+namespace ConnectSdk.Windows.Discovery.Provider
 {
     public class SsdpDiscoveryProvider : IDiscoveryProvider
     {
@@ -28,9 +28,6 @@ namespace MyRemote.ConnectSDK.Discovery.Provider
 
         private readonly Regex uuidReg;
 
-        //private Thread responseThread;
-        //private Thread notifyThread;
-
         public SsdpDiscoveryProvider()
         {
             uuidReg = new Regex("(?<=uuid:)(.+?)(?=(::)|$)");
@@ -49,12 +46,12 @@ namespace MyRemote.ConnectSDK.Discovery.Provider
 
         private void MSsdpSocketOnNotifyReceivedChanged(object sender, string message)
         {
-            HandleDatagramPacket(new SSDP.ParsedDatagram(message));
+            HandleDatagramPacket(new ParsedDatagram(message));
         }
 
         private void MSsdpSocketOnMessageReceivedChanged(object sender, string message)
         {
-            HandleDatagramPacket(new SSDP.ParsedDatagram(message));
+            HandleDatagramPacket(new ParsedDatagram(message));
         }
 
         private void OpenSocket()
@@ -92,35 +89,27 @@ namespace MyRemote.ConnectSDK.Discovery.Provider
                 }
             }
 
-            foreach (var searchTarget in serviceFilters)
+            foreach (var message in serviceFilters.Select(searchTarget => new SSDPSearchMsg(searchTarget.GetNamedString("filter"))).Select(search => search.ToString()))
             {
-                var search = new SSDPSearchMsg(searchTarget.GetNamedString("filter"));
-
-                var message = search.ToString();
-
-                /* Send 3 times like WindowsMedia */
-                //for (int i = 0; i < 3; i++)
+                //Task task = new Task(() =>
+                //{
+                try
                 {
-                    //Task task = new Task(() =>
-                    //{
-                        try
-                        {
-                            if (mSsdpSocket != null)
-                            {
-                                var result = mSsdpSocket.Send(message).Result;
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            throw e;
-                        }
-                    //});
-                    
-                    //task.Start();
-                    //task.Wait(3000);
-                    //todo: add here a delay of 1 sec between calls
+                    if (mSsdpSocket != null)
+                    {
+                        // ReSharper disable once UnusedVariable
+                        var result = mSsdpSocket.Send(message).Result;
+                    }
                 }
-                //break;
+                catch (Exception e)
+                {
+                    throw e;
+                }
+                //});
+                    
+                //task.Start();
+                //task.Wait(3000);
+                //todo: add here a delay of 1 sec between calls
             }
             
         }
@@ -181,15 +170,15 @@ namespace MyRemote.ConnectSDK.Discovery.Provider
             return serviceFilters.Count == 0;
         }
 
-        private void HandleDatagramPacket(SSDP.ParsedDatagram pd)
+        private void HandleDatagramPacket(ParsedDatagram pd)
         {
 
-            string serviceFilter = pd.Data[pd.PacketType.Equals(SSDP.SlNotify) ? SSDP.Nt : SSDP.St];
+            var serviceFilter = pd.Data[pd.PacketType.Equals(SSDP.SlNotify) ? SSDP.Nt : SSDP.St];
 
             if (serviceFilter == null || SSDP.SlMsearch.Equals(pd.PacketType) || !IsSearchingForFilter(serviceFilter))
                 return;
 
-            string usnKey = pd.Data[SSDP.Usn];
+            var usnKey = pd.Data[SSDP.Usn];
 
             if (string.IsNullOrEmpty(usnKey))
                 return;
@@ -216,7 +205,7 @@ namespace MyRemote.ConnectSDK.Discovery.Provider
             }
             else
             {
-                string location = pd.Data[SSDP.Location];
+                var location = pd.Data[SSDP.Location];
 
                 if (string.IsNullOrEmpty(location))
                     return;
@@ -248,7 +237,7 @@ namespace MyRemote.ConnectSDK.Discovery.Provider
 
         public void GetLocationData(string location, string uuid, string serviceFilter)
         {
-            var device = ConnectSdk.Windows.Core.Upnp.Device.CreateInstanceFromXml(location, serviceFilter);
+            var device = Core.Upnp.Device.CreateInstanceFromXml(location, serviceFilter);
 
             if (device != null)
             {
@@ -328,7 +317,7 @@ namespace MyRemote.ConnectSDK.Discovery.Provider
             return false;
         }
 
-        public bool ContainsServicesWithFilter(ConnectSdk.Windows.Core.Upnp.Device device, string filter)
+        public bool ContainsServicesWithFilter(Core.Upnp.Device device, string filter)
         {
             //  TODO  Implement this method.  Not sure why needs to happen since there are now required services.
             return true;

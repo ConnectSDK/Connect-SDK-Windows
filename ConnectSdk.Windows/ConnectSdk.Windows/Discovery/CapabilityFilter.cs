@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace MyRemote.ConnectSDK.Discovery
+namespace ConnectSdk.Windows.Discovery
 {
     /**
      * CapabilityFilter is an object that wraps a List of required capabilities. This CapabilityFilter is used for determining which devices will appear in DiscoveryManager's compatibleDevices array. The contents of a CapabilityFilter's array must be any of the string constants defined in the Capability Class constants.
@@ -99,7 +99,5 @@ namespace MyRemote.ConnectSDK.Discovery
         {
             Capabilities.AddRange(capabilitiesParam);
         }
-
-
     }
 }

@@ -6,8 +6,8 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Data.Json;
-using MyRemote.ConnectSDK.Service.Capability.Listeners;
-using MyRemote.ConnectSDK.Service.Command;
+using ConnectSdk.Windows.Service.Capability.Listeners;
+using ConnectSdk.Windows.Service.Command;
 
 
 namespace MyRemote.ConnectSDK.Service

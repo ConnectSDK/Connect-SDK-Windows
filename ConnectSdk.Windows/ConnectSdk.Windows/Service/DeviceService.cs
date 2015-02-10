@@ -1,20 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Windows.Data.Json;
-using Windows.Networking.Sockets;
 using ConnectSdk.Windows.Core;
-using MyRemote.ConnectSDK.Core;
-using MyRemote.ConnectSDK.Etc.Helper;
-using MyRemote.ConnectSDK.Service.Capability;
-using MyRemote.ConnectSDK.Service.Capability.Listeners;
-using MyRemote.ConnectSDK.Service.Command;
-using MyRemote.ConnectSDK.Service.Config;
-using MyRemote.ConnectSDK.Service.Sessions;
+using ConnectSdk.Windows.Etc.Helper;
+using ConnectSdk.Windows.Service.Capability;
+using ConnectSdk.Windows.Service.Capability.Listeners;
+using ConnectSdk.Windows.Service.Command;
+using ConnectSdk.Windows.Service.Config;
+using MyRemote.ConnectSDK.Service;
 
-namespace MyRemote.ConnectSDK.Service
+namespace ConnectSdk.Windows.Service
 {
     /**
      * ###Overview
@@ -121,12 +116,12 @@ namespace MyRemote.ConnectSDK.Service
                 JsonObject jsonConfig = json.GetNamedObject(KEY_CONFIG);
                 ServiceConfig serviceConfig = null;
                 if (jsonConfig != null)
-                    serviceConfig = Config.ServiceConfig.GetConfig(jsonConfig);
+                    serviceConfig = ServiceConfig.GetConfig(jsonConfig);
 
                 JsonObject jsonDescription = json.GetNamedObject(KEY_DESC);
                 ServiceDescription serviceDescription = null;
                 if (jsonDescription != null)
-                    serviceDescription = Config.ServiceDescription.GetDescription(jsonDescription);
+                    serviceDescription = ServiceDescription.GetDescription(jsonDescription);
 
                 if (serviceConfig == null || serviceDescription == null)
                     return null;

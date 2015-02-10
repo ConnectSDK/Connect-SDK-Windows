@@ -69,6 +69,10 @@
     <Compile Include="Discovery\IDiscoveryProvider.cs" />
     <Compile Include="Discovery\IDiscoveryProviderListener.cs" />
     <Compile Include="Discovery\Provider\SSDPDiscoveryProvider.cs" />
+    <Compile Include="Etc\Helper\DeviceServiceReachability.cs" />
+    <Compile Include="Etc\Helper\DeviceServiceReachabilityListener.cs" />
+    <Compile Include="Etc\Helper\HttpMessage.cs" />
+    <Compile Include="Etc\Helper\Storage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\Capability\AppState.cs" />
     <Compile Include="Service\Capability\CapabilityMethods.cs" />

@@ -1,9 +1,8 @@
 using ConnectSdk.Windows.Core;
-using MyRemote.ConnectSDK.Core;
-using MyRemote.ConnectSDK.Service.Capability.Listeners;
-using MyRemote.ConnectSDK.Service.Command;
+using ConnectSdk.Windows.Service.Capability.Listeners;
+using ConnectSdk.Windows.Service.Command;
 
-namespace MyRemote.ConnectSDK.Service.Capability
+namespace ConnectSdk.Windows.Service.Capability
 {
     public interface ITvControl
     {

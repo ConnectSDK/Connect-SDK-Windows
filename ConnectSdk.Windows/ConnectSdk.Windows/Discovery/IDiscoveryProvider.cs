@@ -1,6 +1,6 @@
 ﻿using Windows.Data.Json;
 
-namespace MyRemote.ConnectSDK.Discovery
+namespace ConnectSdk.Windows.Discovery
 {
     /// <summary>
     ///  ###Overview
@@ -30,24 +30,27 @@ namespace MyRemote.ConnectSDK.Discovery
         /// </summary>
         void Reset();
 
-        /// <summary> Adds a DiscoveryProviderListener, which should be the DiscoveryManager /// </summary>
+        /// <summary> 
+        /// Adds a DiscoveryProviderListener, which should be the DiscoveryManager 
+        /// </summary>
         void AddListener(IDiscoveryProviderListener listener);
 
-        /// <summary> Removes a DiscoveryProviderListener. /// </summary>
+        /// <summary> 
+        /// Removes a DiscoveryProviderListener. 
+        /// </summary>
+        /// <param name="listener">The listener to be removed</param>
         void RemoveListener(IDiscoveryProviderListener listener);
 
         /// <summary>
         ///  Adds a device filter for a particular DeviceService.
-        /// 
-        ///  @param parameters Parameters to be used for discovering a particular DeviceService
         /// </summary>
+        /// <param name="parameters">Parameters to be used for discovering a particular DeviceService</param>
         void AddDeviceFilter(JsonObject parameters);
 
         /// <summary>
         ///  Removes a device filter for a particular DeviceService. If the DiscoveryProvider has no other devices to be searching for, the DiscoveryProvider will be stopped and de-referenced.
-        /// 
-        ///  @param parameters Parameters to be used for discovering a particular DeviceService
         /// </summary>
+        /// <param name="parameters">Parameters to be used for removing a particular DeviceService</param>
         void RemoveDeviceFilter(JsonObject parameters);
 
         /// <summary>

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MyRemote.ConnectSDK.Service.Command
+namespace ConnectSdk.Windows.Service.Command
 {
     public class ServiceCommandError
     {

@@ -1,10 +1,15 @@
-﻿namespace MyRemote.ConnectSDK.Service.Capability
+﻿namespace ConnectSdk.Windows.Service.Capability
 {
     public class AppState
     {
-        /** Whether the app is currently running. */
+        /// <summary>
+        /// Whether the app is currently running.
+        /// </summary>
         public bool Running;
-        /** Whether the app is currently visible. */
+
+        /// <summary>
+        /// Whether the app is currently visible.
+        /// </summary>
         public bool Visible;
 
         public AppState(bool running, bool visible)

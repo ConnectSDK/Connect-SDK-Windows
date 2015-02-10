@@ -5,15 +5,14 @@ using System.Reflection;
 using Windows.Data.Json;
 using ConnectSdk.Windows.Core;
 using ConnectSdk.Windows.Device;
+using ConnectSdk.Windows.Discovery.Provider;
 using ConnectSdk.Windows.Service;
-using MyRemote.ConnectSDK.Core;
+using ConnectSdk.Windows.Service.Command;
+using ConnectSdk.Windows.Service.Config;
 using MyRemote.ConnectSDK.Device;
-using MyRemote.ConnectSDK.Discovery.Provider;
 using MyRemote.ConnectSDK.Service;
-using MyRemote.ConnectSDK.Service.Command;
-using MyRemote.ConnectSDK.Service.Config;
 
-namespace MyRemote.ConnectSDK.Discovery
+namespace ConnectSdk.Windows.Discovery
 {
     /**
      * ###Overview
@@ -190,7 +189,7 @@ namespace MyRemote.ConnectSDK.Discovery
 
         public void RegisterDefaultDeviceTypes()
         {
-            RegisterDeviceService(typeof(WebOSTVService), typeof(SsdpDiscoveryProvider));
+            //RegisterDeviceService(typeof(WebOSTVService), typeof(SsdpDiscoveryProvider));
             RegisterDeviceService(typeof(NetcastTVService), typeof(SsdpDiscoveryProvider));
             //registerDeviceService(typeof(DIALService), typeof(SSDPDiscoveryProvider));
             //registerDeviceService(typeof(RokuService), typeof(SSDPDiscoveryProvider));
@@ -214,7 +213,7 @@ namespace MyRemote.ConnectSDK.Discovery
             if (!IsAssignableFrom(discoveryClass, typeof(IDiscoveryProvider)))
                 return;
 
-            IDiscoveryProvider discoveryProvider = discoveryProviders.FirstOrDefault(dp => dp.GetType() == discoveryClass);
+            var discoveryProvider = discoveryProviders.FirstOrDefault(dp => dp.GetType() == discoveryClass);
 
             if (discoveryProvider == null)
             {
@@ -374,7 +373,7 @@ namespace MyRemote.ConnectSDK.Discovery
 
         public bool IsNetcast(ServiceDescription description)
         {
-            bool isNetcastTv = false;
+            var isNetcastTv = false;
 
             var modelName = description.ModelName;
             var modelDescription = description.ModelDescription;
@@ -443,21 +442,7 @@ namespace MyRemote.ConnectSDK.Discovery
         {
             var deviceIsNew = !allDevices.ContainsKey(serviceDescription.IpAddress);
 
-            //if (deviceIsNew)
-            //{
-            //    if (connectableDeviceStore != null)
-            //    {
-            //        if (device != null)
-            //        {
-            //            allDevices.Add(serviceDescription.IpAddress, device);
-            //            device.IpAddress = serviceDescription.IpAddress;
-            //        }
-            //    }
-            //}
-            //else
-            //{
-            ConnectableDevice device = allDevices[serviceDescription.IpAddress];
-            //}
+            var device = allDevices[serviceDescription.IpAddress];
 
             if (device == null)
             {
@@ -484,9 +469,7 @@ namespace MyRemote.ConnectSDK.Discovery
 
         public void OnServiceRemoved(IDiscoveryProvider provider, ServiceDescription serviceDescription)
         {
-            //Log.d("Connect SDK", "onServiceRemoved: friendlyName: " + serviceDescription.getFriendlyName());
-
-            ConnectableDevice device = allDevices[serviceDescription.IpAddress];
+            var device = allDevices[serviceDescription.IpAddress];
 
             if (device != null)
             {

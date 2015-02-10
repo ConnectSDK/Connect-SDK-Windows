@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Windows.Data.Json;
 
-namespace MyRemote.ConnectSDK.Service.Config
+namespace ConnectSdk.Windows.Service.Config
 {
     public class ServiceDescription
     {
@@ -67,7 +67,7 @@ namespace MyRemote.ConnectSDK.Service.Config
 
         public string Version { get; set; }
 
-        public List<ConnectSdk.Windows.Core.Upnp.Service.Service> ServiceList { get; set; }
+        public List<Core.Upnp.Service.Service> ServiceList { get; set; }
 
         public string LocationXml { get; set; }
 

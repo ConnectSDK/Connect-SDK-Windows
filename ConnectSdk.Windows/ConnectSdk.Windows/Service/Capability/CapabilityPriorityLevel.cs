@@ -1,6 +1,6 @@
-﻿namespace MyRemote.ConnectSDK.Service.Capability
+﻿namespace ConnectSdk.Windows.Service.Capability
 {
-    public enum CapabilityPriorityLevel : int
+    public enum CapabilityPriorityLevel
     {
         // ReSharper disable InconsistentNaming
         VERY_LOW = 1,

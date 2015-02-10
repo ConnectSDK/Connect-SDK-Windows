@@ -12,15 +12,15 @@ using Windows.Data.Json;
 using Windows.Foundation;
 using ConnectSdk.Windows.Core;
 using ConnectSdk.Windows.Device.Netcast;
+using ConnectSdk.Windows.Discovery;
+using ConnectSdk.Windows.Etc.Helper;
 using ConnectSdk.Windows.Service;
+using ConnectSdk.Windows.Service.Capability;
+using ConnectSdk.Windows.Service.Capability.Listeners;
+using ConnectSdk.Windows.Service.Command;
+using ConnectSdk.Windows.Service.Config;
 using MyRemote.ConnectSDK.Core;
-using MyRemote.ConnectSDK.Discovery;
-using MyRemote.ConnectSDK.Etc.Helper;
 using MyRemote.ConnectSDK.Service;
-using MyRemote.ConnectSDK.Service.Capability;
-using MyRemote.ConnectSDK.Service.Capability.Listeners;
-using MyRemote.ConnectSDK.Service.Command;
-using MyRemote.ConnectSDK.Service.Config;
 using MyRemote.ConnectSDK.Service.Sessions;
 
 namespace MyRemote.ConnectSDK.Service

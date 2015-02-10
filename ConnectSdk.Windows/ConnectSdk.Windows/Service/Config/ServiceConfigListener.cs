@@ -1,4 +1,4 @@
-namespace MyRemote.ConnectSDK.Service.Config
+namespace ConnectSdk.Windows.Service.Config
 {
     public interface IServiceConfigListener
     {

@@ -1,7 +1,7 @@
 ﻿using System;
-using MyRemote.ConnectSDK.Service.Command;
+using ConnectSdk.Windows.Service.Command;
 
-namespace MyRemote.ConnectSDK.Service.Capability.Listeners
+namespace ConnectSdk.Windows.Service.Capability.Listeners
 {
     public class LoadEventArgs : EventArgs
     {

@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Windows.Data.Json;
 using ConnectSdk.Windows.Core;
+using ConnectSdk.Windows.Service;
+using ConnectSdk.Windows.Service.Config;
 using MyRemote.ConnectSDK.Device;
-using MyRemote.ConnectSDK.Service.Config;
 
 namespace ConnectSdk.Windows.Device
 {
@@ -207,7 +208,7 @@ namespace ConnectSdk.Windows.Device
             var service = services.GetNamedObject(uuid);
 
             if (service == null) return null;
-            var serviceConfigInfo = service.GetNamedObject(MyRemote.ConnectSDK.Service.DeviceService.KEY_CONFIG);
+            var serviceConfigInfo = service.GetNamedObject(DeviceService.KEY_CONFIG);
 
             return serviceConfigInfo != null ? ServiceConfig.GetConfig(serviceConfigInfo) : null;
         }

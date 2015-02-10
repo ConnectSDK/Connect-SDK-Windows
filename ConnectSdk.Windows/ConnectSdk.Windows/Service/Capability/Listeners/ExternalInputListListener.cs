@@ -1,6 +1,6 @@
-﻿namespace MyRemote.ConnectSDK.Service.Capability.Listeners
-{
-    public class ExternalInputListListener : ResponseListener
-    {
-    }
-}
+﻿//namespace MyRemote.ConnectSDK.Service.Capability.Listeners
+//{
+//    public class ExternalInputListListener : ResponseListener
+//    {
+//    }
+//}

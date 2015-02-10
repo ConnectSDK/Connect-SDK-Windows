@@ -1,9 +1,8 @@
 ﻿using System;
 using Windows.Data.Json;
 using ConnectSdk.Windows.Core;
-using MyRemote.ConnectSDK.Core;
 
-namespace MyRemote.ConnectSDK.Service.Config
+namespace ConnectSdk.Windows.Service.Config
 {
     public class ServiceConfig
     {

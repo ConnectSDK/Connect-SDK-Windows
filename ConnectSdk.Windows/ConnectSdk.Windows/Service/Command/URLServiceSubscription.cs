@@ -1,22 +1,23 @@
 ﻿using System.Collections.Generic;
 using Windows.Data.Json;
+using ConnectSdk.Windows.Service.Capability.Listeners;
+using MyRemote.ConnectSDK.Service;
 
-
-namespace MyRemote.ConnectSDK.Service.Command
+namespace ConnectSdk.Windows.Service.Command
 {
     public class UrlServiceSubscription : ServiceCommand, IServiceSubscription // where T : ResponseListener
     {
-        private readonly List<Capability.Listeners.ResponseListener> listeners = new List<Capability.Listeners.ResponseListener>();
+        private readonly List<ResponseListener> listeners = new List<ResponseListener>();
 
         public UrlServiceSubscription(DeviceService service, string uri, JsonObject payload,
-            Capability.Listeners.ResponseListener listener) :
+            ResponseListener listener) :
                 base(service, uri, payload, listener)
         {
         }
 
 
         public UrlServiceSubscription(DeviceService service, string uri, JsonObject payload, bool isWebOs,
-            Capability.Listeners.ResponseListener listener) :
+            ResponseListener listener) :
                 base(service, uri, payload, isWebOs, listener)
         {
             if (isWebOs)
@@ -45,14 +46,14 @@ namespace MyRemote.ConnectSDK.Service.Command
             //Service.Unsubscribe(this);
         }
 
-        public Capability.Listeners.ResponseListener AddListener(Capability.Listeners.ResponseListener listener)
+        public ResponseListener AddListener(ResponseListener listener)
         {
             listeners.Add(listener);
 
             return listener;
         }
 
-        public void RemoveListener(Capability.Listeners.ResponseListener listener)
+        public void RemoveListener(ResponseListener listener)
         {
             listeners.Remove(listener);
         }
@@ -62,7 +63,7 @@ namespace MyRemote.ConnectSDK.Service.Command
             listeners.Clear();
         }
 
-        public List<Capability.Listeners.ResponseListener> GetListeners()
+        public List<ResponseListener> GetListeners()
         {
             return listeners;
         }

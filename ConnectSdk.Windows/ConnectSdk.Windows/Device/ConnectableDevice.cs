@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using Windows.Data.Json;
 using ConnectSdk.Windows.Core;
+using ConnectSdk.Windows.Discovery;
 using ConnectSdk.Windows.Service;
+using ConnectSdk.Windows.Service.Command;
+using ConnectSdk.Windows.Service.Config;
 using MyRemote.ConnectSDK.Device;
-using MyRemote.ConnectSDK.Discovery;
 using MyRemote.ConnectSDK.Service;
-using MyRemote.ConnectSDK.Service.Command;
-using MyRemote.ConnectSDK.Service.Config;
 
 namespace ConnectSdk.Windows.Device
 {

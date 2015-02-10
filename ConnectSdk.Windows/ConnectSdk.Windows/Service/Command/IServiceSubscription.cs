@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using MyRemote.ConnectSDK.Service.Capability.Listeners;
+using ConnectSdk.Windows.Service.Capability.Listeners;
 
-namespace MyRemote.ConnectSDK.Service.Command
+namespace ConnectSdk.Windows.Service.Command
 {
     /// <summary>
     /// Internal implementation of ServiceSubscription for URL-based commands

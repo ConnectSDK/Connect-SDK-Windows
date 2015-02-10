@@ -1,8 +1,7 @@
 ﻿using ConnectSdk.Windows.Device;
-using MyRemote.ConnectSDK.Device;
-using MyRemote.ConnectSDK.Service.Command;
+using ConnectSdk.Windows.Service.Command;
 
-namespace MyRemote.ConnectSDK.Discovery
+namespace ConnectSdk.Windows.Discovery
 {
     /// <summary>
     /// The DiscoveryManagerListener will receive events on the addition/removal/update of ConnectableDevice objects.
@@ -12,34 +11,30 @@ namespace MyRemote.ConnectSDK.Discovery
     {
         ///  <summary>
         /// This method will be fired upon the first discovery of one of a ConnectableDevice's DeviceServices.
-        ///
-        /// @param manager DiscoveryManager that found device
-        /// @param device ConnectableDevice that was found
         /// </summary>
+        /// <param name="manager">DiscoveryManager that found the device</param>
+        /// <param name="device">ConnectableDevice that was found</param>
         void OnDeviceAdded(DiscoveryManager manager, ConnectableDevice device);
 
         /// <summary>
         /// This method is called when a ConnectableDevice gains or loses a DeviceService in discovery.
-        ///
-        /// @param manager DiscoveryManager that updated device
-        /// @param device ConnectableDevice that was updated
         /// </summary>
+        /// <param name="manager">DiscoveryManager that updated device</param>
+        /// <param name="device">ConnectableDevice that was updated</param>
         void OnDeviceUpdated(DiscoveryManager manager, ConnectableDevice device);
 
         /// <summary>
         /// This method is called when connections to all of a ConnectableDevice's DeviceServices are lost. This will usually happen when a device is powered off or loses internet connectivity.
-        ///
-        /// @param manager DiscoveryManager that lost device
-        /// @param device ConnectableDevice that was lost
         /// </summary>
+        /// <param name="manager">DiscoveryManager that lost device</param>
+        /// <param name="device">ConnectableDevice that was lost</param>
         void OnDeviceRemoved(DiscoveryManager manager, ConnectableDevice device);
 
         /// <summary>
         /// In the event of an error in the discovery phase, this method will be called.
-        ///
-        /// @param manager DiscoveryManager that experienced the error
-        /// @param error NSError with a description of the failure
         /// </summary>
+        /// <param name="manager">DiscoveryManager that experienced the error</param>
+        /// <param name="error">NSError with a description of the failure</param>
         void OnDiscoveryFailed(DiscoveryManager manager, ServiceCommandError error);
     }
 }

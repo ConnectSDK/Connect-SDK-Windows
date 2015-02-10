@@ -1,7 +1,6 @@
-using MyRemote.ConnectSDK.Service.Capability.Listeners;
-using MyRemote.ConnectSDK.Service.Sessions;
+using ConnectSdk.Windows.Service.Capability.Listeners;
 
-namespace MyRemote.ConnectSDK.Service.Capability
+namespace ConnectSdk.Windows.Service.Capability
 {
     public interface IMediaPlayer
     {
@@ -14,7 +13,7 @@ namespace MyRemote.ConnectSDK.Service.Capability
         void PlayMedia(string url, string mimeType, string title, string description, string iconSrc, bool shouldLoop,
             ResponseListener listener);
 
-        void CloseMedia(LaunchSession launchSession, ResponseListener listener);
+        //void CloseMedia(LaunchSession launchSession, ResponseListener listener);
 
     }
 }

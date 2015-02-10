@@ -1,4 +1,4 @@
-﻿namespace MyRemote.ConnectSDK.Service.Capability
+﻿namespace ConnectSdk.Windows.Service.Capability
 {
     public class Launcher : CapabilityMethods
     {

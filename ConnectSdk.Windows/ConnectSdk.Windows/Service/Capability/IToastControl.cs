@@ -1,9 +1,8 @@
 ﻿using Windows.Data.Json;
 using ConnectSdk.Windows.Core;
-using MyRemote.ConnectSDK.Core;
-using MyRemote.ConnectSDK.Service.Capability.Listeners;
+using ConnectSdk.Windows.Service.Capability.Listeners;
 
-namespace MyRemote.ConnectSDK.Service.Capability
+namespace ConnectSdk.Windows.Service.Capability
 {
     public interface IToastControl
     {

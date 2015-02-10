@@ -1,7 +1,7 @@
 using System;
 using Windows.Data.Json;
 
-namespace MyRemote.ConnectSDK.Service.Config
+namespace ConnectSdk.Windows.Service.Config
 {
     public class NetcastTvServiceConfig : ServiceConfig
     {

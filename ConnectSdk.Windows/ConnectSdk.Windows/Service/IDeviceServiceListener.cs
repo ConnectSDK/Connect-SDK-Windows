@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using ConnectSdk.Windows.Service;
 
-namespace MyRemote.ConnectSDK.Service
+namespace ConnectSdk.Windows.Service
 {
     public interface IDeviceServiceListener
     {

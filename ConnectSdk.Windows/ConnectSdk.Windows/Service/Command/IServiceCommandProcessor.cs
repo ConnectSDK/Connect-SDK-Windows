@@ -1,4 +1,6 @@
-﻿namespace MyRemote.ConnectSDK.Service.Command
+﻿using MyRemote.ConnectSDK.Service;
+
+namespace ConnectSdk.Windows.Service.Command
 {
     public interface IServiceCommandProcessor
     {

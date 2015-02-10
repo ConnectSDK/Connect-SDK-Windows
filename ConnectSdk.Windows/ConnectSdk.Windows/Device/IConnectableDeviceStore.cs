@@ -1,6 +1,6 @@
 ﻿using Windows.Data.Json;
 using ConnectSdk.Windows.Device;
-using MyRemote.ConnectSDK.Service.Config;
+using ConnectSdk.Windows.Service.Config;
 
 namespace MyRemote.ConnectSDK.Device
 {

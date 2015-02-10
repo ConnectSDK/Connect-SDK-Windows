@@ -1,6 +1,6 @@
-﻿using MyRemote.ConnectSDK.Service.Capability.Listeners;
+﻿using ConnectSdk.Windows.Service.Capability.Listeners;
 
-namespace MyRemote.ConnectSDK.Service.Capability
+namespace ConnectSdk.Windows.Service.Capability
 {
     public interface IPowerControl
     {
