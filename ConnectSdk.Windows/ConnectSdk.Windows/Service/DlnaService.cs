@@ -18,65 +18,17 @@ namespace ConnectSdk.Windows.Service
     public class DlnaService : DeviceService, IMediaControl, IMediaPlayer
     {
         // ReSharper disable InconsistentNaming
-        public static string ID = "DLNA";
         private const string DATA = "XMLData";
         private const string ACTION = "SOAPAction";
         private const string ACTION_CONTENT = "\"urn:schemas-upnp-org:service:AVTransport:1#%s\"";
+        public static string ID = "DLNA";
         // ReSharper restore InconsistentNaming
 
-        string controlUrl;
+        private string controlUrl;
 
         public DlnaService(ServiceDescription serviceDescription, ServiceConfig serviceConfig)
             : base(serviceDescription, serviceConfig)
         {
-        }
-
-        public new static JsonObject DiscoveryParameters()
-        {
-            var ps = new JsonObject();
-
-            try
-            {
-                ps.Add("serviceId", JsonValue.CreateStringValue(ID));
-                ps.Add("filter", JsonValue.CreateStringValue("urn:schemas-upnp-org:device:MediaRenderer:1"));
-            }
-            catch (Exception e)
-            {
-
-            }
-
-            return ps;
-        }
-
-
-        public override void SetServiceDescription(ServiceDescription serviceDescriptionParam)
-        {
-            serviceDescription = serviceDescriptionParam;
-            var sb = new StringBuilder();
-            var serviceList = serviceDescription.ServiceList;
-
-            if (serviceList == null) return;
-            foreach (Core.Upnp.Service.Service service in serviceList)
-            {
-                if (!service.ServiceType.Contains("AVTransport")) continue;
-                sb.Append(service.BaseUrl);
-                sb.Append(service.ControlUrl);
-                break;
-            }
-            controlUrl = sb.ToString();
-        }
-
-        /******************
-        MEDIA PLAYER
-        *****************/
-        public IMediaPlayer GetMediaPlayer()
-        {
-            return this;
-        }
-
-        public CapabilityPriorityLevel GetMediaPlayerCapabilityLevel()
-        {
-            return CapabilityPriorityLevel.NORMAL;
         }
 
 
@@ -85,100 +37,15 @@ namespace ConnectSdk.Windows.Service
             const string method = "Stop";
             const string instanceId = "0";
 
-            var payload = GetMethodBody(instanceId, method);
+            JsonObject payload = GetMethodBody(instanceId, method);
 
             var request = new ServiceCommand(this, method, payload, listener);
-            request.send();
+            request.Send();
         }
 
 
-        public void DisplayMedia(string url, string mimeType, string title, string description, string iconSrc, ResponseListener listener)
-        {
-            var stopDisplayMediaListener = new ResponseListener();
-            stopDisplayMediaListener.Success += (sender, args) =>
-            {
-                const string instanceId = "0";
-                var mediaElements = mimeType.Split('/');
-                var mediaType = mediaElements[0];
-                var mediaFormat = mediaElements[1];
+        #region Media Control
 
-                if (string.IsNullOrEmpty(mediaType) || string.IsNullOrEmpty(mediaFormat))
-                {
-                    Util.PostError(listener, new ServiceCommandError(0, "You must provide a valid mimeType (audio/*,  video/*, etc)", null));
-                    return;
-                }
-
-                mediaFormat = "mp3".Equals(mediaFormat) ? "mpeg" : mediaFormat;
-                var mMimeType = string.Format("{0}/{1}", mediaType, mediaFormat);
-
-                var playDisplayMediaListener = new ResponseListener();
-                playDisplayMediaListener.Success += (sender2, args2) =>
-                {
-                    const string playMethod = "Play";
-
-                    var parameters = new Dictionary<string, string> {{"Speed", "1"}};
-
-                    var payload = GetMethodBody(instanceId, playMethod, parameters);
-
-                    var playResponseListener = new ResponseListener();
-
-                    playDisplayMediaListener.Success += (o, eventArgs) =>
-                    {
-                        var launchSession = new LaunchSession {Service = this, SessionType = LaunchSessionType.Media};
-                        Util.PostSuccess(listener, new MediaLaunchObject(launchSession, this));
-                    };
-
-                    playDisplayMediaListener.Error += (o, eventArgs) =>
-                    {
-                        if (listener != null)
-                        {
-                            listener.OnError(eventArgs);
-                        }
-                    };
-                    var playrequest = new ServiceCommand(this, playMethod, payload, playResponseListener);
-                    playrequest.send();
-                };
-                playDisplayMediaListener.Error += (sender2, args2) =>
-                {
-                    if (listener != null)
-                    {
-                        stopDisplayMediaListener.OnError(args2);
-                    }
-                };
-                const string method = "SetAVTransportURI";
-                var httpMessage = GetSetAvTransportUriBody(method, instanceId, url, mMimeType, title);
-
-                var request = new ServiceCommand(this, method, httpMessage, playDisplayMediaListener);
-                request.send();
-            };
-
-            stopDisplayMediaListener.Error += (sender, args) =>
-            {
-                throw new Exception(args.ToString());
-            };
-            Stop(stopDisplayMediaListener);
-        }
-
-        public void DisplayImage(string url, string mimeType, string title, string description, string iconSrc, ResponseListener listener)
-        {
-            DisplayMedia(url, mimeType, title, description, iconSrc, listener);
-        }
-
-        public void PlayMedia(string url, string mimeType, string title, string description, string iconSrc, bool shouldLoop, ResponseListener listener)
-        {
-            DisplayMedia(url, mimeType, title, description, iconSrc, listener);
-
-        }
-
-        public void CloseMedia(LaunchSession launchSession, ResponseListener listener)
-        {
-            if (launchSession.Service is DlnaService)
-                ((DlnaService)launchSession.Service).Stop(listener);
-        }
-
-        /******************
-        MEDIA CONTROL
-        *****************/
         public IMediaControl GetMediaControl()
         {
             return this;
@@ -196,10 +63,10 @@ namespace ConnectSdk.Windows.Service
 
             var parameters = new Dictionary<string, string> {{"Speed", "1"}};
 
-            var payload = GetMethodBody(instanceId, method, parameters);
+            JsonObject payload = GetMethodBody(instanceId, method, parameters);
 
             var request = new ServiceCommand(this, method, payload, listener);
-            request.send();
+            request.Send();
         }
 
         public void Pause(ResponseListener listener)
@@ -207,10 +74,10 @@ namespace ConnectSdk.Windows.Service
             const string method = "Pause";
             const string instanceId = "0";
 
-            var payload = GetMethodBody(instanceId, method);
+            JsonObject payload = GetMethodBody(instanceId, method);
 
             var request = new ServiceCommand(this, method, payload, listener);
-            request.send();
+            request.Send();
         }
 
         public void Rewind(ResponseListener listener)
@@ -228,18 +95,216 @@ namespace ConnectSdk.Windows.Service
             const string method = "Seek";
             const string instanceId = "0";
 
-            var second = (position / 1000) % 60;
-            var minute = (position / (1000 * 60)) % 60;
-            var hour = (position / (1000 * 60 * 60)) % 24;
+            long second = (position/1000)%60;
+            long minute = (position/(1000*60))%60;
+            long hour = (position/(1000*60*60))%24;
 
-            var time = string.Format("{0}:{1}:{2}", hour, minute, second);
+            string time = string.Format("{0}:{1}:{2}", hour, minute, second);
 
             var parameters = new Dictionary<string, string> {{"Unit", "REL_TIME"}, {"Target", time}};
 
-            var payload = GetMethodBody(instanceId, method, parameters);
+            JsonObject payload = GetMethodBody(instanceId, method, parameters);
 
             var request = new ServiceCommand(this, method, payload, listener);
-            request.send();
+            request.Send();
+        }
+
+        public void GetDuration(ResponseListener listener)
+        {
+            var responseListener = new ResponseListener();
+
+            responseListener.Success += (sender, args) =>
+            {
+                string strDuration = ParseData((string) args, "TrackDuration");
+
+                long milliTimes = ConvertStrTimeFormatToLong(strDuration)*1000;
+
+                if (listener != null)
+                {
+                    listener.OnSuccess(milliTimes);
+                }
+            };
+
+            responseListener.Error += (sender, args) =>
+            {
+                if (listener != null)
+                {
+                    listener.OnError(args);
+                }
+            };
+        }
+
+        public void GetPosition(ResponseListener listener)
+        {
+            var responseListener = new ResponseListener();
+
+            responseListener.Success += (sender, args) =>
+            {
+                string strDuration = ParseData((string) args, "RelTime");
+
+                long milliTimes = ConvertStrTimeFormatToLong(strDuration)*1000;
+
+                if (listener != null)
+                {
+                    listener.OnSuccess(milliTimes);
+                }
+            };
+
+            responseListener.Error += (sender, args) =>
+            {
+                if (listener != null)
+                {
+                    listener.OnError(args);
+                }
+            };
+        }
+
+        public void GetPlayState(ResponseListener listener)
+        {
+            if (listener != null)
+                listener.OnError(ServiceCommandError.NotSupported());
+        }
+
+        public IServiceSubscription SubscribePlayState(ResponseListener listener)
+        {
+            if (listener != null)
+                listener.OnError(ServiceCommandError.NotSupported());
+
+            return null;
+        }
+
+        #endregion
+
+        #region Media Player
+
+        public IMediaPlayer GetMediaPlayer()
+        {
+            return this;
+        }
+
+        public CapabilityPriorityLevel GetMediaPlayerCapabilityLevel()
+        {
+            return CapabilityPriorityLevel.NORMAL;
+        }
+
+        public void DisplayImage(string url, string mimeType, string title, string description, string iconSrc,
+            ResponseListener listener)
+        {
+            DisplayMedia(url, mimeType, title, description, iconSrc, listener);
+        }
+
+        public void PlayMedia(string url, string mimeType, string title, string description, string iconSrc,
+            bool shouldLoop, ResponseListener listener)
+        {
+            DisplayMedia(url, mimeType, title, description, iconSrc, listener);
+        }
+
+        public void CloseMedia(LaunchSession launchSession, ResponseListener listener)
+        {
+            if (launchSession.Service is DlnaService)
+                ((DlnaService) launchSession.Service).Stop(listener);
+        }
+
+        #endregion
+
+        public new static JsonObject DiscoveryParameters()
+        {
+            var ps = new JsonObject();
+
+            try
+            {
+                ps.Add("serviceId", JsonValue.CreateStringValue(ID));
+                ps.Add("filter", JsonValue.CreateStringValue("urn:schemas-upnp-org:device:MediaRenderer:1"));
+            }
+            catch (Exception e)
+            {
+            }
+
+            return ps;
+        }
+
+
+        public override void SetServiceDescription(ServiceDescription serviceDescriptionParam)
+        {
+            serviceDescription = serviceDescriptionParam;
+            var sb = new StringBuilder();
+            List<Core.Upnp.Service.Service> serviceList = serviceDescription.ServiceList;
+
+            if (serviceList == null) return;
+            foreach (Core.Upnp.Service.Service service in serviceList)
+            {
+                if (!service.ServiceType.Contains("AVTransport")) continue;
+                sb.Append(service.BaseUrl);
+                sb.Append(service.ControlUrl);
+                break;
+            }
+            controlUrl = sb.ToString();
+        }
+
+        public void DisplayMedia(string url, string mimeType, string title, string description, string iconSrc,
+            ResponseListener listener)
+        {
+            var stopDisplayMediaListener = new ResponseListener();
+            stopDisplayMediaListener.Success += (sender, args) =>
+            {
+                const string instanceId = "0";
+                string[] mediaElements = mimeType.Split('/');
+                string mediaType = mediaElements[0];
+                string mediaFormat = mediaElements[1];
+
+                if (string.IsNullOrEmpty(mediaType) || string.IsNullOrEmpty(mediaFormat))
+                {
+                    Util.PostError(listener,
+                        new ServiceCommandError(0, "You must provide a valid mimeType (audio/*,  video/*, etc)", null));
+                    return;
+                }
+
+                mediaFormat = "mp3".Equals(mediaFormat) ? "mpeg" : mediaFormat;
+                string mMimeType = string.Format("{0}/{1}", mediaType, mediaFormat);
+
+                var playDisplayMediaListener = new ResponseListener();
+                playDisplayMediaListener.Success += (sender2, args2) =>
+                {
+                    const string playMethod = "Play";
+
+                    var parameters = new Dictionary<string, string> {{"Speed", "1"}};
+
+                    JsonObject payload = GetMethodBody(instanceId, playMethod, parameters);
+
+                    var playResponseListener = new ResponseListener();
+
+                    playDisplayMediaListener.Success += (o, eventArgs) =>
+                    {
+                        var launchSession = new LaunchSession {Service = this, SessionType = LaunchSessionType.Media};
+                        Util.PostSuccess(listener, new MediaLaunchObject(launchSession, this));
+                    };
+
+                    playDisplayMediaListener.Error += (o, eventArgs) =>
+                    {
+                        if (listener != null)
+                        {
+                            listener.OnError(eventArgs);
+                        }
+                    };
+                    var playrequest = new ServiceCommand(this, playMethod, payload, playResponseListener);
+                    playrequest.Send();
+                };
+                playDisplayMediaListener.Error += (sender2, args2) =>
+                {
+                    if (listener != null)
+                    {
+                        stopDisplayMediaListener.OnError(args2);
+                    }
+                };
+                const string method = "SetAVTransportURI";
+                JsonObject httpMessage = GetSetAvTransportUriBody(method, instanceId, url, mMimeType, title);
+
+                var request = new ServiceCommand(this, method, httpMessage, playDisplayMediaListener);
+                request.Send();
+            };
+
+            stopDisplayMediaListener.Error += (sender, args) => { throw new Exception(args.ToString()); };
+            Stop(stopDisplayMediaListener);
         }
 
         private void GetPositionInfo(ResponseListener listener)
@@ -247,7 +312,7 @@ namespace ConnectSdk.Windows.Service
             const string method = "GetPositionInfo";
             const string instanceId = "0";
 
-            var payload = GetMethodBody(instanceId, method);
+            JsonObject payload = GetMethodBody(instanceId, method);
 
             var responseListener = new ResponseListener();
 
@@ -265,58 +330,7 @@ namespace ConnectSdk.Windows.Service
                     listener.OnError(args);
             };
             var request = new ServiceCommand(this, method, payload, responseListener);
-            request.send();
-        }
-
-        public void GetDuration(ResponseListener listener)
-        {
-            var responseListener = new ResponseListener();
-
-            responseListener.Success += (sender, args) =>
-            {
-                var strDuration = parseData((string)args, "TrackDuration");
-
-                var milliTimes = ConvertStrTimeFormatToLong(strDuration) * 1000;
-
-                if (listener != null)
-                {
-                    listener.OnSuccess(milliTimes);
-                }
-            };
-
-            responseListener.Error += (sender, args) =>
-            {
-                if (listener != null)
-                {
-                    listener.OnError(args);
-                }
-            };
-
-        }
-
-        public void GetPosition(ResponseListener listener)
-        {
-            var responseListener = new ResponseListener();
-
-            responseListener.Success += (sender, args) =>
-            {
-                var strDuration = parseData((string)args, "RelTime");
-
-                var milliTimes = ConvertStrTimeFormatToLong(strDuration) * 1000;
-
-                if (listener != null)
-                {
-                    listener.OnSuccess(milliTimes);
-                }
-            };
-
-            responseListener.Error += (sender, args) =>
-            {
-                if (listener != null)
-                {
-                    listener.OnError(args);
-                }
-            };
+            request.Send();
         }
 
         //public void getPlayState(ResponseListener listener)
@@ -329,10 +343,11 @@ namespace ConnectSdk.Windows.Service
         //    throw new NotImplementedException();
         //}
 
-        public static JsonObject GetSetAvTransportUriBody(string method, string instanceId, string mediaURL, string mime, string title)
+        public static JsonObject GetSetAvTransportUriBody(string method, string instanceId, string mediaURL, string mime,
+            string title)
         {
             const string action = "SetAVTransportURI";
-            var metadata = GetMetadata(mediaURL, mime, title);
+            string metadata = GetMetadata(mediaURL, mime, title);
 
             var sb = new StringBuilder();
             sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
@@ -357,7 +372,6 @@ namespace ConnectSdk.Windows.Service
             }
             catch
             {
-
             }
 
             return obj;
@@ -373,7 +387,8 @@ namespace ConnectSdk.Windows.Service
             var sb = new StringBuilder();
 
             sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-            sb.Append("<s:Envelope s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\" xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\">");
+            sb.Append(
+                "<s:Envelope s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\" xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\">");
 
             sb.Append("<s:Body>");
             sb.Append("<u:" + method + " xmlns:u=\"urn:schemas-upnp-org:service:AVTransport:1\">");
@@ -383,8 +398,8 @@ namespace ConnectSdk.Windows.Service
             {
                 foreach (var entry in parameters)
                 {
-                    var key = entry.Key;
-                    var value = entry.Value;
+                    string key = entry.Key;
+                    string value = entry.Value;
 
                     sb.Append("<" + key + ">");
                     sb.Append(value);
@@ -404,7 +419,6 @@ namespace ConnectSdk.Windows.Service
             }
             catch
             {
-
             }
 
             return obj;
@@ -422,7 +436,8 @@ namespace ConnectSdk.Windows.Service
             sb.Append("xmlns:upnp=&quot;urn:schemas-upnp-org:metadata-1-0/upnp/&quot; ");
             sb.Append("xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot;&gt;");
 
-            sb.Append("&lt;item id=&quot;" + id + "&quot; parentID=&quot;" + parentID + "&quot; restricted=&quot;" + restricted + "&quot;&gt;");
+            sb.Append("&lt;item id=&quot;" + id + "&quot; parentID=&quot;" + parentID + "&quot; restricted=&quot;" +
+                      restricted + "&quot;&gt;");
             sb.Append("&lt;dc:title&gt;" + title + "&lt;/dc:title&gt;");
 
             if (mime.StartsWith("image"))
@@ -437,7 +452,8 @@ namespace ConnectSdk.Windows.Service
             {
                 objectClass = "object.item.audioItem";
             }
-            sb.Append("&lt;res protocolInfo=&quot;http-get:*:" + mime + ":DLNA.ORG_OP=01&quot;&gt;" + mediaURL + "&lt;/res&gt;");
+            sb.Append("&lt;res protocolInfo=&quot;http-get:*:" + mime + ":DLNA.ORG_OP=01&quot;&gt;" + mediaURL +
+                      "&lt;/res&gt;");
             sb.Append("&lt;upnp:class&gt;" + objectClass + "&lt;/upnp:class&gt;");
 
             sb.Append("&lt;/item&gt;");
@@ -450,9 +466,9 @@ namespace ConnectSdk.Windows.Service
         {
             var httpClient = new HttpClient();
 
-            var payload = (JsonObject)command.Payload;
+            var payload = (JsonObject) command.Payload;
 
-            var request = HttpMessage.GetDlnaHttpPost(controlUrl, command.Target);
+            HttpRequestMessage request = HttpMessage.GetDlnaHttpPost(controlUrl, command.Target);
             request.Headers.Add(ACTION, payload.GetNamedString(ACTION));
             try
             {
@@ -466,27 +482,27 @@ namespace ConnectSdk.Windows.Service
 
             try
             {
-
-                var response = httpClient.SendAsync(request).Result;
+                HttpResponseMessage response = httpClient.SendAsync(request).Result;
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    var message = response.Content.ReadAsStringAsync().Result;
+                    string message = response.Content.ReadAsStringAsync().Result;
                     Util.PostSuccess(command.ResponseListenerValue, message);
                 }
                 else
                 {
-                    Util.PostError(command.ResponseListenerValue, ServiceCommandError.GetError((int)response.StatusCode));
+                    Util.PostError(command.ResponseListenerValue,
+                        ServiceCommandError.GetError((int) response.StatusCode));
                 }
             }
             catch (Exception e)
             {
-
             }
         }
 
         protected void SetCapabilities()
         {
-            AppendCapabilites(new List<string>{
+            AppendCapabilites(new List<string>
+            {
                 MediaPlayer.DisplayImage,
                 MediaPlayer.DisplayVideo,
                 MediaControl.Play,
@@ -494,36 +510,37 @@ namespace ConnectSdk.Windows.Service
                 MediaPlayer.MetaDataMimeType,
                 MediaControl.Duration,
                 MediaControl.Position,
-                MediaControl.Seek}
+                MediaControl.Seek
+            }
                 );
         }
 
         public LaunchSession DecodeLaunchSession(string type, JsonObject sessionObj)
         {
             if (type != "dlna") return null;
-            
-            var launchSession = LaunchSession.LaunchSessionFromJsonObject(sessionObj);
+
+            LaunchSession launchSession = LaunchSession.LaunchSessionFromJsonObject(sessionObj);
             launchSession.Service = this;
 
             return launchSession;
         }
 
-        //private string parseData(string response, string key)
-        //{
-        //    string startTag = "<" + key + ">";
-        //    string endTag = "</" + key + ">";
+        private string ParseData(string response, string key)
+        {
+            string startTag = "<" + key + ">";
+            string endTag = "</" + key + ">";
 
-        //    int start = response.IndexOf(startTag);
-        //    int end = response.IndexOf(endTag);
+            int start = response.IndexOf(startTag, StringComparison.Ordinal);
+            int end = response.IndexOf(endTag, StringComparison.Ordinal);
 
-        //    string data = response.Substring(start + startTag.Length, end);
+            string data = response.Substring(start + startTag.Length, end);
 
-        //    return data;
-        //}
+            return data;
+        }
 
         private static long ConvertStrTimeFormatToLong(string strTime)
         {
-            var tokens = strTime.Split(':');
+            string[] tokens = strTime.Split(':');
             long time = 0;
 
             foreach (string token in tokens)
@@ -533,20 +550,6 @@ namespace ConnectSdk.Windows.Service
             }
 
             return time;
-        }
-
-        public void GetPlayState(ResponseListener listener)
-        {
-            if (listener != null)
-                listener.OnError(ServiceCommandError.NotSupported());
-        }
-
-        public IServiceSubscription SubscribePlayState(ResponseListener listener)
-        {
-            if (listener != null)
-                listener.OnError(ServiceCommandError.NotSupported());
-
-            return null;
         }
 
         public override bool IsConnectable()

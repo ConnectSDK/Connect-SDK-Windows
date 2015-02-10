@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Windows.Data.Json;
 using ConnectSdk.Windows.Core;
+using ConnectSdk.Windows.Etc.Helper;
 using ConnectSdk.Windows.Service;
 using ConnectSdk.Windows.Service.Config;
 using MyRemote.ConnectSDK.Device;
@@ -125,7 +126,7 @@ namespace ConnectSdk.Windows.Device
 
             foreach (var service in device.GetServices())
             {
-                var serviceInfo = service.toJSONObject();
+                var serviceInfo = service.ToJsonObject();
 
                 if (serviceInfo != null)
                     services.SetNamedValue(service.ServiceDescription.Uuid, serviceInfo);

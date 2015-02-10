@@ -151,7 +151,7 @@ namespace ConnectSdk.Windows.Device
         {
             var added = getMismatchCapabilities(service.Capabilities, GetCapabilities());
 
-            service.setListener(this);
+            service.Listener = this;
 
             foreach (var listener in listeners)
                 listener.OnCapabilityUpdated(this, added, new List<string>());
@@ -179,7 +179,7 @@ namespace ConnectSdk.Windows.Device
             if (service == null)
                 return;
 
-            service.disconnect();
+            service.Disconnect();
 
             services.Remove(serviceId);
 
@@ -291,7 +291,7 @@ namespace ConnectSdk.Windows.Device
         {
             foreach (var service in services.Values)
             {
-                service.disconnect();
+                service.Disconnect();
             }
 
             foreach (var listener in listeners)
@@ -434,7 +434,7 @@ namespace ConnectSdk.Windows.Device
             var jsonServices = new JsonObject();
             foreach (var service in services.Values)
             {
-                var serviceObject = service.toJSONObject();
+                var serviceObject = service.ToJsonObject();
 
                 jsonServices.Add(service.ServiceConfig.ServiceUuid, serviceObject);
             }
