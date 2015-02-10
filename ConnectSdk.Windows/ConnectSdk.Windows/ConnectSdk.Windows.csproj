@@ -124,6 +124,11 @@
     <Compile Include="Service\NetcastTVService.cs" />
     <Compile Include="Service\PairingType.cs" />
     <Compile Include="Service\ServiceCommand.cs" />
+    <Compile Include="Service\Sessions\LaunchSession.cs" />
+    <Compile Include="Service\Sessions\LaunchSessionType.cs" />
+    <Compile Include="Service\Sessions\WebAppSession.cs" />
+    <Compile Include="Service\Sessions\WebAppSessionListener.cs" />
+    <Compile Include="Service\Sessions\WebAppStatus.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

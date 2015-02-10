@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Windows.Data.Json;
 using ConnectSdk.Windows.Service.Capability.Listeners;
-using MyRemote.ConnectSDK.Service;
 
 namespace ConnectSdk.Windows.Service.Command
 {
@@ -18,7 +17,7 @@ namespace ConnectSdk.Windows.Service.Command
 
         public UrlServiceSubscription(DeviceService service, string uri, JsonObject payload, bool isWebOs,
             ResponseListener listener) :
-                base(service, uri, payload, isWebOs, listener)
+                base(service, uri, payload, listener)
         {
             if (isWebOs)
                 HttpMethod = "subscribe";
@@ -31,8 +30,8 @@ namespace ConnectSdk.Windows.Service.Command
 
         public void Subscribe()
         {
-            if (!(HttpMethod.Equals(TYPE_GET)
-                  || HttpMethod.Equals(TYPE_POST)))
+            if (!(HttpMethod.Equals(TypeGet)
+                  || HttpMethod.Equals(TypePost)))
             {
                 HttpMethod = "subscribe";
             }

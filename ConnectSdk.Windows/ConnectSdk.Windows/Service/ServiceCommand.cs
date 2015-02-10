@@ -1,118 +1,76 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 using Windows.Data.Json;
 using ConnectSdk.Windows.Service.Capability.Listeners;
 using ConnectSdk.Windows.Service.Command;
 
-
-namespace MyRemote.ConnectSDK.Service
+namespace ConnectSdk.Windows.Service
 {
     public class ServiceCommand
     {
-        public static string TYPE_REQ = "request";
-        public static string TYPE_SUB = "subscribe";
-        public static string TYPE_GET = "GET";
-        public static string TYPE_POST = "POST";
-        public static string TYPE_DEL = "DELETE";
+        public static string TypeReq = "request";
+        public static string TypeSub = "subscribe";
+        public static string TypeGet = "GET";
+        public static string TypePost = "POST";
+        public static string TypeDel = "DELETE";
 
-        private IServiceCommandProcessor service;
-        private string httpMethod; // WebOSTV: {request, subscribe}, NetcastTV: {GET, POST}
-        private Object payload;
-        private string target;
-        private int requestId;
-
-        ResponseListener responseListener;
+        readonly ResponseListener responseListener;
 
         public ServiceCommand()
         {
         }
 
-        public ServiceCommand(IServiceCommandProcessor service, string targetURL, Object payload, ResponseListener listener)
+        public ServiceCommand(IServiceCommandProcessor service, string targetUrl, Object payload, ResponseListener listener)
         {
-            this.Service = service;
-            this.Target = targetURL;
-            this.Payload = payload;
-            this.responseListener = listener;
-            this.HttpMethod = TYPE_POST;
+            Service = service;
+            Target = targetUrl;
+            Payload = payload;
+            responseListener = listener;
+            HttpMethod = TypePost;
         }
 
-        public ServiceCommand(IServiceCommandProcessor service, string uri, JsonObject payload, bool isWebOS, ResponseListener listener)
+        public ServiceCommand(IServiceCommandProcessor service, string uri, IJsonValue payload, ResponseListener listener)
         {
-            this.Service = service;
+            Service = service;
             Target = uri;
-            this.Payload = payload;
+            Payload = payload;
             RequestId = -1;
             HttpMethod = "request";
             responseListener = listener;
         }
 
-        public IServiceCommandProcessor Service
-        {
-            get { return service; }
-            set { service = value; }
-        }
+        public IServiceCommandProcessor Service { get; set; }
 
-        public string HttpMethod
-        {
-            get { return httpMethod; }
-            set { httpMethod = value; }
-        }
+        public string HttpMethod { get; set; }
 
-        public object Payload
-        {
-            get { return payload; }
-            set { payload = value; }
-        }
+        public object Payload { get; set; }
 
-        public string Target
-        {
-            get { return target; }
-            set { target = value; }
-        }
+        public string Target { get; set; }
 
-        public int RequestId
-        {
-            get { return requestId; }
-            set { requestId = value; }
-        }
+        public int RequestId { get; set; }
 
-        public void send()
+        public void Send()
         {
             Service.SendCommand(this);
         }
 
-
-
-        public HttpRequestMessage getRequest()
+        public HttpRequestMessage GetRequest()
         {
             if (Target == null)
             {
                 throw new Exception("ServiceCommand has no target url");
             }
 
-            if (this.HttpMethod.Equals(TYPE_GET))
+            if (HttpMethod.Equals(TypeGet))
             {
                 return new HttpRequestMessage(System.Net.Http.HttpMethod.Get, Target);
             }
-            else if (this.HttpMethod.Equals(TYPE_POST))
+            if (HttpMethod.Equals(TypePost))
             {
                 return new HttpRequestMessage(System.Net.Http.HttpMethod.Post, Target);
             }
-            else if (this.HttpMethod.Equals(TYPE_DEL))
-            {
-                return new HttpRequestMessage(System.Net.Http.HttpMethod.Delete, Target);
-            }
-            else
-            {
-                return null;
-            }
+            return HttpMethod.Equals(TypeDel) ? new HttpRequestMessage(System.Net.Http.HttpMethod.Delete, Target) : null;
         }
-
 
         public ResponseListener ResponseListenerValue
         {

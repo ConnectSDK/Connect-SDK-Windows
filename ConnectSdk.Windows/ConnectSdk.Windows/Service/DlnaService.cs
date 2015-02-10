@@ -7,35 +7,33 @@ using System.Text;
 using Windows.Data.Json;
 using ConnectSdk.Windows.Core;
 using ConnectSdk.Windows.Etc.Helper;
-using ConnectSdk.Windows.Service;
 using ConnectSdk.Windows.Service.Capability;
 using ConnectSdk.Windows.Service.Capability.Listeners;
 using ConnectSdk.Windows.Service.Command;
 using ConnectSdk.Windows.Service.Config;
-using MyRemote.ConnectSDK.Core;
-using MyRemote.ConnectSDK.Service.Sessions;
+using ConnectSdk.Windows.Service.Sessions;
 
-namespace MyRemote.ConnectSDK.Service
+namespace ConnectSdk.Windows.Service
 {
     public class DlnaService : DeviceService, IMediaControl, IMediaPlayer
     {
         // ReSharper disable InconsistentNaming
         public static string ID = "DLNA";
-        private static string DATA = "XMLData";
-        private static string ACTION = "SOAPAction";
-        private static string ACTION_CONTENT = "\"urn:schemas-upnp-org:service:AVTransport:1#%s\"";
+        private const string DATA = "XMLData";
+        private const string ACTION = "SOAPAction";
+        private const string ACTION_CONTENT = "\"urn:schemas-upnp-org:service:AVTransport:1#%s\"";
         // ReSharper restore InconsistentNaming
 
-        string controlURL;
+        string controlUrl;
 
         public DlnaService(ServiceDescription serviceDescription, ServiceConfig serviceConfig)
             : base(serviceDescription, serviceConfig)
         {
         }
 
-        public static JsonObject discoveryParameters()
+        public new static JsonObject DiscoveryParameters()
         {
-            JsonObject ps = new JsonObject();
+            var ps = new JsonObject();
 
             try
             {
@@ -51,30 +49,26 @@ namespace MyRemote.ConnectSDK.Service
         }
 
 
-        public override void SetServiceDescription(ServiceDescription serviceDescription)
+        public override void SetServiceDescription(ServiceDescription serviceDescriptionParam)
         {
-            ServiceDescription = serviceDescription;
-            StringBuilder sb = new StringBuilder();
+            serviceDescription = serviceDescriptionParam;
+            var sb = new StringBuilder();
             var serviceList = serviceDescription.ServiceList;
 
-            if (serviceList != null)
+            if (serviceList == null) return;
+            foreach (Core.Upnp.Service.Service service in serviceList)
             {
-                for (int i = 0; i < serviceList.Count; i++)
-                {
-                    if (serviceList[i].ServiceType.Contains("AVTransport"))
-                    {
-                        sb.Append(serviceList[i].BaseUrl);
-                        sb.Append(serviceList[i].ControlUrl);
-                        break;
-                    }
-                }
-                controlURL = sb.ToString();
+                if (!service.ServiceType.Contains("AVTransport")) continue;
+                sb.Append(service.BaseUrl);
+                sb.Append(service.ControlUrl);
+                break;
             }
+            controlUrl = sb.ToString();
         }
 
         /******************
-    MEDIA PLAYER
-    *****************/
+        MEDIA PLAYER
+        *****************/
         public IMediaPlayer GetMediaPlayer()
         {
             return this;
@@ -88,52 +82,49 @@ namespace MyRemote.ConnectSDK.Service
 
         public void Stop(ResponseListener listener)
         {
-            string method = "Stop";
-            string instanceId = "0";
+            const string method = "Stop";
+            const string instanceId = "0";
 
-            JsonObject payload = getMethodBody(instanceId, method);
+            var payload = GetMethodBody(instanceId, method);
 
-            ServiceCommand request = new ServiceCommand(this, method, payload, listener);
+            var request = new ServiceCommand(this, method, payload, listener);
             request.send();
         }
 
 
-        public void displayMedia(string url, string mimeType, string title, string description, string iconSrc, ResponseListener listener)
+        public void DisplayMedia(string url, string mimeType, string title, string description, string iconSrc, ResponseListener listener)
         {
-            ResponseListener stopDisplayMediaListener = new ResponseListener();
+            var stopDisplayMediaListener = new ResponseListener();
             stopDisplayMediaListener.Success += (sender, args) =>
             {
-                string instanceId = "0";
-                string[] mediaElements = mimeType.Split('/');
-                string mediaType = mediaElements[0];
-                string mediaFormat = mediaElements[1];
+                const string instanceId = "0";
+                var mediaElements = mimeType.Split('/');
+                var mediaType = mediaElements[0];
+                var mediaFormat = mediaElements[1];
 
-                if (mediaType == null || mediaType.Length == 0 || mediaFormat == null || mediaFormat.Length == 0)
+                if (string.IsNullOrEmpty(mediaType) || string.IsNullOrEmpty(mediaFormat))
                 {
                     Util.PostError(listener, new ServiceCommandError(0, "You must provide a valid mimeType (audio/*,  video/*, etc)", null));
                     return;
                 }
 
                 mediaFormat = "mp3".Equals(mediaFormat) ? "mpeg" : mediaFormat;
-                string mMimeType = string.Format("{0}/{1}", mediaType, mediaFormat);
+                var mMimeType = string.Format("{0}/{1}", mediaType, mediaFormat);
 
-                ResponseListener playDisplayMediaListener = new ResponseListener();
+                var playDisplayMediaListener = new ResponseListener();
                 playDisplayMediaListener.Success += (sender2, args2) =>
                 {
-                    string playMethod = "Play";
+                    const string playMethod = "Play";
 
-                    Dictionary<string, string> parameters = new Dictionary<string, string>();
-                    parameters.Add("Speed", "1");
+                    var parameters = new Dictionary<string, string> {{"Speed", "1"}};
 
-                    JsonObject payload = getMethodBody(instanceId, playMethod, parameters);
+                    var payload = GetMethodBody(instanceId, playMethod, parameters);
 
-                    ResponseListener playResponseListener = new ResponseListener();
+                    var playResponseListener = new ResponseListener();
 
                     playDisplayMediaListener.Success += (o, eventArgs) =>
                     {
-                        LaunchSession launchSession = new LaunchSession();
-                        launchSession.Service = this;
-                        launchSession.SessionType = LaunchSessionType.Media;
+                        var launchSession = new LaunchSession {Service = this, SessionType = LaunchSessionType.Media};
                         Util.PostSuccess(listener, new MediaLaunchObject(launchSession, this));
                     };
 
@@ -144,7 +135,7 @@ namespace MyRemote.ConnectSDK.Service
                             listener.OnError(eventArgs);
                         }
                     };
-                    ServiceCommand playrequest = new ServiceCommand(this, playMethod, payload, playResponseListener);
+                    var playrequest = new ServiceCommand(this, playMethod, payload, playResponseListener);
                     playrequest.send();
                 };
                 playDisplayMediaListener.Error += (sender2, args2) =>
@@ -154,10 +145,10 @@ namespace MyRemote.ConnectSDK.Service
                         stopDisplayMediaListener.OnError(args2);
                     }
                 };
-                string method = "SetAVTransportURI";
-                JsonObject httpMessage = getSetAVTransportURIBody(method, instanceId, url, mMimeType, title);
+                const string method = "SetAVTransportURI";
+                var httpMessage = GetSetAvTransportUriBody(method, instanceId, url, mMimeType, title);
 
-                ServiceCommand request = new ServiceCommand(this, method, httpMessage, playDisplayMediaListener);
+                var request = new ServiceCommand(this, method, httpMessage, playDisplayMediaListener);
                 request.send();
             };
 
@@ -170,12 +161,12 @@ namespace MyRemote.ConnectSDK.Service
 
         public void DisplayImage(string url, string mimeType, string title, string description, string iconSrc, ResponseListener listener)
         {
-            displayMedia(url, mimeType, title, description, iconSrc, listener);
+            DisplayMedia(url, mimeType, title, description, iconSrc, listener);
         }
 
         public void PlayMedia(string url, string mimeType, string title, string description, string iconSrc, bool shouldLoop, ResponseListener listener)
         {
-            displayMedia(url, mimeType, title, description, iconSrc, listener);
+            DisplayMedia(url, mimeType, title, description, iconSrc, listener);
 
         }
 
@@ -200,26 +191,25 @@ namespace MyRemote.ConnectSDK.Service
 
         public void Play(ResponseListener listener)
         {
-            string method = "Play";
-            string instanceId = "0";
+            const string method = "Play";
+            const string instanceId = "0";
 
-            Dictionary<string, string> parameters = new Dictionary<string, string>();
-            parameters.Add("Speed", "1");
+            var parameters = new Dictionary<string, string> {{"Speed", "1"}};
 
-            JsonObject payload = getMethodBody(instanceId, method, parameters);
+            var payload = GetMethodBody(instanceId, method, parameters);
 
-            ServiceCommand request = new ServiceCommand(this, method, payload, listener);
+            var request = new ServiceCommand(this, method, payload, listener);
             request.send();
         }
 
         public void Pause(ResponseListener listener)
         {
-            string method = "Pause";
-            string instanceId = "0";
+            const string method = "Pause";
+            const string instanceId = "0";
 
-            JsonObject payload = getMethodBody(instanceId, method);
+            var payload = GetMethodBody(instanceId, method);
 
-            ServiceCommand request = new ServiceCommand(this, method, payload, listener);
+            var request = new ServiceCommand(this, method, payload, listener);
             request.send();
         }
 
@@ -235,33 +225,31 @@ namespace MyRemote.ConnectSDK.Service
 
         public void Seek(long position, ResponseListener listener)
         {
-            string method = "Seek";
-            string instanceId = "0";
+            const string method = "Seek";
+            const string instanceId = "0";
 
-            long second = (position / 1000) % 60;
-            long minute = (position / (1000 * 60)) % 60;
-            long hour = (position / (1000 * 60 * 60)) % 24;
+            var second = (position / 1000) % 60;
+            var minute = (position / (1000 * 60)) % 60;
+            var hour = (position / (1000 * 60 * 60)) % 24;
 
-            string time = string.Format("{0}:{1}:{2}", hour, minute, second);
+            var time = string.Format("{0}:{1}:{2}", hour, minute, second);
 
-            Dictionary<string, string> parameters = new Dictionary<string, string>();
-            parameters.Add("Unit", "REL_TIME");
-            parameters.Add("Target", time);
+            var parameters = new Dictionary<string, string> {{"Unit", "REL_TIME"}, {"Target", time}};
 
-            JsonObject payload = getMethodBody(instanceId, method, parameters);
+            var payload = GetMethodBody(instanceId, method, parameters);
 
-            ServiceCommand request = new ServiceCommand(this, method, payload, listener);
+            var request = new ServiceCommand(this, method, payload, listener);
             request.send();
         }
 
-        private void getPositionInfo(ResponseListener listener)
+        private void GetPositionInfo(ResponseListener listener)
         {
-            string method = "GetPositionInfo";
-            string instanceId = "0";
+            const string method = "GetPositionInfo";
+            const string instanceId = "0";
 
-            JsonObject payload = getMethodBody(instanceId, method);
+            var payload = GetMethodBody(instanceId, method);
 
-            ResponseListener responseListener = new ResponseListener();
+            var responseListener = new ResponseListener();
 
             responseListener.Success += (sender, args) =>
             {
@@ -276,19 +264,19 @@ namespace MyRemote.ConnectSDK.Service
                 if (listener != null)
                     listener.OnError(args);
             };
-            ServiceCommand request = new ServiceCommand(this, method, payload, responseListener);
+            var request = new ServiceCommand(this, method, payload, responseListener);
             request.send();
         }
 
         public void GetDuration(ResponseListener listener)
         {
-            ResponseListener responseListener = new ResponseListener();
+            var responseListener = new ResponseListener();
 
             responseListener.Success += (sender, args) =>
             {
-                string strDuration = parseData((string)args, "TrackDuration");
+                var strDuration = parseData((string)args, "TrackDuration");
 
-                long milliTimes = convertStrTimeFormatToLong(strDuration) * 1000;
+                var milliTimes = ConvertStrTimeFormatToLong(strDuration) * 1000;
 
                 if (listener != null)
                 {
@@ -308,13 +296,13 @@ namespace MyRemote.ConnectSDK.Service
 
         public void GetPosition(ResponseListener listener)
         {
-            ResponseListener responseListener = new ResponseListener();
+            var responseListener = new ResponseListener();
 
             responseListener.Success += (sender, args) =>
             {
-                string strDuration = parseData((string)args, "RelTime");
+                var strDuration = parseData((string)args, "RelTime");
 
-                long milliTimes = convertStrTimeFormatToLong(strDuration) * 1000;
+                var milliTimes = ConvertStrTimeFormatToLong(strDuration) * 1000;
 
                 if (listener != null)
                 {
@@ -341,12 +329,12 @@ namespace MyRemote.ConnectSDK.Service
         //    throw new NotImplementedException();
         //}
 
-        public static JsonObject getSetAVTransportURIBody(string method, string instanceId, string mediaURL, string mime, string title)
+        public static JsonObject GetSetAvTransportUriBody(string method, string instanceId, string mediaURL, string mime, string title)
         {
-            string action = "SetAVTransportURI";
-            string metadata = getMetadata(mediaURL, mime, title);
+            const string action = "SetAVTransportURI";
+            var metadata = GetMetadata(mediaURL, mime, title);
 
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
             sb.Append(
                 "<s:Envelope s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\" xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\">");
@@ -361,13 +349,13 @@ namespace MyRemote.ConnectSDK.Service
             sb.Append("</s:Body>");
             sb.Append("</s:Envelope>");
 
-            JsonObject obj = new JsonObject();
+            var obj = new JsonObject();
             try
             {
                 obj.Add(DATA, JsonValue.CreateStringValue(sb.ToString()));
                 obj.Add(ACTION, JsonValue.CreateStringValue(string.Format(ACTION_CONTENT, method)));
             }
-            catch (Exception e)
+            catch
             {
 
             }
@@ -375,14 +363,14 @@ namespace MyRemote.ConnectSDK.Service
             return obj;
         }
 
-        private JsonObject getMethodBody(string instanceId, string method)
+        private JsonObject GetMethodBody(string instanceId, string method)
         {
-            return getMethodBody(instanceId, method, null);
+            return GetMethodBody(instanceId, method, null);
         }
 
-        public static JsonObject getMethodBody(string instanceId, string method, Dictionary<string, string> parameters)
+        public static JsonObject GetMethodBody(string instanceId, string method, Dictionary<string, string> parameters)
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
 
             sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
             sb.Append("<s:Envelope s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\" xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\">");
@@ -395,8 +383,8 @@ namespace MyRemote.ConnectSDK.Service
             {
                 foreach (var entry in parameters)
                 {
-                    string key = entry.Key;
-                    string value = entry.Value;
+                    var key = entry.Key;
+                    var value = entry.Value;
 
                     sb.Append("<" + key + ">");
                     sb.Append(value);
@@ -408,13 +396,13 @@ namespace MyRemote.ConnectSDK.Service
             sb.Append("</s:Body>");
             sb.Append("</s:Envelope>");
 
-            JsonObject obj = new JsonObject();
+            var obj = new JsonObject();
             try
             {
                 obj.Add(DATA, JsonValue.CreateStringValue(sb.ToString()));
                 obj.Add(ACTION, JsonValue.CreateStringValue(string.Format(ACTION_CONTENT, method)));
             }
-            catch (Exception e)
+            catch
             {
 
             }
@@ -422,13 +410,13 @@ namespace MyRemote.ConnectSDK.Service
             return obj;
         }
 
-        public static string getMetadata(string mediaURL, string mime, string title)
+        public static string GetMetadata(string mediaURL, string mime, string title)
         {
-            string id = "1000";
-            string parentID = "0";
-            string restricted = "0";
+            const string id = "1000";
+            const string parentID = "0";
+            const string restricted = "0";
             string objectClass = null;
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
 
             sb.Append("&lt;DIDL-Lite xmlns=&quot;urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/&quot; ");
             sb.Append("xmlns:upnp=&quot;urn:schemas-upnp-org:metadata-1-0/upnp/&quot; ");
@@ -458,27 +446,23 @@ namespace MyRemote.ConnectSDK.Service
             return sb.ToString();
         }
 
-        public override void SendCommand(ServiceCommand mCommand)
+        public override void SendCommand(ServiceCommand command)
         {
+            var httpClient = new HttpClient();
 
-            ServiceCommand command = (ServiceCommand)mCommand;
-            HttpClient httpClient = new HttpClient();
+            var payload = (JsonObject)command.Payload;
 
-            JsonObject payload = (JsonObject)command.Payload;
-
-            HttpRequestMessage request = HttpMessage.GetDlnaHttpPost(controlURL, command.Target);
+            var request = HttpMessage.GetDlnaHttpPost(controlUrl, command.Target);
             request.Headers.Add(ACTION, payload.GetNamedString(ACTION));
             try
             {
                 request.Content =
-                    new StreamContent(new MemoryStream(System.Text.Encoding.UTF8.GetBytes(payload.GetNamedString(DATA))));
+                    new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes(payload.GetNamedString(DATA))));
             }
             catch (Exception e)
             {
                 throw e;
             }
-
-
 
             try
             {
@@ -486,26 +470,23 @@ namespace MyRemote.ConnectSDK.Service
                 var response = httpClient.SendAsync(request).Result;
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    string message = response.Content.ReadAsStringAsync().Result;
+                    var message = response.Content.ReadAsStringAsync().Result;
                     Util.PostSuccess(command.ResponseListenerValue, message);
                 }
                 else
                 {
                     Util.PostError(command.ResponseListenerValue, ServiceCommandError.GetError((int)response.StatusCode));
                 }
-
-
             }
             catch (Exception e)
             {
 
             }
-
         }
 
-        protected void setCapabilities()
+        protected void SetCapabilities()
         {
-            appendCapabilites(new List<string>{
+            AppendCapabilites(new List<string>{
                 MediaPlayer.DisplayImage,
                 MediaPlayer.DisplayVideo,
                 MediaControl.Play,
@@ -517,40 +498,38 @@ namespace MyRemote.ConnectSDK.Service
                 );
         }
 
-        public override LaunchSession decodeLaunchSession(string type, JsonObject sessionObj)
+        public LaunchSession DecodeLaunchSession(string type, JsonObject sessionObj)
         {
-            if (type == "dlna")
-            {
-                LaunchSession launchSession = LaunchSession.LaunchSessionFromJsonObject(sessionObj);
-                launchSession.Service = this;
+            if (type != "dlna") return null;
+            
+            var launchSession = LaunchSession.LaunchSessionFromJsonObject(sessionObj);
+            launchSession.Service = this;
 
-                return launchSession;
-            }
-            return null;
+            return launchSession;
         }
 
-        private string parseData(string response, string key)
+        //private string parseData(string response, string key)
+        //{
+        //    string startTag = "<" + key + ">";
+        //    string endTag = "</" + key + ">";
+
+        //    int start = response.IndexOf(startTag);
+        //    int end = response.IndexOf(endTag);
+
+        //    string data = response.Substring(start + startTag.Length, end);
+
+        //    return data;
+        //}
+
+        private static long ConvertStrTimeFormatToLong(string strTime)
         {
-            string startTag = "<" + key + ">";
-            string endTag = "</" + key + ">";
-
-            int start = response.IndexOf(startTag);
-            int end = response.IndexOf(endTag);
-
-            string data = response.Substring(start + startTag.Length, end);
-
-            return data;
-        }
-
-        private long convertStrTimeFormatToLong(string strTime)
-        {
-            string[] tokens = strTime.Split(':');
+            var tokens = strTime.Split(':');
             long time = 0;
 
-            for (int i = 0; i < tokens.Length; i++)
+            foreach (string token in tokens)
             {
                 time *= 60;
-                time += int.Parse(tokens[i]);
+                time += int.Parse(token);
             }
 
             return time;
@@ -570,17 +549,17 @@ namespace MyRemote.ConnectSDK.Service
             return null;
         }
 
-        public override bool isConnectable()
+        public override bool IsConnectable()
         {
             return true;
         }
 
-        public override bool isConnected()
+        public override bool IsConnected()
         {
             return connected;
         }
 
-        public override void connect()
+        public override void Connect()
         {
             //  TODO:  Fix this for roku.  Right now it is using the InetAddress reachable function.  Need to use an HTTP Method.
             //		mServiceReachability = DeviceServiceReachability.getReachability(serviceDescription.getIpAddress(), this);
@@ -588,10 +567,10 @@ namespace MyRemote.ConnectSDK.Service
 
             connected = true;
 
-            reportConnected(true);
+            ReportConnected(true);
         }
 
-        public override void disconnect()
+        public override void Disconnect()
         {
             connected = false;
 
@@ -602,11 +581,11 @@ namespace MyRemote.ConnectSDK.Service
                 Listener.OnDisconnect(this, null);
         }
 
-        public void onLoseReachability(DeviceServiceReachability reachability)
+        public override void OnLoseReachability(DeviceServiceReachability reachability)
         {
             if (connected)
             {
-                disconnect();
+                Disconnect();
             }
             else
             {

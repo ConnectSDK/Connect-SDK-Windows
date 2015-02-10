@@ -9,7 +9,6 @@ using ConnectSdk.Windows.Service;
 using ConnectSdk.Windows.Service.Command;
 using ConnectSdk.Windows.Service.Config;
 using MyRemote.ConnectSDK.Device;
-using MyRemote.ConnectSDK.Service;
 
 namespace ConnectSdk.Windows.Device
 {
@@ -113,7 +112,7 @@ namespace ConnectSdk.Windows.Device
 
                     if (jsonService != null)
                     {
-                        var newService = DeviceService.getService(jsonService);
+                        var newService = DeviceService.GetService(jsonService);
                         if (newService != null)
                             AddService(newService);
                     }
@@ -279,9 +278,9 @@ namespace ConnectSdk.Windows.Device
         /// </summary>
         public void Connect()
         {
-            foreach (var service in services.Values.Where(service => !service.isConnected()))
+            foreach (var service in services.Values.Where(service => !service.IsConnected()))
             {
-                service.connect();
+                service.Connect();
             }
         }
 
@@ -305,7 +304,7 @@ namespace ConnectSdk.Windows.Device
         /// <returns></returns>
         public bool IsConnected()
         {
-            return services.Values.All(service => service.isConnected());
+            return services.Values.All(service => service.IsConnected());
         }
 
         /// <summary>
@@ -313,7 +312,7 @@ namespace ConnectSdk.Windows.Device
         /// </summary>
         public bool IsConnectable()
         {
-            return services.Values.Any(service => service.isConnectable());
+            return services.Values.Any(service => service.IsConnectable());
         }
 
         /// <summary> 
@@ -339,7 +338,7 @@ namespace ConnectSdk.Windows.Device
         /// </example>
         public bool HasCapability(string capability)
         {
-            return services.Values.Any(service => service.hasCapability(capability));
+            return services.Values.Any(service => service.HasCapability(capability));
         }
 
         /// <summary>
@@ -348,7 +347,7 @@ namespace ConnectSdk.Windows.Device
         /// </summary>
         public bool HasAnyCapability(List<string> capabilities)
         {
-            return services.Values.Any(service => service.hasAnyCapability(capabilities));
+            return services.Values.Any(service => service.HasAnyCapability(capabilities));
         }
 
         /// <summary>

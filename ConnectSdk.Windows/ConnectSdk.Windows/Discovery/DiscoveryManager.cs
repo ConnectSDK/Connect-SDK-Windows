@@ -10,7 +10,6 @@ using ConnectSdk.Windows.Service;
 using ConnectSdk.Windows.Service.Command;
 using ConnectSdk.Windows.Service.Config;
 using MyRemote.ConnectSDK.Device;
-using MyRemote.ConnectSDK.Service;
 
 namespace ConnectSdk.Windows.Discovery
 {
@@ -190,7 +189,7 @@ namespace ConnectSdk.Windows.Discovery
         public void RegisterDefaultDeviceTypes()
         {
             //RegisterDeviceService(typeof(WebOSTVService), typeof(SsdpDiscoveryProvider));
-            RegisterDeviceService(typeof(NetcastTVService), typeof(SsdpDiscoveryProvider));
+            RegisterDeviceService(typeof(NetcastTvService), typeof(SsdpDiscoveryProvider));
             //registerDeviceService(typeof(DIALService), typeof(SSDPDiscoveryProvider));
             //registerDeviceService(typeof(RokuService), typeof(SSDPDiscoveryProvider));
             //registerDeviceService(typeof(CastService), typeof(CastDiscoveryProvider));
@@ -498,7 +497,7 @@ namespace ConnectSdk.Windows.Discovery
 
             if (IsNetcast(desc))
             {
-                deviceServiceClass = typeof(NetcastTVService);
+                deviceServiceClass = typeof(NetcastTvService);
                 var m = deviceServiceClass.GetRuntimeMethod("discoveryParameters", new Type[] { });
                 var result = m.Invoke(null, new object[0]);
 
@@ -565,7 +564,7 @@ namespace ConnectSdk.Windows.Discovery
                 device.RemoveServiceByName(desc.ServiceId);
             }
 
-            var deviceService = DeviceService.getService(deviceServiceClass, desc, serviceConfig);
+            var deviceService = DeviceService.GetService(deviceServiceClass, desc, serviceConfig);
             deviceService.ServiceDescription = desc;
             device.AddService(deviceService);
         }

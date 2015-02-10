@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using System.Linq;
 using Windows.Networking.Connectivity;
+using ConnectSdk.Windows.Service.Capability.Listeners;
+using ConnectSdk.Windows.Service.Command;
 
 namespace ConnectSdk.Windows.Core
 {
@@ -27,19 +29,19 @@ namespace ConnectSdk.Windows.Core
             return DateTime.Now.Millisecond;
         }
 
-        //public static void PostSuccess(ResponseListener listener, object obj) 
-        //{
-        //    if (listener == null)
-        //        return;
-        //    listener.OnSuccess(obj);
-        //}
+        public static void PostSuccess(ResponseListener listener, object obj)
+        {
+            if (listener == null)
+                return;
+            listener.OnSuccess(obj);
+        }
 
-        //public static void PostError(ResponseListener listener, ServiceCommandError error)
-        //{
-        //    if (listener == null)
-        //        return;
-        //    listener.OnError(error);
-        //}
+        public static void PostError(ResponseListener listener, ServiceCommandError error)
+        {
+            if (listener == null)
+                return;
+            listener.OnError(error);
+        }
 
         /// <summary>
         /// checks if there is a wireless network connection

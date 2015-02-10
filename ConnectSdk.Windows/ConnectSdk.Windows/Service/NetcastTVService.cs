@@ -14,43 +14,40 @@ using ConnectSdk.Windows.Core;
 using ConnectSdk.Windows.Device.Netcast;
 using ConnectSdk.Windows.Discovery;
 using ConnectSdk.Windows.Etc.Helper;
-using ConnectSdk.Windows.Service;
 using ConnectSdk.Windows.Service.Capability;
 using ConnectSdk.Windows.Service.Capability.Listeners;
 using ConnectSdk.Windows.Service.Command;
 using ConnectSdk.Windows.Service.Config;
-using MyRemote.ConnectSDK.Core;
-using MyRemote.ConnectSDK.Service;
-using MyRemote.ConnectSDK.Service.Sessions;
+using ConnectSdk.Windows.Service.Sessions;
 
-namespace MyRemote.ConnectSDK.Service
+namespace ConnectSdk.Windows.Service
 {
-    public class NetcastTVService : DeviceService, ILauncher, IMediaControl, IMediaPlayer, ITvControl, IVolumeControl,
+    public class NetcastTvService : DeviceService, ILauncher, IMediaControl, IMediaPlayer, ITvControl, IVolumeControl,
         IExternalInputControl, IMouseControl, ITextInputControl, IPowerControl, IKeyControl
     {
 
-        public static string ID = "Netcast TV";
+        public static string Id = "Netcast TV";
 
-        public static string UDAP_PATH_PAIRING = "/udap/api/pairing";
-        public static string UDAP_PATH_DATA = "/udap/api/data";
-        public static string UDAP_PATH_COMMAND = "/udap/api/command";
-        public static string UDAP_PATH_EVENT = "/udap/api/event";
+        public static string UdapPathPairing = "/udap/api/pairing";
+        public static string UdapPathData = "/udap/api/data";
+        public static string UdapPathCommand = "/udap/api/command";
+        public static string UdapPathEvent = "/udap/api/event";
 
-        public static string UDAP_PATH_APPTOAPP_DATA = "/udap/api/apptoapp/data/";
-        public static string UDAP_PATH_APPTOAPP_COMMAND = "/udap/api/apptoapp/command/";
-        public static string ROAP_PATH_APP_STORE = "/roap/api/command/";
+        public static string UdapPathApptoappData = "/udap/api/apptoapp/data/";
+        public static string UdapPathApptoappCommand = "/udap/api/apptoapp/command/";
+        public static string RoapPathAppStore = "/roap/api/command/";
 
-        public static string UDAP_API_PAIRING = "pairing";
-        public static string UDAP_API_COMMAND = "command";
-        public static string UDAP_API_EVENT = "event";
+        public static string UdapApiPairing = "pairing";
+        public static string UdapApiCommand = "command";
+        public static string UdapApiEvent = "event";
 
-        public static string TARGET_CHANNEL_LIST = "channel_list";
-        public static string TARGET_CURRENT_CHANNEL = "cur_channel";
-        public static string TARGET_VOLUME_INFO = "volume_info";
-        public static string TARGET_APPLIST_GET = "applist_get";
-        public static string TARGET_APPNUM_GET = "appnum_get";
-        public static string TARGET_3D_MODE = "3DMode";
-        public static string TARGET_IS_3D = "is_3D";
+        public static string TargetChannelList = "channel_list";
+        public static string TargetCurrentChannel = "cur_channel";
+        public static string TargetVolumeInfo = "volume_info";
+        public static string TargetApplistGet = "applist_get";
+        public static string TargetAppnumGet = "appnum_get";
+        public static string Target_3DMode = "3DMode";
+        public static string TargetIs_3D = "is_3D";
 
         public enum State
         {
@@ -62,24 +59,21 @@ namespace MyRemote.ConnectSDK.Service
             DISCONNECTING
         };
 
-        private HttpClient httpClient;
+        private readonly HttpClient httpClient;
         //private NetcastHttpServer httpServer;
 
-        private DlnaService dlnaService;
+        private readonly DlnaService dlnaService;
 
         private LaunchSession inputPickerSession;
 
-        private List<AppInfo> applications;
-        private List<IServiceSubscription> subscriptions;
+        private readonly List<AppInfo> applications;
+        private readonly List<IServiceSubscription> subscriptions;
         private StringBuilder keyboardstring;
 
         private State state = State.INITIAL;
-        //private Context context;
 
         private Point mMouseDistance;
         private bool mMouseIsMoving;
-
-        private ResponseListener mTextChangedListener;
 
         public State ServiceState
         {
@@ -87,75 +81,58 @@ namespace MyRemote.ConnectSDK.Service
             set { state = value; }
         }
 
-        private string getUDAPRequestURL(string path)
-        {
-            return getUDAPRequestURL(path, null);
-        }
-
-        private string getUDAPRequestURL(string path, string target)
-        {
-            return getUDAPRequestURL(path, target, null);
-        }
-
-        private string getUDAPRequestURL(string path, string target, string type)
-        {
-            return getUDAPRequestURL(path, target, type, null, null);
-        }
-
-        private string getUDAPRequestURL(string path, string target, string type, string index, string number)
+        private string GetUdapRequestUrl(string path, string target = null, string type = null, string index = null, string number = null)
         {
             // Type Values
             // 1: List of all apps
             // 2: List of apps in the Premium category
             // 3: List of apps in the My Apps category
 
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             sb.Append("http://");
             sb.Append(ServiceDescription.IpAddress);
             sb.Append(":");
             sb.Append(ServiceDescription.Port);
             sb.Append(path);
 
-            if (target != null)
+            if (target == null) return sb.ToString();
+
+            sb.Append("?target=");
+            sb.Append(target);
+
+            if (type != null)
             {
-                sb.Append("?target=");
-                sb.Append(target);
-
-                if (type != null)
-                {
-                    sb.Append("&type=");
-                    sb.Append(type);
-                }
-
-                if (index != null)
-                {
-                    sb.Append("&index=");
-                    sb.Append(index);
-                }
-
-                if (number != null)
-                {
-                    sb.Append("&number=");
-                    sb.Append(number);
-                }
+                sb.Append("&type=");
+                sb.Append(type);
             }
+
+            if (index != null)
+            {
+                sb.Append("&index=");
+                sb.Append(index);
+            }
+
+            if (number == null) return sb.ToString();
+
+            sb.Append("&number=");
+            sb.Append(number);
 
             return sb.ToString();
         }
 
-        private string getUDAPMessageBody(string api, Dictionary<string, string> ps)
+        private string GetUdapMessageBody(string api, Dictionary<string, string> ps)
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             sb.Append("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
             sb.Append("<envelope>");
             sb.Append("<api type=\"" + api + "\">");
 
             foreach (var entry in ps)
             {
-                string key = entry.Key;
-                string value = entry.Value;
+                var key = entry.Key;
+                var value = entry.Value;
 
-                sb.Append(createNode(key, value));
+                sb.Append(CreateNode(key, value));
             }
 
             sb.Append("</api>");
@@ -164,9 +141,9 @@ namespace MyRemote.ConnectSDK.Service
             return sb.ToString();
         }
 
-        private string createNode(string tag, string value)
+        private static string CreateNode(string tag, string value)
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
 
             sb.Append("<" + tag + ">");
             sb.Append(value);
@@ -175,24 +152,24 @@ namespace MyRemote.ConnectSDK.Service
             return sb.ToString();
         }
 
-        public string decToHex(string dec)
+        public string DecToHex(string dec)
         {
-            if (dec != null && dec.Length > 0)
-                return decToHex(long.Parse(dec));
+            if (!string.IsNullOrEmpty(dec))
+                return DecToHex(long.Parse(dec));
             return null;
         }
 
-        public string decToHex(long dec)
+        public string DecToHex(long dec)
         {
             return dec.ToString("X");
         }
 
-        public NetcastTVService(ServiceDescription serviceDescription, ServiceConfig serviceConfig) :
+        public NetcastTvService(ServiceDescription serviceDescription, ServiceConfig serviceConfig) :
             base(serviceDescription, serviceConfig)
         {
             dlnaService = new DlnaService(serviceDescription, serviceConfig);
 
-            if (serviceDescription.Port != 8080)
+            if (serviceDescription != null && serviceDescription.Port != 8080)
                 serviceDescription.Port = 8080;
 
             applications = new List<AppInfo>();
@@ -201,19 +178,13 @@ namespace MyRemote.ConnectSDK.Service
             keyboardstring = new StringBuilder();
 
             httpClient = new HttpClient();
-            //ClientConnectionManager mgr = httpClient.getConnectionManager();
-            //Httpps ps = httpClient.getps();
-            //httpClient = new DefaultHttpClient(new ThreadSafeClientConnManager(ps, mgr.getSchemeRegistry()), ps);
-
-            //state = State.INITIAL;
-
             inputPickerSession = null;
 
-            mTextChangedListener = new ResponseListener();
+            var mTextChangedListener = new ResponseListener();
 
             mTextChangedListener.Success += (sender, o) =>
             {
-                keyboardstring = new StringBuilder((string) o);
+                keyboardstring = new StringBuilder((string)o);
             };
 
             mTextChangedListener.Error += (sender, o) =>
@@ -221,13 +192,13 @@ namespace MyRemote.ConnectSDK.Service
             };
         }
 
-        public static JsonObject discoveryParameters()
+        public new static JsonObject DiscoveryParameters()
         {
-            JsonObject ps = new JsonObject();
+            var ps = new JsonObject();
 
             try
             {
-                ps.Add("serviceId", JsonValue.CreateStringValue(ID));
+                ps.Add("serviceId", JsonValue.CreateStringValue(Id));
                 ps.Add("filter", JsonValue.CreateStringValue("udap:rootservice"));
             }
             catch (Exception e)
@@ -239,20 +210,19 @@ namespace MyRemote.ConnectSDK.Service
         }
 
 
-        public void setServiceDescription(ServiceDescription serviceDescription)
+        public override void SetServiceDescription(ServiceDescription serviceDescriptionParam)
         {
-            ServiceDescription = serviceDescription;
+            ServiceDescription = serviceDescriptionParam;
             if (dlnaService != null)
-                dlnaService.SetServiceDescription(serviceDescription);
-            serviceDescription.Port = 8080;
+                dlnaService.SetServiceDescription(serviceDescriptionParam);
+            serviceDescriptionParam.Port = 8080;
         }
 
 
-        public override void connect()
+        public override void Connect()
         {
             if (ServiceState != State.INITIAL)
             {
-                ////Log.w("Connect SDK", "already connecting; not trying to connect again: " + state);
                 return; // don't try to connect again while connected
             }
 
@@ -261,31 +231,21 @@ namespace MyRemote.ConnectSDK.Service
                 ServiceConfig = new NetcastTvServiceConfig(ServiceConfig.ServiceUuid);
             }
 
-            if ( DiscoveryManager.GetInstance().GetPairingLevel() == DiscoveryManager.PairingLevel.ON ) 
-            {
-                if (((NetcastTvServiceConfig) ServiceConfig).PairingKey != null
-                    && ((NetcastTvServiceConfig) ServiceConfig).PairingKey.Length != 0)
-                {
-                    sendPairingKey(((NetcastTvServiceConfig) ServiceConfig).PairingKey);
-                }
-                else
-                {
-                    showPairingKeyOnTV();
-                }
+            if (DiscoveryManager.GetInstance().GetPairingLevel() != DiscoveryManager.PairingLevel.ON) return;
 
-                //httpServer = new NetcastHttpServer(this, ServiceDescription.Port, mTextChangedListener);
-                //httpServer.setSubscriptions(subscriptions);
-                //httpServer.start();
+            if (!string.IsNullOrEmpty(((NetcastTvServiceConfig)ServiceConfig).PairingKey))
+            {
+                SendPairingKey(((NetcastTvServiceConfig)ServiceConfig).PairingKey);
             }
-            //else
-            //{
-            //    hConnectSuccess();
-            //}
+            else
+            {
+                ShowPairingKeyOnTv();
+            }
         }
 
-        public override void disconnect()
+        public override void Disconnect()
         {
-            endPairing(null);
+            EndPairing(null);
 
             connected = false;
 
@@ -295,42 +255,36 @@ namespace MyRemote.ConnectSDK.Service
             if (Listener != null)
                 Listener.OnDisconnect(this, null);
 
-            //if (httpServer != null)
-            //{
-            //    httpServer.stop();
-            //    httpServer = null;
-            //}
-
             ServiceState = State.INITIAL;
         }
 
-        public override bool isConnectable()
+        public override bool IsConnectable()
         {
             return true;
         }
 
-        public override bool isConnected()
+        public override bool IsConnected()
         {
             return connected;
         }
 
-        private void hConnectSuccess()
+        private void ConnectSuccess()
         {
             //  TODO:  Fix this for Netcast.  Right now it is using the InetAddress reachable function.  Need to use an HTTP Method.
-//		mServiceReachability = DeviceServiceReachability.getReachability(serviceDescription.getIpAddress(), this);
-//		mServiceReachability.start();
+            //		mServiceReachability = DeviceServiceReachability.getReachability(serviceDescription.getIpAddress(), this);
+            //		mServiceReachability.start();
 
             connected = true;
 
             // Pairing was successful, so report connected and ready
-            reportConnected(true);
+            ReportConnected(true);
         }
 
         public override void OnLoseReachability(DeviceServiceReachability reachability)
         {
             if (connected)
             {
-                disconnect();
+                Disconnect();
             }
             else
             {
@@ -339,17 +293,17 @@ namespace MyRemote.ConnectSDK.Service
             }
         }
 
-        public void hostByeBye()
+        public void HostByeBye()
         {
-            disconnect();
+            Disconnect();
         }
 
         //============= Auth ==============================
-        public void showPairingKeyOnTV()
+        public void ShowPairingKeyOnTv()
         {
             ServiceState = State.CONNECTING;
 
-            ResponseListener responseListener = new ResponseListener();
+            var responseListener = new ResponseListener();
             responseListener.Success += (sender, args) =>
             {
                 if (Listener != null)
@@ -363,38 +317,35 @@ namespace MyRemote.ConnectSDK.Service
                     Listener.OnConnectionFailure(this, new Exception(error.ToString()));
             };
 
-            string requestURL = getUDAPRequestURL(UDAP_PATH_PAIRING);
+            var requestUrl = GetUdapRequestUrl(UdapPathPairing);
 
-            Dictionary<string, string> ps = new Dictionary<string, string>();
-            ps.Add("name", "showKey");
+            var ps = new Dictionary<string, string> { { "name", "showKey" } };
 
-            string httpMessage = getUDAPMessageBody(UDAP_API_PAIRING, ps);
+            string httpMessage = GetUdapMessageBody(UdapApiPairing, ps);
 
-            ServiceCommand command = new ServiceCommand(this, requestURL,
+            var command = new ServiceCommand(this, requestUrl,
                 httpMessage, responseListener);
-            command.send();
+            command.Send();
         }
 
         // TODO add this when user cancel pairing
-        public void removePairingKeyOnTV()
+        public void RemovePairingKeyOnTv()
         {
-            ResponseListener responseListener = new ResponseListener();
+            var responseListener = new ResponseListener();
             responseListener.Success += (sender, args) => { };
             responseListener.Error += (sender, args) => { };
 
-            string requestURL = getUDAPRequestURL(UDAP_PATH_PAIRING);
+            var requestUrl = GetUdapRequestUrl(UdapPathPairing);
 
-            Dictionary<string, string> ps = new Dictionary<string, string>();
-            ps.Add("name", "CancelAuthKeyReq");
+            var ps = new Dictionary<string, string> { { "name", "CancelAuthKeyReq" } };
 
-            string httpMessage = getUDAPMessageBody(UDAP_API_PAIRING, ps);
+            string httpMessage = GetUdapMessageBody(UdapApiPairing, ps);
 
-            ServiceCommand command = new ServiceCommand(this, requestURL,
-                httpMessage, responseListener);
-            command.send();
+            var command = new ServiceCommand(this, requestUrl, httpMessage, responseListener);
+            command.Send();
         }
 
-        public override void sendPairingKey(string pairingKey)
+        public override void SendPairingKey(string pairingKey)
         {
             ServiceState = State.PAIRING;
 
@@ -403,13 +354,13 @@ namespace MyRemote.ConnectSDK.Service
                 ServiceConfig = new NetcastTvServiceConfig(ServiceConfig.ServiceUuid);
             }
 
-            ResponseListener responseListener = new ResponseListener();
+            var responseListener = new ResponseListener();
 
             responseListener.Success += (sender, args) =>
             {
                 ServiceState = State.PAIRED;
-                ((NetcastTvServiceConfig) ServiceConfig).PairingKey = pairingKey;
-                hConnectSuccess();
+                ((NetcastTvServiceConfig)ServiceConfig).PairingKey = pairingKey;
+                ConnectSuccess();
             };
             responseListener.Error += (sender, args) =>
             {
@@ -419,33 +370,37 @@ namespace MyRemote.ConnectSDK.Service
                     Listener.OnConnectionFailure(this, new Exception(args.ToString()));
             };
 
-            string requestURL = getUDAPRequestURL(UDAP_PATH_PAIRING);
+            var requestUrl = GetUdapRequestUrl(UdapPathPairing);
 
-            Dictionary<string, string> ps = new Dictionary<string, string>();
-            ps.Add("name", "hello");
-            ps.Add("value", pairingKey);
-            ps.Add("port", ServiceDescription.Port.ToString());
+            var ps = new Dictionary<string, string>
+            {
+                {"name", "hello"},
+                {"value", pairingKey},
+                {"port", ServiceDescription.Port.ToString()}
+            };
 
-            string httpMessage = getUDAPMessageBody(UDAP_API_PAIRING, ps);
+            var httpMessage = GetUdapMessageBody(UdapApiPairing, ps);
 
-            ServiceCommand command = new ServiceCommand(this, requestURL,
+            var command = new ServiceCommand(this, requestUrl,
                 httpMessage, responseListener);
-            command.send();
+            command.Send();
         }
 
-        private void endPairing(ResponseListener listener)
+        private void EndPairing(ResponseListener listener)
         {
-            string requestURL = getUDAPRequestURL(UDAP_PATH_PAIRING);
+            var requestUrl = GetUdapRequestUrl(UdapPathPairing);
 
-            Dictionary<string, string> ps = new Dictionary<string, string>();
-            ps.Add("name", "byebye");
-            ps.Add("port", ServiceDescription.Port.ToString());
+            var ps = new Dictionary<string, string>
+            {
+                {"name", "byebye"},
+                {"port", ServiceDescription.Port.ToString()}
+            };
 
-            string httpMessage = getUDAPMessageBody(UDAP_API_PAIRING, ps);
+            var httpMessage = GetUdapMessageBody(UdapApiPairing, ps);
 
-            ServiceCommand command = new ServiceCommand(this, requestURL,
+            var command = new ServiceCommand(this, requestUrl,
                 httpMessage, listener);
-            command.send();
+            command.Send();
         }
 
 
@@ -464,45 +419,9 @@ namespace MyRemote.ConnectSDK.Service
             return CapabilityPriorityLevel.HIGH;
         }
 
-        private class NetcastTVLaunchSessionR : LaunchSession
+        public void GetApplication(string appName, ResponseListener listener)
         {
-            private string appName;
-            private NetcastTVService service;
-
-            private NetcastTVLaunchSessionR(NetcastTVService service, string auid, string appName)
-            {
-                this.service = service;
-                AppId = auid;
-            }
-
-            private NetcastTVLaunchSessionR(NetcastTVService service, JsonObject obj)
-            {
-                this.service = service;
-                fromJsonObject(obj);
-            }
-
-            public void close(ResponseListener responseListener)
-            {
-            }
-
-            public JsonObject toJsonObject()
-            {
-                JsonObject obj = base.ToJsonObject();
-                obj.Add("type", JsonValue.CreateStringValue("netcasttv"));
-                obj.Add("appName", JsonValue.CreateStringValue(appName));
-                return obj;
-            }
-
-            public void fromJsonObject(JsonObject obj)
-            {
-                base.FromJsonObject(obj);
-                appName = obj.GetNamedString("appName");
-            }
-        }
-
-        public void getApplication(string appName, ResponseListener listener)
-        {
-            ResponseListener responseListener = new ResponseListener();
+            var responseListener = new ResponseListener();
             responseListener.Success += (sender, args) =>
             {
                 //string strObj = ((string) args);
@@ -523,46 +442,42 @@ namespace MyRemote.ConnectSDK.Service
 
 
 
-            string uri = UDAP_PATH_APPTOAPP_DATA + appName;
-            string requestURL = getUDAPRequestURL(uri);
+            var uri = UdapPathApptoappData + appName;
+            var requestUrl = GetUdapRequestUrl(uri);
 
-            ServiceCommand command = new ServiceCommand(this, requestURL, null,
-                responseListener);
-            command.HttpMethod = ServiceCommand.TYPE_GET;
-            command.send();
+            var command = new ServiceCommand(this, requestUrl, null, responseListener) { HttpMethod = ServiceCommand.TypeGet };
+            command.Send();
         }
 
         public void LaunchApp(string appId, ResponseListener listener)
         {
-            ResponseListener appInfoListener = new ResponseListener();
-            appInfoListener.Success += (sender, args) =>
-            {
-                LaunchAppWithInfo((AppInfo) args, listener);
-            };
-            appInfoListener.Error += (sender, args) =>
-            {
-                Util.PostError(listener, args);
-            };
+            var appInfoListener = new ResponseListener();
 
-            getAppInfoForId(appId, appInfoListener);
+            appInfoListener.Success += (sender, args) => LaunchAppWithInfo((AppInfo)args, listener);
+            appInfoListener.Error += (sender, args) => Util.PostError(listener, args);
+
+            GetAppInfoForId(appId, appInfoListener);
         }
 
-        private void getAppInfoForId(string appId, ResponseListener listener)
+        private void GetAppInfoForId(string appId, ResponseListener listener)
         {
-            ResponseListener appListListener = new ResponseListener();
+            var appListListener = new ResponseListener();
             appListListener.Success += (sender, args) =>
             {
-                foreach (AppInfo info in args as List<AppInfo>)
-                {
-                    if (info.Name.Equals(appId))
+                var appInfos = args as List<AppInfo>;
+                if (appInfos != null)
+                    foreach (var info in appInfos)
                     {
-                        Util.PostSuccess(listener, info);
+                        if (info.Name.Equals(appId))
+                        {
+                            Util.PostSuccess(listener, info);
+                        }
+                        return;
                     }
-                    return;
-                }
 
                 Util.PostError(listener, new ServiceCommandError(0, "Unable to find the App with id", null));
             };
+
             appListListener.Error += (sender, args) =>
             {
                 Util.PostError(listener, args);
@@ -571,9 +486,9 @@ namespace MyRemote.ConnectSDK.Service
             GetAppList(appListListener);
         }
 
-        private void launchApplication(string appName, string auid, string contentId, ResponseListener listener)
+        private void LaunchApplication(string appName, string auid, string contentId, ResponseListener listener)
         {
-            JsonObject jsonObj = new JsonObject();
+            var jsonObj = new JsonObject();
 
             try
             {
@@ -585,11 +500,11 @@ namespace MyRemote.ConnectSDK.Service
                 throw e;
             }
 
-            ResponseListener responseListener = new ResponseListener();
+            var responseListener = new ResponseListener();
 
             responseListener.Success += (sender, args) =>
             {
-                LaunchSession launchSession = LaunchSession.LaunchSessionForAppId(auid);
+                var launchSession = LaunchSession.LaunchSessionForAppId(auid);
                 launchSession.AppName = appName;
                 launchSession.Service = this;
                 launchSession.SessionType = LaunchSessionType.App;
@@ -599,15 +514,13 @@ namespace MyRemote.ConnectSDK.Service
 
             responseListener.Error += (sender, args) =>
             {
-                Util.PostError(listener, (ServiceCommandError) args);
+                Util.PostError(listener, (ServiceCommandError)args);
             };
 
 
-            string requestURL = getUDAPRequestURL(UDAP_PATH_APPTOAPP_COMMAND);
+            var requestUrl = GetUdapRequestUrl(UdapPathApptoappCommand);
 
-            Dictionary<string, string> ps = new Dictionary<string, string>();
-            ps.Add("name", "AppExecute");
-            ps.Add("auid", auid);
+            var ps = new Dictionary<string, string> { { "name", "AppExecute" }, { "auid", auid } };
             if (appName != null)
             {
                 ps.Add("appname", appName);
@@ -617,11 +530,11 @@ namespace MyRemote.ConnectSDK.Service
                 ps.Add("contentid", contentId);
             }
 
-            string httpMessage = getUDAPMessageBody(UDAP_API_COMMAND, ps);
+            var httpMessage = GetUdapMessageBody(UdapApiCommand, ps);
 
-            ServiceCommand request = new ServiceCommand(this, requestURL,
+            var request = new ServiceCommand(this, requestUrl,
                 httpMessage, responseListener);
-            request.send();
+            request.Send();
         }
 
 
@@ -633,18 +546,19 @@ namespace MyRemote.ConnectSDK.Service
 
         public void LaunchAppWithInfo(AppInfo appInfo, Object ps, ResponseListener listener)
         {
-            string appName = HttpMessage.Encode(appInfo.Name);
-            string appId = appInfo.Id;
+            var appName = HttpMessage.Encode(appInfo.Name);
+            var appId = appInfo.Id;
             string contentId = null;
             JsonObject mps = null;
-            if (ps is JsonObject)
-                mps = (JsonObject) ps;
+            var o = ps as JsonObject;
+            if (o != null)
+                mps = o;
 
             if (mps != null)
             {
                 try
                 {
-                    contentId = (string) mps.GetNamedString("contentId");
+                    contentId = mps.GetNamedString("contentId");
                 }
                 catch (Exception e)
                 {
@@ -652,203 +566,204 @@ namespace MyRemote.ConnectSDK.Service
                 }
             }
 
-            launchApplication(appName, appId, contentId, listener);
+            LaunchApplication(appName, appId, contentId, listener);
         }
 
 
         public void LaunchBrowser(string url, ResponseListener listener)
         {
-            //if ( !(url == null || url.Length == 0) ) 
-            //Log.w("Connect SDK", "Netcast TV does not support deeplink for Browser");
+            const string appName = "Internet";
 
-            string appName = "Internet";
-
-            ResponseListener appInfoListener = new ResponseListener();
+            var appInfoListener = new ResponseListener();
             appInfoListener.Success += (sender, o) =>
             {
                 string contentId = null;
-                AppInfo ai = o as AppInfo;
-                launchApplication(appName, ai.Id, contentId, listener);
-
+                var ai = o as AppInfo;
+                if (ai != null) LaunchApplication(appName, ai.Id, null, listener);
             };
 
             appInfoListener.Error += (sender, o) =>
             {
                 Util.PostError(listener, o);
             };
-            getApplication(appName, appInfoListener);
+            GetApplication(appName, appInfoListener);
         }
 
 
-        public void LaunchYouTube(string contentId,  ResponseListener listener) {
-        //    string appName = "YouTube";
+        public void LaunchYouTube(string contentId, ResponseListener listener)
+        {
+            //    string appName = "YouTube";
 
-        //    getApplication(appName, new ResponseListener() {
-
-
-        //        public void onSuccess(AppInfo appInfo) {
-        //            launchApplication(appName, appInfo.getId(), contentId, listener);
-        //        }
+            //    getApplication(appName, new ResponseListener() {
 
 
-        //        public void onError(ServiceCommandError error) {
-        //            Util.PostError(listener, error);
-        //        }
-        //    });
+            //        public void onSuccess(AppInfo appInfo) {
+            //            launchApplication(appName, appInfo.getId(), contentId, listener);
+            //        }
+
+
+            //        public void onError(ServiceCommandError error) {
+            //            Util.PostError(listener, error);
+            //        }
+            //    });
         }
 
 
-        public void LaunchHulu(string contentId,  ResponseListener listener) {
-        //    string appName = "Hulu";
+        public void LaunchHulu(string contentId, ResponseListener listener)
+        {
+            //    string appName = "Hulu";
 
-        //    getApplication(appName, new ResponseListener() {
-
-
-        //        public void onSuccess(AppInfo appInfo) {
-        //            launchApplication(appName, appInfo.getId(), contentId, listener);
-        //        }
+            //    getApplication(appName, new ResponseListener() {
 
 
-        //        public void onError(ServiceCommandError error) {
-        //            Util.PostError(listener, error);
-        //        }
-        //    });		
+            //        public void onSuccess(AppInfo appInfo) {
+            //            launchApplication(appName, appInfo.getId(), contentId, listener);
+            //        }
+
+
+            //        public void onError(ServiceCommandError error) {
+            //            Util.PostError(listener, error);
+            //        }
+            //    });		
         }
 
 
-        public void LaunchNetflix(string contentId,  ResponseListener listener) {
-        //    string appName = "Netflix";
+        public void LaunchNetflix(string contentId, ResponseListener listener)
+        {
+            //    string appName = "Netflix";
 
-        //    getApplication(appName, new ResponseListener() {
-
-
-        //        public void onSuccess( AppInfo appInfo) {
-        //            JsonObject jsonObj = new JsonObject();
-
-        //            try {
-        //                jsonObj.put("id", appInfo.getId());
-        //                jsonObj.put("name", appName);
-        //            } catch (Exception e) {
-        //                throw e;
-        //            }
-
-        //            ResponseListener responseListener = new ResponseListener() {
+            //    getApplication(appName, new ResponseListener() {
 
 
-        //                public void onSuccess(Object response) {
-        //                    LaunchSession launchSession = LaunchSession.launchSessionForAppId(appInfo.getId());
-        //                    launchSession.setAppName(appName);
-        //                    launchSession.setService(NetcastTVService.this);
-        //                    launchSession.setSessionType(LaunchSessionType.App);
+            //        public void onSuccess( AppInfo appInfo) {
+            //            JsonObject jsonObj = new JsonObject();
 
-        //                    Util.PostSuccess(listener, launchSession);
-        //                }
+            //            try {
+            //                jsonObj.put("id", appInfo.getId());
+            //                jsonObj.put("name", appName);
+            //            } catch (Exception e) {
+            //                throw e;
+            //            }
 
-
-        //                public void onError(ServiceCommandError error) {
-        //                    if ( listener != null ) 
-        //                        Util.PostError(listener, error);
-        //                }
-        //            };
-
-        //            string requestURL = getUDAPRequestURL(UDAP_PATH_APPTOAPP_COMMAND);
-
-        //            Dictionary<string,string> ps = new Dictionary<string,string>();
-        //            ps.Add("name", "SearchCMDPlaySDPContent");
-        //            ps.Add("content_type", "1");
-        //            ps.Add("conts_exec_type", "20");
-        //            ps.Add("conts_plex_type_flag", "N");
-        //            ps.Add("conts_search_id", "2023237");
-        //            ps.Add("conts_age", "18");
-        //            ps.Add("exec_id", "netflix");
-        //            ps.Add("item_id", "-Q m=http%3A%2F%2Fapi.netflix.com%2Fcatalog%2Ftitles%2Fmovies%2F" + contentId + "&amp;source_type=4&amp;trackId=6054700&amp;trackUrl=https%3A%2F%2Fapi.netflix.com%2FAPI_APP_ID_6261%3F%23Search%3F");
-        //            ps.Add("app_type", "");
-
-        //            string httpMessage = getUDAPMessageBody(UDAP_API_COMMAND, ps);
-
-        //            ServiceCommand request = new ServiceCommand(NetcastTVService.this, requestURL, httpMessage, responseListener);
-        //            request.send();
-        //        }
+            //            ResponseListener responseListener = new ResponseListener() {
 
 
-        //        public void onError(ServiceCommandError error) {
-        //            if ( listener != null ) 
-        //                Util.PostError(listener, error);
-        //        }
-        //    });		
+            //                public void onSuccess(Object response) {
+            //                    LaunchSession launchSession = LaunchSession.launchSessionForAppId(appInfo.getId());
+            //                    launchSession.setAppName(appName);
+            //                    launchSession.setService(NetcastTVService.this);
+            //                    launchSession.setSessionType(LaunchSessionType.App);
+
+            //                    Util.PostSuccess(listener, launchSession);
+            //                }
+
+
+            //                public void onError(ServiceCommandError error) {
+            //                    if ( listener != null ) 
+            //                        Util.PostError(listener, error);
+            //                }
+            //            };
+
+            //            string requestURL = getUDAPRequestURL(UDAP_PATH_APPTOAPP_COMMAND);
+
+            //            Dictionary<string,string> ps = new Dictionary<string,string>();
+            //            ps.Add("name", "SearchCMDPlaySDPContent");
+            //            ps.Add("content_type", "1");
+            //            ps.Add("conts_exec_type", "20");
+            //            ps.Add("conts_plex_type_flag", "N");
+            //            ps.Add("conts_search_id", "2023237");
+            //            ps.Add("conts_age", "18");
+            //            ps.Add("exec_id", "netflix");
+            //            ps.Add("item_id", "-Q m=http%3A%2F%2Fapi.netflix.com%2Fcatalog%2Ftitles%2Fmovies%2F" + contentId + "&amp;source_type=4&amp;trackId=6054700&amp;trackUrl=https%3A%2F%2Fapi.netflix.com%2FAPI_APP_ID_6261%3F%23Search%3F");
+            //            ps.Add("app_type", "");
+
+            //            string httpMessage = getUDAPMessageBody(UDAP_API_COMMAND, ps);
+
+            //            ServiceCommand request = new ServiceCommand(NetcastTVService.this, requestURL, httpMessage, responseListener);
+            //            request.send();
+            //        }
+
+
+            //        public void onError(ServiceCommandError error) {
+            //            if ( listener != null ) 
+            //                Util.PostError(listener, error);
+            //        }
+            //    });		
         }
 
 
-        public void LaunchAppStore(string appId,  ResponseListener listener) {
-        //    string targetPath = getUDAPRequestURL(ROAP_PATH_APP_STORE);
+        public void LaunchAppStore(string appId, ResponseListener listener)
+        {
+            //    string targetPath = getUDAPRequestURL(ROAP_PATH_APP_STORE);
 
-        //    Map<string, string> ps = new HashMap<string, string>();
-        //    ps.Add("name", "SearchCMDPlaySDPContent");
-        //    ps.Add("content_type", "4");
-        //    ps.Add("conts_exec_type", "");
-        //    ps.Add("conts_plex_type_flag", "");
-        //    ps.Add("conts_search_id", "");
-        //    ps.Add("conts_age", "12");
-        //    ps.Add("exec_id", "");
-        //    ps.Add("item_id", HttpMessage.encode(appId));
-        //    ps.Add("app_type", "S");
+            //    Map<string, string> ps = new HashMap<string, string>();
+            //    ps.Add("name", "SearchCMDPlaySDPContent");
+            //    ps.Add("content_type", "4");
+            //    ps.Add("conts_exec_type", "");
+            //    ps.Add("conts_plex_type_flag", "");
+            //    ps.Add("conts_search_id", "");
+            //    ps.Add("conts_age", "12");
+            //    ps.Add("exec_id", "");
+            //    ps.Add("item_id", HttpMessage.encode(appId));
+            //    ps.Add("app_type", "S");
 
-        //    string httpMessage = getUDAPMessageBody(UDAP_API_COMMAND, ps);
+            //    string httpMessage = getUDAPMessageBody(UDAP_API_COMMAND, ps);
 
-        //    ResponseListener responseListener = new ResponseListener() {
-
-
-        //        public void onSuccess(Object response) {
-        //            LaunchSession launchSession = LaunchSession.launchSessionForAppId(appId);
-        //            launchSession.setAppName("LG Smart World"); // TODO: this will not work in Korea, use Korean name instead
-        //            launchSession.setService(NetcastTVService.this);
-        //            launchSession.setSessionType(LaunchSessionType.App);
-
-        //            Util.PostSuccess(listener, launchSession);
-        //        }
+            //    ResponseListener responseListener = new ResponseListener() {
 
 
-        //        public void onError(ServiceCommandError error) {
-        //            Util.PostError(listener, error);
-        //        }
-        //    };	
-        //    ServiceCommand command = new ServiceCommand(this, targetPath, httpMessage, responseListener);
-        //    command.send();
+            //        public void onSuccess(Object response) {
+            //            LaunchSession launchSession = LaunchSession.launchSessionForAppId(appId);
+            //            launchSession.setAppName("LG Smart World"); // TODO: this will not work in Korea, use Korean name instead
+            //            launchSession.setService(NetcastTVService.this);
+            //            launchSession.setSessionType(LaunchSessionType.App);
+
+            //            Util.PostSuccess(listener, launchSession);
+            //        }
+
+
+            //        public void onError(ServiceCommandError error) {
+            //            Util.PostError(listener, error);
+            //        }
+            //    };	
+            //    ServiceCommand command = new ServiceCommand(this, targetPath, httpMessage, responseListener);
+            //    command.send();
         }
 
 
         public void CloseApp(LaunchSession launchSession, ResponseListener listener)
         {
-            string requestURL = getUDAPRequestURL(UDAP_PATH_APPTOAPP_COMMAND);
+            var requestUrl = GetUdapRequestUrl(UdapPathApptoappCommand);
 
-            Dictionary<string, string> ps = new Dictionary<string, string>();
-            ps.Add("name", "AppTerminate");
-            ps.Add("auid", launchSession.AppId);
+            var ps = new Dictionary<string, string> { { "name", "AppTerminate" }, { "auid", launchSession.AppId } };
             if (launchSession.AppName != null)
                 ps.Add("appname", HttpMessage.Encode(launchSession.AppName));
 
-            string httpMessage = getUDAPMessageBody(UDAP_API_COMMAND, ps);
+            var httpMessage = GetUdapMessageBody(UdapApiCommand, ps);
 
-            ServiceCommand command = new ServiceCommand(launchSession.Service,
-                requestURL, httpMessage, listener);
-            command.send();
+            var command = new ServiceCommand(launchSession.Service,
+                requestUrl, httpMessage, listener);
+            command.Send();
         }
 
-        private void getTotalNumberOfApplications(int type, ResponseListener listener)
+        private void GetTotalNumberOfApplications(int type, ResponseListener listener)
         {
-            ResponseListener responseListener = new ResponseListener();
+            var responseListener = new ResponseListener();
             responseListener.Success += (sender, o) =>
             {
                 var lea = o as LoadEventArgs;
+                if (lea == null) return;
                 var load = lea.Load.GetPayload() as HttpResponseMessage;
 
-                string strObj = load.Content.ReadAsStringAsync().Result;
+                if (load == null) return;
+
+                var strObj = load.Content.ReadAsStringAsync().Result;
 
                 JsonObject jsonObject;
                 JsonObject.TryParse(strObj, out jsonObject);
 
                 var tarray = jsonObject.GetNamedArray("Channel List", new JsonArray());
-                int applicationNumber = parseAppNumberXmlToJSON(strObj);
+                var applicationNumber = parseAppNumberXmlToJSON(strObj);
 
                 Util.PostSuccess(listener, applicationNumber);
             };
@@ -857,25 +772,26 @@ namespace MyRemote.ConnectSDK.Service
                 Util.PostError(listener, o);
             };
 
-            string requestURL = getUDAPRequestURL(UDAP_PATH_DATA, TARGET_APPNUM_GET, type.ToString());
+            var requestUrl = GetUdapRequestUrl(UdapPathData, TargetAppnumGet, type.ToString());
 
-            ServiceCommand command = new ServiceCommand(this, requestURL, null,
-                responseListener);
-            command.HttpMethod = ServiceCommand.TYPE_GET;
-            command.send();
+            var command = new ServiceCommand(this, requestUrl, null,
+                responseListener) { HttpMethod = ServiceCommand.TypeGet };
+            command.Send();
         }
 
-        private void getApplications(int type, int number, ResponseListener listener)
+        private void GetApplications(int type, int number, ResponseListener listener)
         {
-            ResponseListener responseListener = new ResponseListener();
+            var responseListener = new ResponseListener();
             responseListener.Success += (sender, o) =>
             {
                 var lea = o as LoadEventArgs;
+                if (lea == null) return;
                 var load = lea.Load.GetPayload() as HttpResponseMessage;
 
-                string strObj = load.Content.ReadAsStringAsync().Result;
+                if (load == null) return;
+                var strObj = load.Content.ReadAsStringAsync().Result;
 
-                List<AppInfo> appList = new List<AppInfo>();
+                var appList = new List<AppInfo>();
 
                 var reader = Util.GenerateStreamFromstring(strObj);
                 var xmlReader = XmlReader.Create(reader);
@@ -900,13 +816,11 @@ namespace MyRemote.ConnectSDK.Service
 
             };
 
-            string requestURL = getUDAPRequestURL(UDAP_PATH_DATA, TARGET_APPLIST_GET, type.ToString(), "0",
+            var requestUrl = GetUdapRequestUrl(UdapPathData, TargetApplistGet, type.ToString(), "0",
                 number.ToString());
 
-            ServiceCommand command = new ServiceCommand(this, requestURL, null,
-                responseListener);
-            command.HttpMethod = ServiceCommand.TYPE_GET;
-            command.send();
+            var command = new ServiceCommand(this, requestUrl, null, responseListener) { HttpMethod = ServiceCommand.TypeGet };
+            command.Send();
         }
 
 
@@ -914,21 +828,27 @@ namespace MyRemote.ConnectSDK.Service
         {
             applications.Clear();
 
-            ResponseListener responseListener = new ResponseListener();
+            var responseListener = new ResponseListener();
             responseListener.Success += (sender, o) =>
             {
-                ResponseListener responseListener2 = new ResponseListener();
+                var responseListener2 = new ResponseListener();
                 responseListener2.Success += (sender2, o2) =>
                 {
-                    applications.AddRange((List<AppInfo>) (((o2 as LoadEventArgs).Load as ServiceCommandError).GetPayload()));
-                    ResponseListener responseListener3 = new ResponseListener();
+                    var loadEventArgs = o2 as LoadEventArgs;
+                    if (loadEventArgs != null)
+                        applications.AddRange((List<AppInfo>)(loadEventArgs.Load.GetPayload()));
+                    var responseListener3 = new ResponseListener();
                     responseListener3.Success += (sender3, o3) =>
                     {
-                        ResponseListener responseListener4 = new ResponseListener();
+                        var responseListener4 = new ResponseListener();
                         responseListener4.Success += (sender4, o4) =>
                         {
-                            List<AppInfo> apps = (List<AppInfo>)(((o4 as LoadEventArgs).Load as ServiceCommandError).GetPayload());
-                            applications.AddRange(apps);
+                            var eventArgs = o4 as LoadEventArgs;
+                            if (eventArgs != null)
+                            {
+                                var apps = (List<AppInfo>)(eventArgs.Load.GetPayload());
+                                applications.AddRange(apps);
+                            }
                             Util.PostSuccess(listener, applications);
                         };
 
@@ -936,29 +856,31 @@ namespace MyRemote.ConnectSDK.Service
                         {
                             Util.PostError(listener, o4);
                         };
-                        getApplications(3, (int)((o3 as LoadEventArgs).Load as ServiceCommandError).GetPayload(), responseListener4);
+                        var args = o3 as LoadEventArgs;
+                        if (args != null)
+                            GetApplications(3, (int)args.Load.GetPayload(), responseListener4);
                     };
 
                     responseListener3.Error += (sender3, o3) =>
                     {
                         Util.PostError(listener, o3);
                     };
-                    getTotalNumberOfApplications(3, responseListener3);
+                    GetTotalNumberOfApplications(3, responseListener3);
                 };
                 responseListener2.Error += (sender2, o2) =>
                 {
                     Util.PostError(listener, o2);
                 };
-                getApplications(2, (int)((o as LoadEventArgs).Load as ServiceCommandError).GetPayload(), responseListener2);
+                var loadEventArgs1 = o as LoadEventArgs;
+                if (loadEventArgs1 != null)
+                    GetApplications(2, (int)loadEventArgs1.Load.GetPayload(), responseListener2);
             };
 
             responseListener.Error += (sender, o) =>
             {
                 Util.PostError(listener, o);
             };
-            getTotalNumberOfApplications(2, responseListener);
-
-
+            GetTotalNumberOfApplications(2, responseListener);
         }
 
 
@@ -980,13 +902,13 @@ namespace MyRemote.ConnectSDK.Service
 
         public void GetAppState(LaunchSession launchSession, ResponseListener listener)
         {
-            string requestURL = string.Format("{0}{1}", getUDAPRequestURL(UDAP_PATH_APPTOAPP_DATA),
+            var requestUrl = string.Format("{0}{1}", GetUdapRequestUrl(UdapPathApptoappData),
                 string.Format("/{0}/status", launchSession.AppId));
 
-            ResponseListener responseListener = new ResponseListener();
+            var responseListener = new ResponseListener();
             responseListener.Success += (sender, o) =>
             {
-                string response = (string) o;
+                var response = (string)o;
                 AppState appState;
                 if (response.Equals("NONE"))
                     appState = new AppState(false, false);
@@ -1007,10 +929,8 @@ namespace MyRemote.ConnectSDK.Service
                 Util.PostError(listener, o);
             };
 
-            ServiceCommand command = new ServiceCommand(this, requestURL, null,
-                responseListener);
-            command.HttpMethod = ServiceCommand.TYPE_GET;
-            command.send();
+            var command = new ServiceCommand(this, requestUrl, null, responseListener) { HttpMethod = ServiceCommand.TypeGet };
+            command.Send();
         }
 
 
@@ -1040,15 +960,17 @@ namespace MyRemote.ConnectSDK.Service
 
         public void GetChannelList(ResponseListener listener)
         {
-            string requestURL = getUDAPRequestURL(UDAP_PATH_DATA, TARGET_CHANNEL_LIST);
+            var requestUrl = GetUdapRequestUrl(UdapPathData, TargetChannelList);
 
-            ResponseListener responseListener = new ResponseListener();
+            var responseListener = new ResponseListener();
             responseListener.Success += (sender, o) =>
             {
                 var lea = o as LoadEventArgs;
+                if (lea == null) return;
                 var load = lea.Load.GetPayload() as HttpResponseMessage;
 
-                string strObj = load.Content.ReadAsStringAsync().Result;
+                if (load == null) return;
+                var strObj = load.Content.ReadAsStringAsync().Result;
 
                 JsonObject jsonObject;
                 JsonObject.TryParse(strObj, out jsonObject);
@@ -1089,10 +1011,8 @@ namespace MyRemote.ConnectSDK.Service
                 Util.PostError(responseListener, o);
             };
 
-            ServiceCommand request = new ServiceCommand(this, requestURL, null,
-                responseListener);
-            request.HttpMethod = ServiceCommand.TYPE_GET;
-            request.send();
+            var command = new ServiceCommand(this, requestUrl, null, responseListener) { HttpMethod = ServiceCommand.TypeGet };
+            command.Send();
         }
 
 
@@ -1110,33 +1030,31 @@ namespace MyRemote.ConnectSDK.Service
 
         public void SetChannel(ChannelInfo channelInfo, ResponseListener listener)
         {
-            ResponseListener responseListener = new ResponseListener();
+            var responseListener = new ResponseListener();
             responseListener.Success += (sender, o) =>
             {
-                List<ChannelInfo> channelList = o as List<ChannelInfo>;
-                string requestURL = getUDAPRequestURL(UDAP_PATH_COMMAND);
+                var channelList = o as List<ChannelInfo>;
+                var requestUrl = GetUdapRequestUrl(UdapPathCommand);
 
-                Dictionary<string, string> ps = new Dictionary<string, string>();
+                var ps = new Dictionary<string, string>();
 
-                for (int i = 0; i < channelList.Count; i++)
-                {
-                    ChannelInfo ch = channelList[i];
-                    JsonObject rawData = ch.RawData;
-
-                    try
+                if (channelList != null)
+                    foreach (ChannelInfo ch in channelList)
                     {
-                        string major = channelInfo.ChannelNumber.Split('-')[0];
-                        string minor = channelInfo.ChannelNumber.Split('-')[1];
+                        var rawData = ch.RawData;
 
-                        int majorNumber = ch.MajorNumber;
-                        int minorNumber = ch.MinorNumber;
-
-                        string sourceIndex = (string) rawData.GetNamedString("sourceIndex");
-                        int physicalNum = (int) rawData.GetNamedNumber("physicalNumber");
-
-                        if (major == majorNumber.ToString()
-                            && minor == minorNumber.ToString())
+                        try
                         {
+                            var major = channelInfo.ChannelNumber.Split('-')[0];
+                            var minor = channelInfo.ChannelNumber.Split('-')[1];
+
+                            var majorNumber = ch.MajorNumber;
+                            var minorNumber = ch.MinorNumber;
+
+                            var sourceIndex = rawData.GetNamedString("sourceIndex");
+                            var physicalNum = (int)rawData.GetNamedNumber("physicalNumber");
+
+                            if (major != majorNumber.ToString() || minor != minorNumber.ToString()) continue;
                             ps.Add("name", "HandleChannelChange");
                             ps.Add("major", major);
                             ps.Add("minor", minor);
@@ -1145,17 +1063,16 @@ namespace MyRemote.ConnectSDK.Service
 
                             break;
                         }
+                        catch (Exception e)
+                        {
+                            throw e;
+                        }
                     }
-                    catch (Exception e)
-                    {
-                        throw e;
-                    }
-                }
 
-                string httpMessage = getUDAPMessageBody(UDAP_API_COMMAND, ps);
+                var httpMessage = GetUdapMessageBody(UdapApiCommand, ps);
 
-                ServiceCommand request = new ServiceCommand(this,requestURL,httpMessage,listener);
-                request.send();
+                var request = new ServiceCommand(this, requestUrl, httpMessage, listener);
+                request.Send();
             };
 
             responseListener.Error += (sender, o) =>
@@ -1170,11 +1087,12 @@ namespace MyRemote.ConnectSDK.Service
 
         public void GetCurrentChannel(ResponseListener listener)
         {
-            string requestURL = getUDAPRequestURL(UDAP_PATH_DATA, TARGET_CURRENT_CHANNEL);
-            ResponseListener responseListener = new ResponseListener();
+            var requestUrl = GetUdapRequestUrl(UdapPathData, TargetCurrentChannel);
+            var responseListener = new ResponseListener();
             responseListener.Success += (sender, o) =>
             {
-                string strObj = (string) o;
+                //TODO: fix this
+                var strObj = (string)o;
 
                 try
                 {
@@ -1205,9 +1123,9 @@ namespace MyRemote.ConnectSDK.Service
             {
                 Util.PostError(listener, o);
             };
-            ServiceCommand request = new ServiceCommand(this, requestURL, null,
-                responseListener);
-            request.send();
+
+            var request = new ServiceCommand(this, requestUrl, null, responseListener);
+            request.Send();
         }
 
 
@@ -1215,13 +1133,12 @@ namespace MyRemote.ConnectSDK.Service
         {
             GetCurrentChannel(listener); // This is for the initial Current TV Channel Info.
 
-            UrlServiceSubscription request = new UrlServiceSubscription(this,
-                "ChannelChanged", null, null);
-            request.HttpMethod = ServiceCommand.TYPE_GET;
+            var request = new UrlServiceSubscription(this, "ChannelChanged", null, null);
+            request.HttpMethod = ServiceCommand.TypeGet;
             request.AddListener(listener);
-            addSubscription(request as IServiceSubscription);
+            AddSubscription(request);
 
-            return (IServiceSubscription)request;
+            return request;
         }
 
 
@@ -1259,10 +1176,10 @@ namespace MyRemote.ConnectSDK.Service
 
         public void Set3DEnabled(bool enabled, ResponseListener listener)
         {
-            ResponseListener responseListener = new ResponseListener();
+            var responseListener = new ResponseListener();
             responseListener.Success += (sender, o) =>
             {
-                if (enabled != (bool) o)
+                if (enabled != (bool)o)
                 {
                     SendKeyCode((int)VirtualKeycodes.VIDEO_3D, listener);
                 }
@@ -1279,11 +1196,11 @@ namespace MyRemote.ConnectSDK.Service
 
         public void Get3DEnabled(ResponseListener listener)
         {
-            ResponseListener responseListener = new ResponseListener();
+            var responseListener = new ResponseListener();
             responseListener.Success += (sender, o) =>
             {
-                string strObj = (string) o;
-                string upperStr = strObj.ToUpper();
+                var strObj = (string)o;
+                var upperStr = strObj.ToUpper();
 
                 Util.PostSuccess(listener, upperStr.Contains("TRUE"));
             };
@@ -1293,12 +1210,13 @@ namespace MyRemote.ConnectSDK.Service
                 Util.PostError(listener, o);
             };
 
-            string requestURL = getUDAPRequestURL(UDAP_PATH_DATA, TARGET_IS_3D);
+            var requestUrl = GetUdapRequestUrl(UdapPathData, TargetIs_3D);
 
-            ServiceCommand request = new ServiceCommand(this, requestURL, null,
-                responseListener);
-            request.HttpMethod = ServiceCommand.TYPE_GET;
-            request.send();
+            var request = new ServiceCommand(this, requestUrl, null, responseListener)
+            {
+                HttpMethod = ServiceCommand.TypeGet
+            };
+            request.Send();
         }
 
 
@@ -1306,45 +1224,36 @@ namespace MyRemote.ConnectSDK.Service
         {
             Get3DEnabled(listener);
 
-            UrlServiceSubscription request = new UrlServiceSubscription(this,
-                TARGET_3D_MODE, null, null);
-            request.HttpMethod = ServiceCommand.TYPE_GET;
+            var request = new UrlServiceSubscription(this, Target_3DMode, null, null) { HttpMethod = ServiceCommand.TypeGet };
             request.AddListener(listener);
 
-            addSubscription(request);
+            AddSubscription(request);
 
             return request;
         }
 
-
-
         /**************
-    VOLUME
-    **************/
-
+        VOLUME
+        **************/
         public IVolumeControl GetVolumeControl()
         {
             return this;
         }
-
 
         public CapabilityPriorityLevel GetVolumeControlCapabilityLevel()
         {
             return CapabilityPriorityLevel.HIGH;
         }
 
-
         public void VolumeUp(ResponseListener listener)
         {
             SendKeyCode((int)VirtualKeycodes.VOLUME_UP, listener);
         }
 
-
         public void VolumeDown(ResponseListener listener)
         {
             SendKeyCode((int)VirtualKeycodes.VOLUME_DOWN, listener);
         }
-
 
         public void SetVolume(float volume, ResponseListener listener)
         {
@@ -1352,26 +1261,24 @@ namespace MyRemote.ConnectSDK.Service
             Util.PostError(listener, ServiceCommandError.NotSupported());
         }
 
-
         public void GetVolume(ResponseListener listener)
         {
-            ResponseListener responseListener = new ResponseListener();
+            var responseListener = new ResponseListener();
             responseListener.Success += (sender, o) =>
             {
-                Util.PostSuccess(listener, ((VolumeStatus) o).Volume);
+                Util.PostSuccess(listener, ((VolumeStatus)o).Volume);
             };
 
             responseListener.Error += (sender, o) =>
             {
                 Util.PostError(listener, o);
             };
-            getVolumeStatus(responseListener);
+            GetVolumeStatus(responseListener);
         }
-
 
         public void SetMute(bool isMute, ResponseListener listener)
         {
-            ResponseListener responseListener = new ResponseListener();
+            var responseListener = new ResponseListener();
             responseListener.Success += (sender, o) =>
             {
                 //if (isMute != ((VolumeStatus) o).isMute)
@@ -1384,26 +1291,24 @@ namespace MyRemote.ConnectSDK.Service
             {
                 Util.PostError(listener, o);
             };
-            getVolumeStatus(responseListener);
+            GetVolumeStatus(responseListener);
         }
 
 
         public void GetMute(ResponseListener listener)
         {
-            ResponseListener responseListener = new ResponseListener();
+            var responseListener = new ResponseListener();
             responseListener.Success += (sender, o) =>
             {
-                Util.PostSuccess(listener, ((VolumeStatus) o).IsMute);
+                Util.PostSuccess(listener, ((VolumeStatus)o).IsMute);
             };
 
             responseListener.Error += (sender, o) =>
             {
                 Util.PostError(listener, o);
             };
-            getVolumeStatus(responseListener);
+            GetVolumeStatus(responseListener);
         }
-
-
 
         public IServiceSubscription SubscribeVolume(ResponseListener listener)
         {
@@ -1413,7 +1318,6 @@ namespace MyRemote.ConnectSDK.Service
             return null;
         }
 
-
         public IServiceSubscription SubscribeMute(ResponseListener listener)
         {
             // Do nothing - not supported
@@ -1422,22 +1326,21 @@ namespace MyRemote.ConnectSDK.Service
             return null;
         }
 
-        private void getVolumeStatus(ResponseListener listener)
+        private void GetVolumeStatus(ResponseListener listener)
         {
-            ResponseListener responseListener = new ResponseListener();
+            var responseListener = new ResponseListener();
             responseListener.Success += (sender, o) =>
             {
-                string strObj =
+                var strObj =
                     (new StreamReader(
-                        (((HttpResponseMessage) ((LoadEventArgs) o).Load.GetPayload()).Content.ReadAsStreamAsync()
+                        (((HttpResponseMessage)((LoadEventArgs)o).Load.GetPayload()).Content.ReadAsStreamAsync()
                             .Result)))
                         .ReadToEnd();
 
                 var reader = Util.GenerateStreamFromstring(strObj);
                 var xmlReader = XmlReader.Create(reader);
-                var number = "";
-                bool isMute = false;
-                int volume = 0;
+                var isMute = false;
+                var volume = 0;
                 try
                 {
                     while (xmlReader.Read())
@@ -1462,54 +1365,51 @@ namespace MyRemote.ConnectSDK.Service
                 Util.PostError(listener, o);
             };
 
-            string requestURL = getUDAPRequestURL(UDAP_PATH_DATA, TARGET_VOLUME_INFO);
+            var requestUrl = GetUdapRequestUrl(UdapPathData, TargetVolumeInfo);
 
-            ServiceCommand request = new ServiceCommand(this, requestURL, null,
-                responseListener);
-            request.HttpMethod = ServiceCommand.TYPE_GET;
-            request.send();
+            var request = new ServiceCommand(this, requestUrl, null,
+                responseListener) { HttpMethod = ServiceCommand.TypeGet };
+            request.Send();
         }
 
         /**************
-    EXTERNAL INPUT
-    **************/
+        EXTERNAL INPUT
+        **************/
 
         public IExternalInputControl GetExternalInput()
         {
             return this;
         }
 
-
         public CapabilityPriorityLevel GetExternalInputControlPriorityLevel()
         {
             return CapabilityPriorityLevel.HIGH;
         }
 
-
         public void LaunchInputPicker(ResponseListener listener)
         {
-            string appName = "Input List";
-            string encodedStr = HttpMessage.Encode(appName);
+            const string appName = "Input List";
+            var encodedStr = HttpMessage.Encode(appName);
 
-            ResponseListener responseListener = new ResponseListener();
+            var responseListener = new ResponseListener();
             responseListener.Success += (sender, o) =>
             {
-                ResponseListener responseLaunchListener = new ResponseListener();
+                var responseLaunchListener = new ResponseListener();
                 responseListener.Success += (sender2, o2) =>
                 {
                     if (inputPickerSession == null)
                     {
-                        inputPickerSession = (LaunchSession) o2;
+                        inputPickerSession = (LaunchSession)o2;
                     }
 
-                    Util.PostSuccess(listener, (LaunchSession) o2);
+                    Util.PostSuccess(listener, (LaunchSession)o2);
                 };
 
                 responseListener.Error += (sender2, o2) =>
                 {
                     Util.PostError(listener, o2);
                 };
-                launchApplication(appName, ((AppInfo) o).Id, null, responseLaunchListener);
+                LaunchApplication(appName, ((AppInfo)o).Id, null, responseLaunchListener);
             };
 
             responseListener.Error += (sender, o) =>
@@ -1517,11 +1417,8 @@ namespace MyRemote.ConnectSDK.Service
                 Util.PostError(listener, o);
             };
 
-            getApplication(encodedStr, responseListener);
-
-
+            GetApplication(encodedStr, responseListener);
         }
-
 
         public void CloseInputPicker(LaunchSession launchSession, ResponseListener listener)
         {
@@ -1532,11 +1429,11 @@ namespace MyRemote.ConnectSDK.Service
         }
 
 
-        public void GetExternalInputList(ExternalInputListListener listener)
-        {
-            // Do nothing - not Supported
-            Util.PostError(listener, ServiceCommandError.NotSupported());
-        }
+        //public void GetExternalInputList(ExternalInputListListener listener)
+        //{
+        //    // Do nothing - not Supported
+        //    Util.PostError(listener, ServiceCommandError.NotSupported());
+        //}
 
 
         public void SetExternalInput(ExternalInputInfo input, ResponseListener listener)
@@ -1545,22 +1442,18 @@ namespace MyRemote.ConnectSDK.Service
             Util.PostError(listener, ServiceCommandError.NotSupported());
         }
 
-
         /******************
-    MEDIA PLAYER
-    *****************/
-
+        MEDIA PLAYER
+        *****************/
         public IMediaPlayer GetMediaPlayer()
         {
             return this;
         }
 
-
         public CapabilityPriorityLevel GetMediaPlayerCapabilityLevel()
         {
             return CapabilityPriorityLevel.HIGH;
         }
-
 
         public void DisplayImage(string url, string mimeType, string title, string description, string iconSrc,
             ResponseListener listener)
@@ -1569,12 +1462,7 @@ namespace MyRemote.ConnectSDK.Service
             {
                 dlnaService.DisplayImage(url, mimeType, title, description, iconSrc, listener);
             }
-            else
-            {
-                //System.err.println("DLNA Service is not ready yet");
-            }
         }
-
 
         public void PlayMedia(string url, string mimeType, string title, string description, string iconSrc,
             bool shouldLoop, ResponseListener listener)
@@ -1583,12 +1471,7 @@ namespace MyRemote.ConnectSDK.Service
             {
                 dlnaService.PlayMedia(url, mimeType, title, description, iconSrc, shouldLoop, listener);
             }
-            else
-            {
-                //System.err.println("DLNA Service is not ready yet");
-            }
         }
-
 
         public void CloseMedia(LaunchSession launchSession, ResponseListener listener)
         {
@@ -1602,50 +1485,43 @@ namespace MyRemote.ConnectSDK.Service
         }
 
         /******************
-    MEDIA CONTROL
-    *****************/
+        MEDIA CONTROL
+        *****************/
 
         public IMediaControl GetMediaControl()
         {
             return this;
         }
 
-
         public CapabilityPriorityLevel GetMediaControlCapabilityLevel()
         {
             return CapabilityPriorityLevel.NORMAL;
         }
 
-
         public void Play(ResponseListener listener)
         {
-            SendKeyCode((int) VirtualKeycodes.PLAY, listener);
+            SendKeyCode((int)VirtualKeycodes.PLAY, listener);
         }
-
 
         public void Pause(ResponseListener listener)
         {
-            SendKeyCode((int) VirtualKeycodes.PAUSE, listener);
+            SendKeyCode((int)VirtualKeycodes.PAUSE, listener);
         }
-
 
         public void Stop(ResponseListener listener)
         {
-            SendKeyCode((int) VirtualKeycodes.STOP, listener);
+            SendKeyCode((int)VirtualKeycodes.STOP, listener);
         }
-
 
         public void Rewind(ResponseListener listener)
         {
-            SendKeyCode((int) VirtualKeycodes.REWIND, listener);
+            SendKeyCode((int)VirtualKeycodes.REWIND, listener);
         }
-
 
         public void FastForward(ResponseListener listener)
         {
-            SendKeyCode((int) VirtualKeycodes.FAST_FORWARD, listener);
+            SendKeyCode((int)VirtualKeycodes.FAST_FORWARD, listener);
         }
-
 
         public void Seek(long position, ResponseListener listener)
         {
@@ -1663,7 +1539,6 @@ namespace MyRemote.ConnectSDK.Service
             }
         }
 
-
         public void GetPosition(ResponseListener listener)
         {
             if (dlnaService != null)
@@ -1672,63 +1547,58 @@ namespace MyRemote.ConnectSDK.Service
             }
         }
 
-
         /**************
-    MOUSE CONTROL
-    **************/
+        MOUSE CONTROL
+        **************/
 
         public IMouseControl GetMouseControl()
         {
             return this;
         }
 
-
         public CapabilityPriorityLevel GetMouseControlCapabilityLevel()
         {
             return CapabilityPriorityLevel.HIGH;
         }
 
-        private void setMouseCursorVisible(bool visible, ResponseListener listener)
+        private void SetMouseCursorVisible(bool visible, ResponseListener listener)
         {
-            string requestURL = getUDAPRequestURL(UDAP_PATH_EVENT);
+            var requestUrl = GetUdapRequestUrl(UdapPathEvent);
 
-            Dictionary<string, string> ps = new Dictionary<string, string>();
-            ps.Add("name", "CursorVisible");
-            ps.Add("value", visible ? "true" : "false");
-            ps.Add("mode", "auto");
+            var ps = new Dictionary<string, string>
+            {
+                {"name", "CursorVisible"},
+                {"value", visible ? "true" : "false"},
+                {"mode", "auto"}
+            };
 
-            string httpMessage = getUDAPMessageBody(UDAP_API_EVENT, ps);
+            var httpMessage = GetUdapMessageBody(UdapApiEvent, ps);
 
-            ServiceCommand request = new ServiceCommand(this, requestURL,
-                httpMessage, listener);
-            request.send();
+            var request = new ServiceCommand(this, requestUrl, httpMessage, listener);
+            request.Send();
         }
-
 
         public void ConnectMouse()
         {
-            ResponseListener responseListener = new ResponseListener();
+            var responseListener = new ResponseListener();
             responseListener.Success += (sender, o) =>
             {
                 mMouseDistance = new Point(0, 0);
                 mMouseIsMoving = false;
                 isMouseConnected = true;
-
             };
 
             responseListener.Error += (sender, o) =>
             {
                 isMouseConnected = false;
-
             };
 
-            setMouseCursorVisible(true, responseListener);
+            SetMouseCursorVisible(true, responseListener);
         }
-
 
         public void DisconnectMouse()
         {
-            setMouseCursorVisible(false, null);
+            SetMouseCursorVisible(false, null);
             isMouseConnected = false;
         }
 
@@ -1738,57 +1608,53 @@ namespace MyRemote.ConnectSDK.Service
             return isMouseConnected;
         }
 
-
         public void Click()
         {
-            ResponseListener responseListener = new ResponseListener();
+            var responseListener = new ResponseListener();
 
-            string requestURL = getUDAPRequestURL(UDAP_PATH_COMMAND);
+            var requestUrl = GetUdapRequestUrl(UdapPathCommand);
 
-            Dictionary<string, string> ps = new Dictionary<string, string>();
-            ps.Add("name", "HandleTouchClick");
+            var ps = new Dictionary<string, string> { { "name", "HandleTouchClick" } };
 
-            string httpMessage = getUDAPMessageBody(UDAP_API_COMMAND, ps);
+            var httpMessage = GetUdapMessageBody(UdapApiCommand, ps);
 
-            ServiceCommand request = new ServiceCommand(this, requestURL,
-                httpMessage, responseListener);
-            request.send();
+            var request = new ServiceCommand(this, requestUrl, httpMessage, responseListener);
+            request.Send();
         }
-
 
         public void Move(double dx, double dy)
         {
             mMouseDistance.X += dx;
             mMouseDistance.Y += dy;
 
-            if (!mMouseIsMoving)
-            {
-                mMouseIsMoving = true;
-                this.moveMouse();
-            }
+            if (mMouseIsMoving) return;
+            mMouseIsMoving = true;
+            MoveMouse();
         }
 
-        private void moveMouse()
+        private void MoveMouse()
         {
-            string requestURL = getUDAPRequestURL(UDAP_PATH_COMMAND);
+            var requestUrl = GetUdapRequestUrl(UdapPathCommand);
 
-            int x = (int) mMouseDistance.X;
-            int y = (int) mMouseDistance.Y;
+            var x = (int)mMouseDistance.X;
+            var y = (int)mMouseDistance.Y;
 
-            Dictionary<string, string> ps = new Dictionary<string, string>();
-            ps.Add("name", "HandleTouchMove");
-            ps.Add("x", x.ToString());
-            ps.Add("y", y.ToString());
+            var ps = new Dictionary<string, string>
+            {
+                {"name", "HandleTouchMove"},
+                {"x", x.ToString()},
+                {"y", y.ToString()}
+            };
 
             mMouseDistance.X = mMouseDistance.Y = 0;
 
-            NetcastTVService mouseService = this;
+            var mouseService = this;
 
-            ResponseListener responseListener = new ResponseListener();
+            var responseListener = new ResponseListener();
             responseListener.Success += (sender, o) =>
             {
                 if (mMouseDistance.X > 0 || mMouseDistance.Y > 0)
-                    mouseService.moveMouse();
+                    mouseService.MoveMouse();
                 else
                     mMouseIsMoving = false;
             };
@@ -1798,92 +1664,73 @@ namespace MyRemote.ConnectSDK.Service
                 mMouseIsMoving = false;
             };
 
-            string httpMessage = getUDAPMessageBody(UDAP_API_COMMAND, ps);
+            var httpMessage = GetUdapMessageBody(UdapApiCommand, ps);
 
-            ServiceCommand request = new ServiceCommand(this, requestURL,
-                httpMessage, responseListener);
-            request.send();
+            var request = new ServiceCommand(this, requestUrl, httpMessage, responseListener);
+            request.Send();
         }
-
 
         public void Move(Point diff)
         {
             Move(diff.X, diff.Y);
         }
 
-
         public void Scroll(double dx, double dy)
         {
-            ResponseListener responseListener = new ResponseListener();
+            var responseListener = new ResponseListener();
 
-            string requestURL = getUDAPRequestURL(UDAP_PATH_COMMAND);
+            var requestUrl = GetUdapRequestUrl(UdapPathCommand);
 
-            Dictionary<string, string> ps = new Dictionary<string, string>();
-            ps.Add("name", "HandleTouchWheel");
-            if (dy > 0)
-                ps.Add("value", "up");
-            else
-                ps.Add("value", "down");
+            var ps = new Dictionary<string, string> { { "name", "HandleTouchWheel" }, { "value", dy > 0 ? "up" : "down" } };
 
-            string httpMessage = getUDAPMessageBody(UDAP_API_COMMAND, ps);
+            var httpMessage = GetUdapMessageBody(UdapApiCommand, ps);
 
-            ServiceCommand request = new ServiceCommand(this, requestURL,
-                httpMessage, responseListener);
-            request.send();
+            var request = new ServiceCommand(this, requestUrl, httpMessage, responseListener);
+            request.Send();
         }
-
 
         public void Scroll(Point diff)
         {
             Scroll(diff.X, diff.Y);
         }
 
-
         /**************
-    KEYBOARD CONTROL
-    **************/
-
+        KEYBOARD CONTROL
+        **************/
         public ITextInputControl GetTextInputControl()
         {
             return this;
         }
-
 
         public CapabilityPriorityLevel GetTextInputControlCapabilityLevel()
         {
             return CapabilityPriorityLevel.HIGH;
         }
 
-
         public IServiceSubscription SubscribeTextInputStatus(ResponseListener listener)
         {
             keyboardstring = new StringBuilder();
 
-            UrlServiceSubscription request =
-                new UrlServiceSubscription(this, "KeyboardVisible", null, null);
+            var request = new UrlServiceSubscription(this, "KeyboardVisible", null, null);
             request.AddListener(listener);
 
-            addSubscription(request);
+            AddSubscription(request);
 
             return request;
         }
 
-
         public void SendText(string input)
         {
-            //Log.d("Connect SDK", "Add to Queue: " + input);
             keyboardstring.Append(input);
-            handleKeyboardInput("Editing", keyboardstring.ToString());
+            HandleKeyboardInput("Editing", keyboardstring.ToString());
         }
-
 
         public void SendEnter()
         {
-            ResponseListener responseListener = new ResponseListener();
-            handleKeyboardInput("EditEnd", keyboardstring.ToString());
-            SendKeyCode((int) VirtualKeycodes.RED, responseListener); // Send RED Key to enter the "ENTER" button
+            var responseListener = new ResponseListener();
+            HandleKeyboardInput("EditEnd", keyboardstring.ToString());
+            SendKeyCode((int)VirtualKeycodes.RED, responseListener); // Send RED Key to enter the "ENTER" button
         }
-
 
         public void SendDelete()
         {
@@ -1896,109 +1743,89 @@ namespace MyRemote.ConnectSDK.Service
                 keyboardstring = new StringBuilder();
             }
 
-            handleKeyboardInput("Editing", keyboardstring.ToString());
+            HandleKeyboardInput("Editing", keyboardstring.ToString());
         }
 
-        private void handleKeyboardInput(string state, string buffer)
+        private void HandleKeyboardInput(string state, string buffer)
         {
-            ResponseListener responseListener = new ResponseListener();
+            var responseListener = new ResponseListener();
 
-            string requestURL = getUDAPRequestURL(UDAP_PATH_EVENT);
+            var requestUrl = GetUdapRequestUrl(UdapPathEvent);
 
-            Dictionary<string, string> ps = new Dictionary<string, string>();
-            ps.Add("name", "TextEdited");
-            ps.Add("state", state);
-            ps.Add("value", buffer);
+            var ps = new Dictionary<string, string> { { "name", "TextEdited" }, { "state", state }, { "value", buffer } };
 
-            string httpMessage = getUDAPMessageBody(UDAP_API_EVENT, ps);
+            var httpMessage = GetUdapMessageBody(UdapApiEvent, ps);
 
-            ServiceCommand request = new ServiceCommand(this, requestURL,
-                httpMessage, responseListener);
-            request.send();
+            var request = new ServiceCommand(this, requestUrl, httpMessage, responseListener);
+            request.Send();
         }
-
 
         /**************
-    KEY CONTROL
-    **************/
+        KEY CONTROL
+        **************/
 
         public IKeyControl GetKeyControl()
         {
             return this;
         }
 
-
         public CapabilityPriorityLevel GetKeyControlCapabilityLevel()
         {
             return CapabilityPriorityLevel.HIGH;
         }
 
-
         public void Up(ResponseListener listener)
         {
-            SendKeyCode((int) VirtualKeycodes.KEY_UP, listener);
+            SendKeyCode((int)VirtualKeycodes.KEY_UP, listener);
         }
-
 
         public void Down(ResponseListener listener)
         {
-            SendKeyCode((int) VirtualKeycodes.KEY_DOWN, listener);
+            SendKeyCode((int)VirtualKeycodes.KEY_DOWN, listener);
         }
-
 
         public void Left(ResponseListener listener)
         {
-            SendKeyCode((int) VirtualKeycodes.KEY_LEFT, listener);
+            SendKeyCode((int)VirtualKeycodes.KEY_LEFT, listener);
         }
-
 
         public void Right(ResponseListener listener)
         {
-            SendKeyCode((int) VirtualKeycodes.KEY_RIGHT, listener);
+            SendKeyCode((int)VirtualKeycodes.KEY_RIGHT, listener);
         }
-
 
         public void Ok(ResponseListener listener)
         {
-            SendKeyCode((int) VirtualKeycodes.OK, listener);
+            SendKeyCode((int)VirtualKeycodes.OK, listener);
         }
-
 
         public void Back(ResponseListener listener)
         {
-            SendKeyCode((int) VirtualKeycodes.BACK, listener);
+            SendKeyCode((int)VirtualKeycodes.BACK, listener);
         }
-
 
         public void Home(ResponseListener listener)
         {
-            SendKeyCode((int) VirtualKeycodes.HOME, listener);
+            SendKeyCode((int)VirtualKeycodes.HOME, listener);
         }
 
-
         /**************
-    POWER CONTROL
-    **************/
-
+        POWER CONTROL
+        **************/
         public IPowerControl GetPowerControl()
         {
             return this;
         }
-
 
         public CapabilityPriorityLevel GetPowerControlCapabilityLevel()
         {
             return CapabilityPriorityLevel.HIGH;
         }
 
-
         public void PowerOff(ResponseListener listener)
         {
-            ResponseListener responseListener = new ResponseListener();
-
-            SendKeyCode((int) VirtualKeycodes.POWER, responseListener);
+            SendKeyCode((int)VirtualKeycodes.POWER, new ResponseListener());
         }
-
 
         public void PowerOn(ResponseListener listener)
         {
@@ -2006,7 +1833,7 @@ namespace MyRemote.ConnectSDK.Service
                 listener.OnError(ServiceCommandError.NotSupported());
         }
 
-        private JsonObject parseVolumeXmlToJSON(string data)
+        private JsonObject ParseVolumeXmlToJson(string data)
         {
             throw new NotImplementedException();
             //SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
@@ -2024,10 +1851,9 @@ namespace MyRemote.ConnectSDK.Service
             //{
             //    throw e;
             //}
-            return null;
         }
 
-        private int parseAppNumberXmlToJSON(string data)
+        private static int parseAppNumberXmlToJSON(string data)
         {
             var reader = Util.GenerateStreamFromstring(data);
             var xmlReader = XmlReader.Create(reader);
@@ -2060,7 +1886,7 @@ namespace MyRemote.ConnectSDK.Service
             return 0;
         }
 
-        private JsonArray parseApplicationsXmlToJSON(string data)
+        private JsonArray ParseApplicationsXmlToJson(string data)
         {
             throw new NotImplementedException();
             //SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
@@ -2082,58 +1908,51 @@ namespace MyRemote.ConnectSDK.Service
             return null;
         }
 
-        public string getHttpMessageForHandleKeyInput(int keycode)
+        public string GetHttpMessageForHandleKeyInput(int keycode)
         {
             string strKeycode = keycode.ToString();
 
-            Dictionary<string, string> ps = new Dictionary<string, string>();
-            ps.Add("name", "HandleKeyInput");
-            ps.Add("value", strKeycode);
+            var ps = new Dictionary<string, string> { { "name", "HandleKeyInput" }, { "value", strKeycode } };
 
-            return getUDAPMessageBody(UDAP_API_COMMAND, ps);
+            return GetUdapMessageBody(UdapApiCommand, ps);
         }
 
 
         public void SendKeyCode(int keycode, ResponseListener listener)
         {
-            ResponseListener responseListener = new ResponseListener();
+            var responseListener = new ResponseListener();
 
             responseListener.Success += (sender, o) =>
             {
-                string requestURL = getUDAPRequestURL(UDAP_PATH_COMMAND);
-                string httpMessage = getHttpMessageForHandleKeyInput(keycode);
+                var requestUrl = GetUdapRequestUrl(UdapPathCommand);
+                var httpMessage = GetHttpMessageForHandleKeyInput(keycode);
 
-                ServiceCommand request = new ServiceCommand(this, requestURL,
-                    httpMessage, listener);
-                request.send();
+                var request = new ServiceCommand(this, requestUrl, httpMessage, listener);
+                request.Send();
             };
             responseListener.Error += (sender, o) =>
             {
                 Util.PostError(listener, o);
             };
-
-            {
-                setMouseCursorVisible(false, responseListener);
-            }
+            SetMouseCursorVisible(false, responseListener);
         }
 
         public override void SendCommand(ServiceCommand mCommand)
         {
-
-            Task t = new Task(() =>
+            var t = new Task(() =>
             {
-                ServiceCommand command = (ServiceCommand)mCommand;
+                var command = mCommand;
 
-                Object payload = command.Payload;
+                var payload = command.Payload;
 
-                var request = command.getRequest();
+                var request = command.GetRequest();
                 request.Headers.Add(HttpMessage.USER_AGENT, HttpMessage.UDAP_USER_AGENT);
 
 
                 //request.Headers.Add(HttpMessage.CONTENT_TYPE_HEADER, HttpMessage.CONTENT_TYPE);
                 HttpWebResponse response = null;
 
-                if (payload != null && command.HttpMethod.Equals(ServiceCommand.TYPE_POST))
+                if (payload != null && command.HttpMethod.Equals(ServiceCommand.TypePost))
                 {
                     request.Method = HttpMethod.Post;
                     request.Content =
@@ -2145,9 +1964,6 @@ namespace MyRemote.ConnectSDK.Service
                 try
                 {
                     var res = httpClient.SendAsync(request).Result;
-
-
-
                     if (res.IsSuccessStatusCode)
                     {
                         Util.PostSuccess(command.ResponseListenerValue, res);
@@ -2166,35 +1982,27 @@ namespace MyRemote.ConnectSDK.Service
             t.RunSynchronously();
         }
 
-        private void addSubscription(IServiceSubscription subscription)
+        private void AddSubscription(IServiceSubscription subscription)
         {
             subscriptions.Add(subscription);
-
-            //if (httpServer != null)
-            //    httpServer.setSubscriptions(subscriptions);
         }
-
 
         public override void Unsubscribe(UrlServiceSubscription subscription)
         {
             subscriptions.Remove(subscription);
-
-            //if (httpServer != null)
-            //    httpServer.setSubscriptions(subscriptions);
         }
-
 
         protected void setCapabilities()
         {
-            
-            if (DiscoveryManager.GetInstance().GetPairingLevel() == DiscoveryManager.PairingLevel.ON) 
-            {
-                appendCapabilites(TextInputControl.Capabilities.ToList());
-                appendCapabilites(MouseControl.Capabilities.ToList());
-                appendCapabilites(KeyControl.Capabilities.ToList());
-                appendCapabilites(MediaPlayer.Capabilities.ToList());
 
-                appendCapabilites(
+            if (DiscoveryManager.GetInstance().GetPairingLevel() == DiscoveryManager.PairingLevel.ON)
+            {
+                AppendCapabilites(TextInputControl.Capabilities.ToList());
+                AppendCapabilites(MouseControl.Capabilities.ToList());
+                AppendCapabilites(KeyControl.Capabilities.ToList());
+                AppendCapabilites(MediaPlayer.Capabilities.ToList());
+
+                AppendCapabilites(
                     new List<string>
                     {
                         PowerControl.Off,
@@ -2240,8 +2048,8 @@ namespace MyRemote.ConnectSDK.Service
             }
             else
             {
-                appendCapabilites(MediaPlayer.Capabilities.ToList());
-                appendCapabilites(new List<string>
+                AppendCapabilites(MediaPlayer.Capabilities.ToList());
+                AppendCapabilites(new List<string>
                 {
                     MediaControl.Play,
                     MediaControl.Pause,
@@ -2255,12 +2063,10 @@ namespace MyRemote.ConnectSDK.Service
             }
         }
 
-
         public void GetPlayState(ResponseListener listener)
         {
             Util.PostError(listener, ServiceCommandError.NotSupported());
         }
-
 
         public IServiceSubscription SubscribePlayState(ResponseListener listener)
         {

@@ -1,4 +1,5 @@
 using ConnectSdk.Windows.Service.Capability.Listeners;
+using ConnectSdk.Windows.Service.Sessions;
 
 namespace ConnectSdk.Windows.Service.Capability
 {
@@ -13,7 +14,6 @@ namespace ConnectSdk.Windows.Service.Capability
         void PlayMedia(string url, string mimeType, string title, string description, string iconSrc, bool shouldLoop,
             ResponseListener listener);
 
-        //void CloseMedia(LaunchSession launchSession, ResponseListener listener);
-
+        void CloseMedia(LaunchSession launchSession, ResponseListener listener);
     }
 }

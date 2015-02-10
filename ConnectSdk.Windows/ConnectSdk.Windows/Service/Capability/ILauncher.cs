@@ -2,6 +2,7 @@
 using ConnectSdk.Windows.Core;
 using ConnectSdk.Windows.Service.Capability.Listeners;
 using ConnectSdk.Windows.Service.Command;
+using ConnectSdk.Windows.Service.Sessions;
 
 namespace ConnectSdk.Windows.Service.Capability
 {
@@ -14,17 +15,16 @@ namespace ConnectSdk.Windows.Service.Capability
         void LaunchAppWithInfo(AppInfo appInfo, Object ps, ResponseListener listener);
         void LaunchApp(string appId, ResponseListener listener);
 
-        //void CloseApp(LaunchSession launchSession, ResponseListener listener);
+        void CloseApp(LaunchSession launchSession, ResponseListener listener);
 
         void GetAppList(ResponseListener listener);
 
         void GetRunningApp(ResponseListener listener);
         IServiceSubscription SubscribeRunningApp(ResponseListener listener);
 
-        //void GetAppState(LaunchSession launchSession, ResponseListener listener);
+        void GetAppState(LaunchSession launchSession, ResponseListener listener);
 
-        //IServiceSubscription SubscribeAppState(LaunchSession launchSession,
-        //    ResponseListener listener);
+        IServiceSubscription SubscribeAppState(LaunchSession launchSession, ResponseListener listener);
 
         void LaunchBrowser(string url, ResponseListener listener);
         void LaunchYouTube(string contentId, ResponseListener listener);

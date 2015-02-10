@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Windows.Data.Json;
 using ConnectSdk.Windows.Core;
 using ConnectSdk.Windows.Etc.Helper;
@@ -7,26 +8,24 @@ using ConnectSdk.Windows.Service.Capability;
 using ConnectSdk.Windows.Service.Capability.Listeners;
 using ConnectSdk.Windows.Service.Command;
 using ConnectSdk.Windows.Service.Config;
-using MyRemote.ConnectSDK.Service;
+using ConnectSdk.Windows.Service.Sessions;
 
 namespace ConnectSdk.Windows.Service
 {
-    /**
-     * ###Overview
-     * From a high-level perspective, DeviceService completely abstracts the functionality of a particular service/protocol (webOS TV, Netcast TV, Chromecast, Roku, DIAL, etc).
-     *
-     * ###In Depth
-     * DeviceService is an abstract class that is meant to be extended. You shouldn't ever use DeviceService directly, unless extending it to provide support for an additional service/protocol.
-     *
-     * Immediately after discovery of a DeviceService, DiscoveryManager will set the DeviceService's Listener to the ConnectableDevice that owns the DeviceService. You should not change the Listener unless you intend to manage the lifecycle of that service. The DeviceService will proxy all of its Listener method calls through the ConnectableDevice's ConnectableDeviceListener.
-     *
-     * ####Connection & Pairing
-     * Your ConnectableDevice object will let you know if you need to connect or pair to any services.
-     *
-     * ####Capabilities
-     * All DeviceService objects have a group of capabilities. These capabilities can be implemented by any object, and that object will be returned when you call the DeviceService's capability methods (launcher, mediaPlayer, volumeControl, etc).
-     */
-
+    /// <summary>
+    /// Overview
+    /// From a high-level perspective, DeviceService completely abstracts the functionality of a particular service/protocol (webOS TV, Netcast TV, Chromecast, Roku, DIAL, etc).
+    /// 
+    /// In Depth
+    /// DeviceService is an abstract class that is meant to be extended. You shouldn't ever use DeviceService directly, unless extending it to provide support for an additional service/protocol.
+    /// Immediately after discovery of a DeviceService, DiscoveryManager will set the DeviceService's Listener to the ConnectableDevice that owns the DeviceService. You should not change the Listener unless you intend to manage the lifecycle of that service. The DeviceService will proxy all of its Listener method calls through the ConnectableDevice's ConnectableDeviceListener.
+    /// 
+    /// Connection & Pairing
+    /// Your ConnectableDevice object will let you know if you need to connect or pair to any services.
+    /// 
+    /// Capabilities
+    /// All DeviceService objects have a group of capabilities. These capabilities can be implemented by any object, and that object will be returned when you call the DeviceService's capability methods (launcher, mediaPlayer, volumeControl, etc).
+    /// </summary>
     public class DeviceService : IDeviceServiceReachabilityListener, IServiceCommandProcessor
     {
         // ReSharper disable InconsistentNaming
@@ -41,38 +40,33 @@ namespace ConnectSdk.Windows.Service
         protected bool connected = false;
         // ReSharper restore InconsistentNaming
 
-
-        /**
-	 * An array of capabilities supported by the DeviceService. This array may change based off a number of factors.
-	 * - DiscoveryManager's pairingLevel value
-	 * - Connect SDK framework version
-	 * - First screen device OS version
-	 * - First screen device configuration (apps installed, settings, etc)
-	 * - Physical region
-	 */
+        /// <summary>
+        /// An array of capabilities supported by the DeviceService. This array may change based off a number of factors.
+	    /// DiscoveryManager's pairingLevel value
+	    /// - Connect SDK framework version
+	    /// - First screen device OS version
+	    /// - First screen device configuration (apps installed, settings, etc)
+        /// - Physical region
+        /// </summary>
         private List<string> mCapabilities;
 
-        protected IDeviceServiceListener listener;
+        private IDeviceServiceListener listener;
 
-        public List<ServiceCommand> requests = new List<ServiceCommand>();
+        public List<ServiceCommand> Requests = new List<ServiceCommand>();
 
         public DeviceService(ServiceDescription serviceDescription, ServiceConfig serviceConfig)
         {
-            this.ServiceDescription = serviceDescription;
-            this.ServiceConfig = serviceConfig;
+            ServiceDescription = serviceDescription;
+            ServiceConfig = serviceConfig;
 
             mCapabilities = new List<string>();
-
-            //setCapabilities();
         }
 
         public DeviceService(ServiceConfig serviceConfig)
         {
-            this.ServiceConfig = serviceConfig;
+            ServiceConfig = serviceConfig;
 
             mCapabilities = new List<string>();
-
-            //setCapabilities();
         }
 
         public ServiceDescription ServiceDescription
@@ -99,7 +93,7 @@ namespace ConnectSdk.Windows.Service
             set { mCapabilities = value; }
         }
 
-        public static DeviceService getService(JsonObject json)
+        public static DeviceService GetService(JsonObject json)
         {
             DeviceService newServiceClass = null;
 
@@ -127,20 +121,20 @@ namespace ConnectSdk.Windows.Service
                     return null;
 
 
-                if (className.Equals("AirPlayService", StringComparison.OrdinalIgnoreCase))
-                {
-                    serviceDescription.ServiceId = AirPlayService.Id;
-                    newServiceClass =
-                        (AirPlayService)
-                            Activator.CreateInstance(typeof (AirPlayService),
-                                new object[] {serviceDescription, serviceConfig});
-                }
+                //if (className.Equals("AirPlayService", StringComparison.OrdinalIgnoreCase))
+                //{
+                //    serviceDescription.ServiceId = AirPlayService.Id;
+                //    newServiceClass =
+                //        (AirPlayService)
+                //            Activator.CreateInstance(typeof (AirPlayService),
+                //                new object[] {serviceDescription, serviceConfig});
+                //}
                 if (className.Equals("NetcastTVService", StringComparison.OrdinalIgnoreCase))
                 {
-                    serviceDescription.ServiceId = NetcastTVService.ID;
+                    serviceDescription.ServiceId = NetcastTvService.Id;
                     newServiceClass =
-                        (NetcastTVService)
-                            Activator.CreateInstance(typeof (NetcastTVService),
+                        (NetcastTvService)
+                            Activator.CreateInstance(typeof (NetcastTvService),
                                 new object[] {serviceDescription, serviceConfig});
                 }
                 return newServiceClass;
@@ -149,59 +143,46 @@ namespace ConnectSdk.Windows.Service
             {
                 throw e;
             }
-            return null;
         }
 
-        public static DeviceService getService(Type clazz, ServiceConfig serviceConfig)
+        public static DeviceService GetService(Type clazz, ServiceConfig serviceConfig)
         {
             return Activator.CreateInstance(clazz, new object[] {serviceConfig}) as DeviceService;
         }
 
-        public static DeviceService getService(Type clazz, ServiceDescription serviceDescription,
+        public static DeviceService GetService(Type clazz, ServiceDescription serviceDescription,
             ServiceConfig serviceConfig)
         {
             return Activator.CreateInstance(clazz, new object[] {serviceDescription, serviceConfig}) as DeviceService;
         }
 
 
-        public static JsonObject discoveryParameters()
+        public static JsonObject DiscoveryParameters()
         {
             return null;
         }
 
-        // @endcond
-
-        /**
-	 * Will attempt to connect to the DeviceService. The failure/success will be reported back to the DeviceServiceListener. If the connection attempt reveals that pairing is required, the DeviceServiceListener will also be notified in that event.
-	 */
-
-        public virtual void connect()
+        public virtual void Connect()
         {
 
         }
 
-        /**
-	 * Will attempt to disconnect from the DeviceService. The failure/success will be reported back to the DeviceServiceListener.
-	 */
-
-        public virtual void disconnect()
+        public virtual void Disconnect()
         {
 
         }
 
-        /** Whether the DeviceService is currently connected */
-
-        public virtual bool isConnected()
+        public virtual bool IsConnected()
         {
             return true;
         }
 
-        public virtual bool isConnectable()
+        public virtual bool IsConnectable()
         {
             return false;
         }
 
-        protected void reportConnected(bool ready)
+        protected void ReportConnected(bool ready)
         {
             //Util.runOnUI(new Runnable() {
             //    @Override
@@ -212,18 +193,10 @@ namespace ConnectSdk.Windows.Service
             //});
         }
 
-        /**
-	 * Will attempt to pair with the DeviceService with the provided pairingData. The failure/success will be reported back to the DeviceServiceListener.
-	 *
-	 * @param pairingKey Data to be used for pairing. The type of this parameter will vary depending on what type of pairing is required, but is likely to be a string (pin code, pairing key, etc).
-	 */
-
-        public virtual void sendPairingKey(string pairingKey)
+        public virtual void SendPairingKey(string pairingKey)
         {
 
         }
-
-        // @cond INTERNAL
 
         public virtual void Unsubscribe(UrlServiceSubscription subscription)
         {
@@ -235,99 +208,35 @@ namespace ConnectSdk.Windows.Service
 
         }
 
-
-
-        /**
-	 * Test to see if the capabilities array contains a given capability. See the individual Capability classes for acceptable capability values.
-	 *
-	 * It is possible to append a wildcard search term `.Any` to the end of the search term. This method will return true for capabilities that match the term up to the wildcard.
-	 *
-	 * Example: `Launcher.App.Any`
-	 *
-	 * @param capability Capability to test against
-	 */
-
-        public bool hasCapability(string capability)
+        public bool HasCapability(string capability)
         {
-            //Matcher m = CapabilityMethods.ANY_PATTERN.matcher(capability);
-
-            //if (m.find())
-            //{
-            //    string match = m.group();
-            //    foreach (var item in mCapabilities)
-            //    {
-
-            //        if (item.IndexOf(match) != -1)
-            //        {
-            //            return true;
-            //        }
-            //    }
-
-            //    return false;
-            //}
-
             return mCapabilities.Contains(capability);
         }
 
-        /**
-	 * Test to see if the capabilities array contains at least one capability in a given set of capabilities. See the individual Capability classes for acceptable capability values.
-	 *
-	 * See hasCapability: for a description of the wildcard feature provided by this method.
-	 *
-	 * @param capabilities Set of capabilities to test against
-	 */
-
-        public bool hasAnyCapability(List<string> capabilities)
+        public bool HasAnyCapability(List<string> capabilities)
         {
-            foreach (var capability in capabilities)
-            {
-                if (hasCapability(capability))
-                    return true;
-            }
-
-            return false;
+            return capabilities.Any(HasCapability);
         }
 
-
-
-        /**
-     * Test to see if the capabilities array contains a given set of capabilities. See the individual Capability classes for acceptable capability values.
-     *
-     * See hasCapability: for a description of the wildcard feature provided by this method.
-     *
-     * @param capabilities Set of capabilities to test against
-     */
-
-        public bool hasCapabilities(List<string> capabilities)
+        public bool HasCapabilities(List<string> capabilities)
         {
-            bool hasCaps = true;
-
-            foreach (var capability in capabilities)
-            {
-                if (!hasCapability(capability))
-                {
-                    hasCaps = false;
-                    break;
-                }
-            }
-
-            return hasCaps;
+            return capabilities.All(HasCapability);
         }
 
-        protected void appendCapability(string capability)
+        protected void AppendCapability(string capability)
         {
             mCapabilities.Add(capability);
         }
 
-        protected void appendCapabilites(List<string> newItems)
+        protected void AppendCapabilites(List<string> newItems)
         {
             foreach (var capability in newItems)
                 mCapabilities.Add(capability);
         }
 
-        public virtual void SetServiceDescription(ServiceDescription serviceDescription)
+        public virtual void SetServiceDescription(ServiceDescription serviceDescriptionParam)
         {
-            this.serviceDescription = serviceDescription;
+            serviceDescription = serviceDescriptionParam;
         }
 
         public ServiceDescription GetServiceDescription()
@@ -335,17 +244,17 @@ namespace ConnectSdk.Windows.Service
             return serviceDescription;
         }
 
-        public JsonObject toJSONObject()
+        public JsonObject ToJsonObject()
         {
-            JsonObject jsonObj = new JsonObject();
+            var jsonObj = new JsonObject();
 
             try
             {
-                jsonObj.Add(KEY_CLASS, JsonValue.CreateStringValue(this.GetType().Name));
+                jsonObj.Add(KEY_CLASS, JsonValue.CreateStringValue(GetType().Name));
                 jsonObj.Add("description", ServiceDescription.ToJsonObject());
                 jsonObj.Add("config", ServiceConfig.ToJsonObject());
             }
-            catch (Exception e)
+            catch
             {
 
             }
@@ -360,37 +269,7 @@ namespace ConnectSdk.Windows.Service
             get { return ServiceDescription.ServiceId; }
         }
 
-        // @cond INTERNAL
-        /**
-	 * Create a LaunchSession from a serialized JSON object.
-	 * May return null if the session was not the one that created the session.
-	 * 
-	 * Intended for internal use.
-	 */
-
-        public virtual LaunchSession decodeLaunchSession(string type, JsonObject sessionObj)
-        {
-            return null;
-        }
-
-        public IDeviceServiceListener getListener()
-        {
-            return Listener;
-        }
-
-        public void setListener(IDeviceServiceListener listener)
-        {
-            this.Listener = listener;
-        }
-
-        /**
-	 * Closes the session on the first screen device. Depending on the sessionType, the associated service will have different ways of handling the close functionality.
-	 *
-	 * @param launchSession LaunchSession to close
-	 * @param success (optional) listener to be called on success/failure
-	 */
-
-        public void closeLaunchSession(LaunchSession launchSession, ResponseListener listener)
+        public void CloseLaunchSession(LaunchSession launchSession, ResponseListener listener)
         {
             if (launchSession == null)
             {
@@ -398,7 +277,7 @@ namespace ConnectSdk.Windows.Service
                 return;
             }
 
-            DeviceService service = launchSession.Service;
+            var service = launchSession.Service;
             if (service == null)
             {
                 Util.PostError(listener,
@@ -409,22 +288,25 @@ namespace ConnectSdk.Windows.Service
             switch (launchSession.SessionType)
             {
                 case LaunchSessionType.App:
-                    if (service is ILauncher)
-                        ((ILauncher) service).CloseApp(launchSession, listener);
+                    var launcher = service as ILauncher;
+                    if (launcher != null)
+                        launcher.CloseApp(launchSession, listener);
                     break;
                 case LaunchSessionType.Media:
-                    if (service is IMediaPlayer)
-                        ((IMediaPlayer) service).CloseMedia(launchSession, listener);
+                    var player = service as IMediaPlayer;
+                    if (player != null)
+                        player.CloseMedia(launchSession, listener);
                     break;
                 case LaunchSessionType.ExternalInputPicker:
-                    if (service is IExternalInputControl)
-                        ((IExternalInputControl) service).CloseInputPicker(launchSession, listener);
+                    var control = service as IExternalInputControl;
+                    if (control != null)
+                        control.CloseInputPicker(launchSession, listener);
                     break;
                 case LaunchSessionType.WebApp:
+                    // TODO: check this, there is no implementation of IWebAppLauncher yet
                     if (service is IWebAppLauncher)
-                        ((IWebAppLauncher) service).CloseWebApp(launchSession, listener);
+                        ((IWebAppLauncher)service).CloseWebApp(launchSession, listener);
                     break;
-                case LaunchSessionType.Unknown:
                 default:
                     Util.PostError(listener,
                         new ServiceCommandError(0, "This DeviceService does not know ho to close this LaunchSession",
@@ -433,59 +315,48 @@ namespace ConnectSdk.Windows.Service
             }
         }
 
-        public void addCapability(string capability)
+        public void AddCapability(string capability)
         {
-            if (capability == null || capability.Length == 0 || this.mCapabilities.Contains(capability))
+            if (string.IsNullOrEmpty(capability) || mCapabilities.Contains(capability))
                 return;
 
-            this.mCapabilities.Add(capability);
+            mCapabilities.Add(capability);
 
-            List<string> added = new List<string>();
-            added.Add(capability);
+            var added = new List<string> {capability};
 
             if (Listener != null)
                 Listener.OnCapabilitiesUpdated(this, added, new List<string>());
         }
 
-        public void addCapabilities(List<string> capabilities)
+        public void AddCapabilities(List<string> capabilities)
         {
             if (capabilities == null)
                 return;
 
-            foreach (var capability in capabilities)
+            foreach (var capability in capabilities.Where(capability => !string.IsNullOrEmpty(capability) && !mCapabilities.Contains(capability)))
             {
-                if (capability == null || capability.Length == 0 || mCapabilities.Contains(capability))
-                    continue;
-
                 mCapabilities.Add(capability);
             }
-
-            //    Util.runOnUI(new Runnable()
-            //    {
-
-            //        @Override
-            //    public void run() {
 
             if (Listener != null)
                 Listener.OnCapabilitiesUpdated(this, capabilities, new List<string>());
         }
 
 
-        public void removeCapability(string capability)
+        public void RemoveCapability(string capability)
         {
             if (capability == null)
                 return;
 
-            this.mCapabilities.Remove(capability);
+            mCapabilities.Remove(capability);
 
-            List<string> removed = new List<string>();
-            removed.Add(capability);
+            var removed = new List<string> {capability};
 
             if (Listener != null)
                 Listener.OnCapabilitiesUpdated(this, new List<string>(), removed);
         }
 
-        public void removeCapabilities(List<string> capabilities)
+        public void RemoveCapabilities(List<string> capabilities)
         {
             if (capabilities == null)
                 return;
@@ -505,32 +376,16 @@ namespace ConnectSdk.Windows.Service
         {
         }
 
-        protected void setCapabilities(List<String> newCapabilities)
+        protected void SetCapabilities(List<String> newCapabilities)
         {
-            List<String> oldCapabilities = mCapabilities;
+            var oldCapabilities = mCapabilities;
 
             mCapabilities = newCapabilities;
 
-            List<String> _lostCapabilities = new List<String>();
+            var lostCapabilities = oldCapabilities.Where(capability => !newCapabilities.Contains(capability)).ToList();
+            var addedCapabilities = newCapabilities.Where(capability => !oldCapabilities.Contains(capability)).ToList();
 
-            foreach (String capability in oldCapabilities)
-            {
-                if (!newCapabilities.Contains(capability))
-                    _lostCapabilities.Add(capability);
-            }
-
-            List<String> _addedCapabilities = new List<String>();
-
-            foreach (String capability in newCapabilities)
-            {
-                if (!oldCapabilities.Contains(capability))
-                    _addedCapabilities.Add(capability);
-            }
-
-            List<String> lostCapabilities = _lostCapabilities;
-            List<String> addedCapabilities = _addedCapabilities;
-
-            if (this.listener != null)
+            if (listener != null)
             {
                 listener.OnCapabilitiesUpdated(this, addedCapabilities, lostCapabilities);
             }

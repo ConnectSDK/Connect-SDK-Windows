@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using ConnectSdk.Windows.Service;
 using ConnectSdk.Windows.Service.Command;
-using MyRemote.ConnectSDK.Service;
 
 namespace ConnectSdk.Windows.Device
 {

@@ -1,5 +1,6 @@
 ﻿using ConnectSdk.Windows.Core;
 using ConnectSdk.Windows.Service.Capability.Listeners;
+using ConnectSdk.Windows.Service.Sessions;
 
 namespace ConnectSdk.Windows.Service.Capability
 {
@@ -9,7 +10,7 @@ namespace ConnectSdk.Windows.Service.Capability
         CapabilityPriorityLevel GetExternalInputControlPriorityLevel();
 
         void LaunchInputPicker(ResponseListener listener);
-        //void CloseInputPicker(LaunchSession launchSessionm, ResponseListener listener);
+        void CloseInputPicker(LaunchSession launchSessionm, ResponseListener listener);
 
         //void GetExternalInputList(ExternalInputListListener listener);
         void SetExternalInput(ExternalInputInfo input, ResponseListener listener);
