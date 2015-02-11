@@ -1,38 +1,30 @@
-﻿#if WINDOWS_PHONE_APP
-using Windows.Phone.Devices.Notification;
-#endif
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Xml.Serialization;
 using Windows.UI.Popups;
+using Windows.UI.Xaml;
 using ConnectSdk.Demo.Annotations;
 using ConnectSdk.Windows.Core;
 using ConnectSdk.Windows.Device;
-using MyRemote.Tablet.Model;
-using MyRemote.Tablet.Tablet;
+using UpdateControls.Collections;
 
 namespace ConnectSdk.Demo.Demo
 {
     public class Model : INotifyPropertyChanged
     {
-        private List<TvDefinition> knownTvs;
-        private Command addCommand;
+        private IndependentList<TvDefinition> knownTvs;
         private Command deleteCommand;
         private Command executeCommand;
         private string textInput;
         private bool touchEnabled;
-        private bool textEnabled;
 
         private SdkConnector sdkConnector;
 
         public string IpAddress;
         public string Port;
-        private ObservableCollection<ConnectableDevice> discoverredTvList;
 
-        public List<TvDefinition> KnownTvs
+        public IndependentList<TvDefinition> KnownTvs
         {
             get { return knownTvs; }
             set
@@ -42,27 +34,15 @@ namespace ConnectSdk.Demo.Demo
             }
         }
 
-        [XmlIgnore]
         public Command DeleteCommand
         {
-            get
-            {
-                if (deleteCommand == null)
-                    deleteCommand = new Command(Delete);
-                return deleteCommand;
-            }
+            get { return deleteCommand ?? (deleteCommand = new Command(Delete)); }
             set { deleteCommand = value; }
         }
 
-        [XmlIgnore]
         public Command ExecuteCommand
         {
-            get
-            {
-                if (executeCommand == null)
-                    executeCommand = new Command(Execute);
-                return executeCommand;
-            }
+            get { return executeCommand ?? (executeCommand = new Command(Execute)); }
             set { executeCommand = value; }
         }
 
@@ -76,8 +56,7 @@ namespace ConnectSdk.Demo.Demo
             {
                 if (Equals(value, textInput)) return;
                 textInput = value;
-                SendText(textInput, textEnabled);
-                textEnabled = true;
+                SendText(textInput);
             }
         }
 
@@ -91,90 +70,49 @@ namespace ConnectSdk.Demo.Demo
 
                 if (sdkConnector == null) sdkConnector = new SdkConnector(SelectedDevice);
                 sdkConnector.EnableMouse("", true);
-
-                //connector.EnableMouse(this.SelectedTv.BaseUrl, touchEnabled);
             }
         }
 
 
-        public bool TextEnabled
-        {
-            get { return touchEnabled; }
-            set
-            {
-                textEnabled = value;
-               
-            }
-        }
         public long UniqueId { get; set; }
 
-        public ObservableCollection<ConnectableDevice> DiscoverredTvList
-        {
-            get { return discoverredTvList; }
-            set { discoverredTvList = value; OnPropertyChanged();}
-        }
+        public IndependentList<ConnectableDevice> DiscoverredTvList { get; set; }
 
         public List<AppInfo> Channels { get; set; }
 
         private void Delete(object param)
         {
             knownTvs.Clear();
-            
+
         }
 
         private async void CloseApp()
         {
-            MessageDialog msgd = new MessageDialog("The TV is powering-off. This can take a few moments. This application will now close.", "Info");
-            var res = await msgd.ShowAsync();
-            App.Current.Exit();
+            var msgd = new MessageDialog("The TV is powering-off. This can take a few moments. This application will now close.", "Info");
+            await msgd.ShowAsync();
+            Application.Current.Exit();
         }
 
         private void Execute(object param)
         {
             if (sdkConnector == null) sdkConnector = new SdkConnector(SelectedDevice);
 
-            try
+            sdkConnector.MakeCommand(param as string);
+
+            var s = param as string;
+            if (s != null && s.Equals("1"))
             {
-#if WINDOWS_PHONE_APP
-                if (VibrationOn)
-                {
-                    VibrationDevice vd = VibrationDevice.GetDefault();
-                    vd.Vibrate(TimeSpan.FromSeconds(0.1));
-
-                }
-#endif
-                sdkConnector.MakeCommand(param as string);
-
-                if ((param as string).Equals("1"))
-                {
-                    //MessageDialog msgd = new MessageDialog("The TV is powering-off. This can take a few moments. This application will now close.", "Info");
-                    //msgd.ShowAsync();
-                    //App.Current.Exit();    
-                    CloseApp();
-                }
+                CloseApp();
             }
-            catch (Exception e)
-            {
-            }
-
         }
 
         public Model()
         {
-            //var savedData = AppSettings.Current.KnownTvs;
-            //if (!string.IsNullOrEmpty(savedData))
-            //{
-            //    TvListToSave savedModel = DeserializeObject<TvListToSave>(savedData);
-            //    knownTvs = new IndependentList<TvDefinition>(savedModel.List);
-
-            //}
-            //else knownTvs = new IndependentList<TvDefinition>();
-
             ExecuteCommand.Enabled = true;
-            DiscoverredTvList = new ObservableCollection<ConnectableDevice>();
+            DiscoverredTvList = new IndependentList<ConnectableDevice>();
         }
 
- 
+
         public void Move(double x, double y)
         {
             if (sdkConnector == null) sdkConnector = new SdkConnector(SelectedDevice);
@@ -199,7 +137,7 @@ namespace ConnectSdk.Demo.Demo
             sdkConnector.Scroll(ScrollDirection.Down);
         }
 
-        private void SendText(string text, bool textEnabled)
+        private void SendText(string text)
         {
 
             if (sdkConnector == null) sdkConnector = new SdkConnector(SelectedDevice);

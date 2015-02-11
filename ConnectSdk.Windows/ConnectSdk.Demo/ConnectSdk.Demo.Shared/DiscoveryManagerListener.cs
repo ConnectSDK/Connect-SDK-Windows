@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using ConnectSdk.Windows.Device;
 using ConnectSdk.Windows.Discovery;
 using ConnectSdk.Windows.Service;
 using ConnectSdk.Windows.Service.Command;
+using UpdateControls.Collections;
 
 namespace ConnectSdk.Demo.Demo
 {
@@ -15,7 +15,7 @@ namespace ConnectSdk.Demo.Demo
 
         public void OnDeviceAdded(DiscoveryManager manager, ConnectableDevice device)
         {
-            App.ApplicationModel.DiscoverredTvList = new ObservableCollection<ConnectableDevice> { device };
+            App.ApplicationModel.DiscoverredTvList.Add(device);
         }
 
         public void OnDeviceUpdated(DiscoveryManager manager, ConnectableDevice device)

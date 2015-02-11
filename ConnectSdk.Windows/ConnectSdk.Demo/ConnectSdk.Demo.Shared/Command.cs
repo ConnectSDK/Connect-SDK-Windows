@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace MyRemote.Tablet.Model
+namespace ConnectSdk.Demo.Demo
 {
     public class Command : ICommand
     {

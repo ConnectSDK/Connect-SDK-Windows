@@ -5,7 +5,7 @@ using Windows.UI;
 using Windows.UI.Xaml.Media;
 using ConnectSdk.Demo.Annotations;
 
-namespace MyRemote.Tablet.Tablet
+namespace ConnectSdk.Demo.Demo
 {
     public class TvDefinition : INotifyPropertyChanged
     {
@@ -15,11 +15,8 @@ namespace MyRemote.Tablet.Tablet
         private string modelName;
         private string usn;
         private string key;
-        private bool keyValid = true;
         private bool available;
         private string availableText;
-        private string rawDescription;
-        private string rawAdditionaInfo;
 
         public string Name
         {
@@ -89,7 +86,7 @@ namespace MyRemote.Tablet.Tablet
 
         public string BaseUrl
         {
-            get { return Url.Substring(0, Url.IndexOf("/", 10)); }
+            get { return Url.Substring(0, Url.IndexOf("/", 10, System.StringComparison.Ordinal)); }
         }
 
         public bool Available
@@ -126,20 +123,10 @@ namespace MyRemote.Tablet.Tablet
                 return new SolidColorBrush(Colors.Red);
             }
         }
-        public string RawDescription
-        {
-            get
-            {
-                return rawDescription;
-            }
-            set { rawDescription = value; }
-        }
 
-        public string RawAdditionaInfo
-        {
-            get { return rawAdditionaInfo; }
-            set { rawAdditionaInfo = value; }
-        }
+        public string RawDescription { get; set; }
+
+        public string RawAdditionaInfo { get; set; }
 
 
         public event PropertyChangedEventHandler PropertyChanged;

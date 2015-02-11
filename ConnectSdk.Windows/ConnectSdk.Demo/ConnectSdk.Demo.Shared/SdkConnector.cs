@@ -7,7 +7,7 @@ namespace ConnectSdk.Demo.Demo
 {
     public class SdkConnector
     {
-        private ConnectableDevice device;
+        private readonly ConnectableDevice device;
 
         public SdkConnector()
         {
@@ -146,12 +146,6 @@ namespace ConnectSdk.Demo.Demo
             if (textControlDevice == null)
                 textControlDevice = device.GetControl<ITextInputControl>();
             textControlDevice.SendText(text);
-        }
-
-        private void ErrorHandler(Exception error)
-        {
-            //"http://192.168.0.100:8080/udap/api/pairing"
-            //RunningContext.AskForError(error);
         }
     }
 }
