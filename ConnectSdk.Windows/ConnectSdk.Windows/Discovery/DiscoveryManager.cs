@@ -224,7 +224,7 @@ namespace ConnectSdk.Windows.Discovery
                     discoveryProviders.Add(discoveryProvider);
                 }
             }
-            var m = deviceClass.GetRuntimeMethod("discoveryParameters", new Type[] { });
+            var m = deviceClass.GetRuntimeMethod("DiscoveryParameters", new Type[] { });
             var result = m.Invoke(discoveryProvider, new object[] { }) as JsonObject;
             var discoveryParameters = result;
             if (discoveryParameters != null)
@@ -441,8 +441,8 @@ namespace ConnectSdk.Windows.Discovery
         {
             var deviceIsNew = !allDevices.ContainsKey(serviceDescription.IpAddress);
 
-            var device = allDevices[serviceDescription.IpAddress];
-
+            var device = (from d in allDevices where d.Key == serviceDescription.IpAddress select d.Value).FirstOrDefault();
+                
             if (device == null)
             {
                 device = new ConnectableDevice(serviceDescription) { IpAddress = serviceDescription.IpAddress };
