@@ -8,9 +8,11 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Xml.Serialization;
 using Windows.Data.Json;
 using Windows.Foundation;
 using ConnectSdk.Windows.Core;
+using ConnectSdk.Windows.Core.ChannelListDeserializer;
 using ConnectSdk.Windows.Device.Netcast;
 using ConnectSdk.Windows.Discovery;
 using ConnectSdk.Windows.Etc.Helper;
@@ -972,38 +974,21 @@ namespace ConnectSdk.Windows.Service
                 if (load == null) return;
                 var strObj = load.Content.ReadAsStringAsync().Result;
 
-                JsonObject jsonObject;
-                JsonObject.TryParse(strObj, out jsonObject);
+                XmlSerializer ser = new XmlSerializer(typeof(ConnectSdk.Windows.Core.ChannelListDeserializer.envelope));
+                var obj = ser.Deserialize(new StringReader(strObj)) as envelope;
 
-                var tarray = jsonObject.GetNamedArray("Channel List", new JsonArray());
+                List<ChannelInfo> channels = new List<ChannelInfo>();
+                for (int i = 0; i < obj.dataList.data.Count(); i++)
+                {
+                    channels.Add(new ChannelInfo()
+                    {
+                        ChannelId = obj.dataList.data[i].displayMajor.ToString(),
+                        ChannelNumber = obj.dataList.data[i].displayMajor.ToString(),
+                        ChannelName = obj.dataList.data[i].chname.ToString()
+                    });
+                }
+                Util.PostSuccess(listener, channels);
 
-                //todo: fix this
-                //try {
-                //    SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-                //    InputStream stream = new ByteArrayInputStream(strObj.getBytes("UTF-8"));
-                //    SAXParser saxParser = saxParserFactory.newSAXParser();
-
-                //    NetcastChannelParser parser = new NetcastChannelParser();
-                //    saxParser.parse(stream, parser);
-
-                //    JSONArray channelArray = parser.getJSONChannelArray();
-                //    ArrayList<ChannelInfo> channelList = new ArrayList<ChannelInfo>();
-
-                //    for (int i = 0; i < channelArrayLength; i++) {
-                //         JsonObject rawData;
-                //         try {
-                //             rawData = (JsonObject) channelArray.get(i);
-
-                //             ChannelInfo channel = NetcastChannelParser.parseRawChannelData(rawData);
-                //             channelList.add(channel);
-                //         } catch (Exception e) {
-                //             throw e;
-                //         }
-                //    }
-
-                //    Util.PostSuccess(responseListener, channelList);
-                //} catch (Exception e) {
-                //    throw e;
             };
 
             responseListener.Error += (sender, o) =>
@@ -1721,6 +1706,7 @@ namespace ConnectSdk.Windows.Service
 
         public void SendText(string input)
         {
+            keyboardstring.Clear();
             keyboardstring.Append(input);
             HandleKeyboardInput("Editing", keyboardstring.ToString());
         }

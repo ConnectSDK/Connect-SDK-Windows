@@ -80,7 +80,8 @@
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
-            <StackPanel Grid.Row="1" Grid.Column="1" Margin="10">
+            <StackPanel Grid.Row="1" Grid.Column="1" Margin="10" >
+                <TextBlock Text="Select first the tv from the left list" Style="{StaticResource SubheaderTextBlockStyle}" Margin="10" Foreground="Red"></TextBlock>
                 <TextBlock Text="Enter the key shown on the TV" Style="{StaticResource SubheaderTextBlockStyle}" Margin="10"></TextBlock>
                 <TextBox x:Name="PairingKeyTextBox" InputScope="Number" Margin="10"></TextBox>
                 <Button x:ConnectionId='2' x:Name="PairOkButton" Content="Ok"                               HorizontalAlignment="Left" FontSize="22" Margin="10"/>

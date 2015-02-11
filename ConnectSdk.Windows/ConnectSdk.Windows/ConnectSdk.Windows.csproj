@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="Core\AppInfo.cs" />
     <Compile Include="Core\ChannelInfo.cs" />
+    <Compile Include="Core\ChannelInfoDeserializer.cs" />
     <Compile Include="Core\ExternalInputInfo.cs" />
     <Compile Include="Core\ProgramInfo.cs" />
     <Compile Include="Core\ProgramList.cs" />

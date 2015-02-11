@@ -23,6 +23,7 @@ namespace ConnectSdk.Demo.Demo
 
         public string IpAddress;
         public string Port;
+        private ConnectableDevice selectedDevice;
 
         public IndependentList<TvDefinition> KnownTvs
         {
@@ -47,7 +48,17 @@ namespace ConnectSdk.Demo.Demo
         }
 
         public TvDefinition SelectedTv { get; set; }
-        public ConnectableDevice SelectedDevice { get; set; }
+
+        public ConnectableDevice SelectedDevice
+        {
+            get { return selectedDevice; }
+            set { selectedDevice = value; OnPropertyChanged("CanEnterKey");}
+        }
+
+        public Visibility CanEnterKey
+        {
+            get { return this.SelectedDevice != null ? Visibility.Visible : Visibility.Collapsed; }
+        }
 
         public string TextInput
         {
@@ -78,7 +89,8 @@ namespace ConnectSdk.Demo.Demo
 
         public IndependentList<ConnectableDevice> DiscoverredTvList { get; set; }
 
-        public List<AppInfo> Channels { get; set; }
+        public IndependentList<AppInfo> Apps { get; set; }
+        public IndependentList<ChannelInfo> Channels { get; set; }
 
         private void Delete(object param)
         {

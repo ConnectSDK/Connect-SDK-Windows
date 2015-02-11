@@ -66,16 +66,72 @@
                 </DataTemplate>
             </HubSection>
             <HubSection Header="Scrollpad">
+                <DataTemplate>
+                    <StackPanel>
+                        <Border x:Name="ScrollPad" Margin="2" Width="300" Height="300" BorderThickness="5" BorderBrush="Green" CornerRadius="5" ManipulationMode="TranslateX, TranslateY" Tapped="ScrollPadOnTapped" ManipulationDelta="ScrollPadOnManipulationDelta" DoubleTapped="ScrollPad_OnDoubleTapped" >
+                            <TextBlock Text="Pad" FontSize="22" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></TextBlock>
+                        </Border>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox x:Name="TextBoxToSend" FontSize="35" Margin="2" Width="230" Text="{Binding Path=TextInput, Mode=TwoWay, UpdateSourceTrigger=Explicit}" TextChanged="TextBoxToSend_OnTextChanged"></TextBox>
+                            <Button Content="Clear" Name="ButtonClear" Click="ButtonClear_OnClick"></Button>
+                        </StackPanel>
 
-            </HubSection>
-            <HubSection Header="Channels">
+                    </StackPanel>
+
+                </DataTemplate>
 
             </HubSection>
             <HubSection Header="Apps">
-
+                <DataTemplate>
+                    <ListView x:Name="TvListBox" Width="400" ItemsSource="{Binding Path=Apps}" HorizontalContentAlignment="Stretch" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+                        <ListView.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapGrid Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ListView.ItemsPanel>
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Width="100">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="100"></RowDefinition>
+                                        <RowDefinition></RowDefinition>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="1" Text="{Binding Path=Name}" TextWrapping="Wrap" HorizontalAlignment="Center" FontSize="14" Style="{StaticResource TitleTextBlockStyle}" Margin="0,-10,0,10" Foreground="White" />
+                                    <Image Grid.Row="0" Source="{Binding Path=Url}" Height="80" x:Name="AppImage" Tapped="AppImage_OnTapped"></Image>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </DataTemplate>
+            </HubSection>
+            <HubSection Header="Channels">
+                <DataTemplate>
+                    <ListView Width="300" ItemsSource="{Binding Path=Channels}" HorizontalContentAlignment="Stretch" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Width="300">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="40"></ColumnDefinition>
+                                        <ColumnDefinition></ColumnDefinition>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{Binding Path=ChannelNumber}" FontSize="14" Foreground="White" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Path=ChannelName}" FontSize="14" Foreground="White" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </DataTemplate>
             </HubSection>
             <HubSection Header="Capture">
+                <DataTemplate>
+                    <StackPanel>
+                        <Button Click="PrintButton_OnClick" VerticalAlignment="Bottom" Margin="0,39,0,0" Content="Capture">
 
+                        </Button>
+                        <Image x:Name="CaptureImage" Width="800" Height="600"/>
+
+                    </StackPanel>
+                </DataTemplate>
             </HubSection>
 
         </Hub>
