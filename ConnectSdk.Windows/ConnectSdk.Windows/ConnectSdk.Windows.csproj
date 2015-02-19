@@ -136,6 +136,7 @@
     <Compile Include="Service\Config\ServiceConfig.cs" />
     <Compile Include="Service\Config\IServiceConfigListener.cs" />
     <Compile Include="Service\Config\ServiceDescription.cs" />
+    <Compile Include="Service\Config\WebOsTvServiceConfig.cs" />
     <Compile Include="Service\DeviceService.cs" />
     <Compile Include="Service\DlnaService.cs" />
     <Compile Include="Service\IDeviceServiceListener.cs" />
@@ -147,12 +148,18 @@
     <Compile Include="Service\Sessions\WebAppSession.cs" />
     <Compile Include="Service\Sessions\WebAppSessionListener.cs" />
     <Compile Include="Service\Sessions\WebAppStatus.cs" />
+    <Compile Include="Service\Sessions\WebOsWebAppSession.cs" />
     <Compile Include="Service\Upnp\DlnaMediaInfoParser.cs" />
+    <Compile Include="Service\WebOsTvService.cs" />
+    <Compile Include="Service\WebOs\ButtonType.cs" />
+    <Compile Include="Service\WebOs\IWebOstvServiceSocketClientListener.cs" />
+    <Compile Include="Service\WebOs\WebOsTvKeyboardInput.cs" />
+    <Compile Include="Service\WebOs\WebOstvMouseSocketConnection.cs" />
+    <Compile Include="Service\WebOs\WebOstvServiceSocketClient.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Service\AirPlay\" />
     <Folder Include="Service\NetCast\" />
-    <Folder Include="Service\WebOs\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

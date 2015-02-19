@@ -9,10 +9,10 @@ namespace ConnectSdk.Windows.Service.Capability
         IExternalInputControl GetExternalInput();
         CapabilityPriorityLevel GetExternalInputControlPriorityLevel();
 
-        void LaunchInputPicker(ResponseListener listener);
-        void CloseInputPicker(LaunchSession launchSessionm, ResponseListener listener);
+        void LaunchInputPicker(ResponseListener pListener);
+        void CloseInputPicker(LaunchSession launchSessionm, ResponseListener pListener);
 
         //void GetExternalInputList(ExternalInputListListener listener);
-        void SetExternalInput(ExternalInputInfo input, ResponseListener listener);
+        void SetExternalInput(ExternalInputInfo input, ResponseListener pListener);
     }
 }

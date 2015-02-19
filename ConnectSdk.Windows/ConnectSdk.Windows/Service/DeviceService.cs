@@ -50,7 +50,7 @@ namespace ConnectSdk.Windows.Service
         /// </summary>
         private List<string> capabilities;
 
-        private IDeviceServiceListener listener;
+        protected IDeviceServiceListener listener;
 
         public List<ServiceCommand> Requests = new List<ServiceCommand>();
 

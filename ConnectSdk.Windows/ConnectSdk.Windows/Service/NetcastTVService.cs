@@ -1206,7 +1206,7 @@ namespace ConnectSdk.Windows.Service
             return CapabilityPriorityLevel.HIGH;
         }
 
-        public void LaunchInputPicker(ResponseListener listener)
+        public void LaunchInputPicker(ResponseListener pListener)
         {
             const string appName = "Input List";
             var encodedStr = HttpMessage.Encode(appName);
@@ -1222,30 +1222,30 @@ namespace ConnectSdk.Windows.Service
                         inputPickerSession = (LaunchSession)o2;
                     }
 
-                    Util.PostSuccess(listener, o2);
+                    Util.PostSuccess(pListener, o2);
                 };
 
-                responseListener.Error += (sender2, o2) => Util.PostError(listener, o2);
+                responseListener.Error += (sender2, o2) => Util.PostError(pListener, o2);
                 LaunchApplication(appName, ((AppInfo)o).Id, null, responseLaunchListener);
             };
 
-            responseListener.Error += (sender, o) => Util.PostError(listener, o);
+            responseListener.Error += (sender, o) => Util.PostError(pListener, o);
 
             GetApplication(encodedStr, responseListener);
         }
 
-        public void CloseInputPicker(LaunchSession launchSession, ResponseListener listener)
+        public void CloseInputPicker(LaunchSession launchSession, ResponseListener pListener)
         {
             if (inputPickerSession != null)
             {
-                inputPickerSession.Close(listener);
+                inputPickerSession.Close(pListener);
             }
         }
 
-        public void SetExternalInput(ExternalInputInfo input, ResponseListener listener)
+        public void SetExternalInput(ExternalInputInfo input, ResponseListener pListener)
         {
             // Do nothing - not Supported
-            Util.PostError(listener, ServiceCommandError.NotSupported());
+            Util.PostError(pListener, ServiceCommandError.NotSupported());
         }
 
         #endregion
@@ -1672,7 +1672,7 @@ namespace ConnectSdk.Windows.Service
         }
 
 
-        public void SendKeyCode(int keycode, ResponseListener listener)
+        public void SendKeyCode(int keycode, ResponseListener pListener)
         {
             var responseListener = new ResponseListener();
 
@@ -1681,10 +1681,10 @@ namespace ConnectSdk.Windows.Service
                 var requestUrl = GetUdapRequestUrl(UdapPathCommand);
                 var httpMessage = GetHttpMessageForHandleKeyInput(keycode);
 
-                var request = new ServiceCommand(this, requestUrl, httpMessage, listener);
+                var request = new ServiceCommand(this, requestUrl, httpMessage, pListener);
                 request.Send();
             };
-            responseListener.Error += (sender, o) => Util.PostError(listener, o);
+            responseListener.Error += (sender, o) => Util.PostError(pListener, o);
             SetMouseCursorVisible(false, responseListener);
         }
 
