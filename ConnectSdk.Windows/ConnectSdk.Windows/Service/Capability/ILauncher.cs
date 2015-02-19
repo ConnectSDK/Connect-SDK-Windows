@@ -23,7 +23,6 @@ namespace ConnectSdk.Windows.Service.Capability
         IServiceSubscription SubscribeRunningApp(ResponseListener listener);
 
         void GetAppState(LaunchSession launchSession, ResponseListener listener);
-
         IServiceSubscription SubscribeAppState(LaunchSession launchSession, ResponseListener listener);
 
         void LaunchBrowser(string url, ResponseListener listener);

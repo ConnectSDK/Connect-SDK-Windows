@@ -6,6 +6,17 @@ namespace ConnectSdk.Windows.Service.Config
     public class NetcastTvServiceConfig : ServiceConfig
     {
         public static string KeyPairing = "pairingKey";
+        private string pairingKey;
+
+        public string PairingKey
+        {
+            get { return pairingKey; }
+            set
+            {
+                pairingKey = value;
+                NotifyUpdate();
+            }
+        }
 
         public NetcastTvServiceConfig(string serviceUuid) :
             base(serviceUuid)
@@ -23,8 +34,6 @@ namespace ConnectSdk.Windows.Service.Config
         {
             PairingKey = json.GetNamedString(KeyPairing);
         }
-
-        public string PairingKey { get; set; }
 
         public override JsonObject ToJsonObject()
         {

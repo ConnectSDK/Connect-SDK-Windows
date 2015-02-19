@@ -28,13 +28,28 @@ namespace ConnectSdk.Windows.Core
 
         public override bool Equals(object obj)
         {
-            var info = obj as ExternalInputInfo;
-            if (info != null)
-            {
-                var eii = info;
-                return Id.Equals(eii.Id) && Name.Equals(eii.Name);
-            }
-            return false;
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            return obj.GetType() == GetType() && Equals((ExternalInputInfo) obj);
         }
+
+        protected bool Equals(ExternalInputInfo other)
+        {
+            return string.Equals(Id, other.Id) && string.Equals(Name, other.Name) && Connected.Equals(other.Connected) && string.Equals(IconUrl, other.IconUrl) && Equals(RawData, other.RawData);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = (Id != null ? Id.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Name != null ? Name.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ Connected.GetHashCode();
+                hashCode = (hashCode * 397) ^ (IconUrl != null ? IconUrl.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (RawData != null ? RawData.GetHashCode() : 0);
+                return hashCode;
+            }
+        }
+
     }
 }

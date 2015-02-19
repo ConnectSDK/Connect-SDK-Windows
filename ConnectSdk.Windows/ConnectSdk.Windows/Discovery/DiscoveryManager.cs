@@ -2,60 +2,24 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Windows.Data.Json;
 using ConnectSdk.Windows.Core;
 using ConnectSdk.Windows.Device;
-using ConnectSdk.Windows.Discovery.Provider;
 using ConnectSdk.Windows.Service;
 using ConnectSdk.Windows.Service.Command;
 using ConnectSdk.Windows.Service.Config;
-using MyRemote.ConnectSDK.Device;
 
 namespace ConnectSdk.Windows.Discovery
 {
-    /**
-     * ###Overview
-     *
-     * At the heart of Connect SDK is DiscoveryManager, a multi-protocol service discovery engine with a pluggable architecture. Much of your initial experience with Connect SDK will be with the DiscoveryManager class, as it consolidates discovered service information into ConnectableDevice objects.
-     *
-     * ###In depth
-     * DiscoveryManager supports discovering services of differing protocols by using DiscoveryProviders. Many services are discoverable over [SSDP][0] and are registered to be discovered with the SSDPDiscoveryProvider class.
-     *
-     * As services are discovered on the network, the DiscoveryProviders will notify DiscoveryManager. DiscoveryManager is capable of attributing multiple services, if applicable, to a single ConnectableDevice instance. Thus, it is possible to have a mixed-mode ConnectableDevice object that is theoretically capable of more functionality than a single service can provide.
-     *
-     * DiscoveryManager keeps a running list of all discovered devices and maintains a filtered list of devices that have satisfied any of your CapabilityFilters. This filtered list is used by the DevicePicker when presenting the user with a list of devices.
-     *
-     * Only one instance of the DiscoveryManager should be in memory at a time. To assist with this, DiscoveryManager has static method at sharedManager.
-     *
-     * Example:
-     *
-     * @capability kMediaControlPlay
-     *
-     @code
-        DiscoveryManager.init(getApplicationContext());
-        DiscoveryManager discoveryManager = DiscoveryManager.getInstance();
-        discoveryManager.addListener(this);
-        discoveryManager.start();
-     @endcode
-     *
-     * [0]: http://tools.ietf.org/html/draft-cai-ssdp-v1-03
-     */
-
     public class DiscoveryManager : IConnectableDeviceListener, IDiscoveryProviderListener, IServiceConfigListener
     {
-
-        public enum PairingLevel
+        public enum PairingLevelEnum
         {
-            // ReSharper disable InconsistentNaming
-            OFF,
-            ON
-            // ReSharper restore InconsistentNaming
+            Off,
+            On
         }
 
-        // @cond INTERNAL
         private static DiscoveryManager instance;
 
-        //Context context;
         private IConnectableDeviceStore connectableDeviceStore;
 
         private readonly Dictionary<string, ConnectableDevice> allDevices;
@@ -67,13 +31,9 @@ namespace ConnectSdk.Windows.Discovery
         private readonly List<IDiscoveryManagerListener> discoveryListeners;
         private List<CapabilityFilter> capabilityFilters;
 
-        //BroadcastReceiver receiver;
-        private bool isBroadcastReceiverRegistered;
-
-        private PairingLevel pairingLevel;
-
         private bool mSearching;
-        private bool mShouldResume;
+
+        public PairingLevelEnum PairingLevel { get; set; }
 
         public static void Init()
         {
@@ -93,7 +53,7 @@ namespace ConnectSdk.Windows.Discovery
         public static DiscoveryManager GetInstance()
         {
             if (instance == null)
-                throw new Exception("Call DiscoveryManager.init(Context) first");
+                throw new Exception("Call DiscoveryManager.Init(Context) first");
 
             return instance;
         }
@@ -117,9 +77,69 @@ namespace ConnectSdk.Windows.Discovery
             discoveryListeners = new List<IDiscoveryManagerListener>();
 
             capabilityFilters = new List<CapabilityFilter>();
-            pairingLevel = PairingLevel.OFF;
+            PairingLevel = PairingLevelEnum.Off;
+
+            //TODO : check the code below. why do we do this?
+
+            // WifiManager wifiMgr = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+            //multicastLock = wifiMgr.createMulticastLock("Connect SDK");
+            //multicastLock.setReferenceCounted(true);
+
+            //capabilityFilters = new ArrayList<CapabilityFilter>();
+            //pairingLevel = PairingLevel.OFF;
+
+            //receiver = new BroadcastReceiver() { 
+
+            //    @Override 
+            //    public void onReceive(Context context, Intent intent) { 
+            //        String action = intent.getAction();
+
+            //        if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
+            //            NetworkInfo networkInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+
+            //            switch (networkInfo.getState()) {
+            //            case CONNECTED:
+            //                if (mSearching) {
+            //                    for (DiscoveryProvider provider : discoveryProviders) {
+            //                        provider.restart();
+            //                    }
+            //                }
+
+            //                break;
+
+            //            case DISCONNECTED:
+            //                Log.w("Connect SDK", "Network connection is disconnected"); 
+
+            //                for (DiscoveryProvider provider : discoveryProviders) {
+            //                    provider.reset();
+            //                }
+
+            //                allDevices.clear();
+
+            //                for (ConnectableDevice device: compatibleDevices.values()) {
+            //                    handleDeviceLoss(device);
+            //                }
+            //                compatibleDevices.clear();
+
+            //                break;
+
+            //            case CONNECTING:
+            //                break;
+            //            case DISCONNECTING:
+            //                break;
+            //            case SUSPENDED:
+            //                break;
+            //            case UNKNOWN:
+            //                break;
+            //            }
+            //        }
+            //    } 
+            //};
+
+            //registerBroadcastReceiver();
         }
 
+/*
         private void RegisterBroadcastReceiver()
         {
             if (isBroadcastReceiverRegistered == false)
@@ -127,7 +147,9 @@ namespace ConnectSdk.Windows.Discovery
                 isBroadcastReceiverRegistered = true;
             }
         }
+*/
 
+/*
         private void UnregisterBroadcastReceiver()
         {
             if (isBroadcastReceiverRegistered)
@@ -135,6 +157,7 @@ namespace ConnectSdk.Windows.Discovery
                 isBroadcastReceiverRegistered = false;
             }
         }
+*/
 
         public void AddListener(IDiscoveryManagerListener listener)
         {
@@ -188,15 +211,11 @@ namespace ConnectSdk.Windows.Discovery
 
         public void RegisterDefaultDeviceTypes()
         {
-            //RegisterDeviceService(typeof(WebOSTVService), typeof(SsdpDiscoveryProvider));
-            RegisterDeviceService(typeof(NetcastTvService), typeof(SsdpDiscoveryProvider));
-            //registerDeviceService(typeof(DIALService), typeof(SSDPDiscoveryProvider));
-            //registerDeviceService(typeof(RokuService), typeof(SSDPDiscoveryProvider));
-            //registerDeviceService(typeof(CastService), typeof(CastDiscoveryProvider));
-
-            //registerDeviceService(typeof (DlnaService), typeof (SsdpDiscoveryProvider)); //  includes Netcast
-
-            //registerDeviceService(typeof(AirPlayService), typeof(SSDPDiscoveryProvider));
+            Dictionary<Type, Type> devicesList = DefaultPlatform.GetDeviceServiceMap();
+            foreach (var pair in  devicesList)
+            {
+                RegisterDeviceService(pair.Key, pair.Value);
+            }
         }
 
 
@@ -207,9 +226,9 @@ namespace ConnectSdk.Windows.Discovery
 
         public void RegisterDeviceService(Type deviceClass, Type discoveryClass)
         {
-            if (!IsAssignableFrom(deviceClass, typeof(DeviceService)))
+            if (!IsAssignableFrom(deviceClass, typeof (DeviceService)))
                 return;
-            if (!IsAssignableFrom(discoveryClass, typeof(IDiscoveryProvider)))
+            if (!IsAssignableFrom(discoveryClass, typeof (IDiscoveryProvider)))
                 return;
 
             var discoveryProvider = discoveryProviders.FirstOrDefault(dp => dp.GetType() == discoveryClass);
@@ -224,43 +243,35 @@ namespace ConnectSdk.Windows.Discovery
                     discoveryProviders.Add(discoveryProvider);
                 }
             }
-            var m = deviceClass.GetRuntimeMethod("DiscoveryParameters", new Type[] { });
-            var result = m.Invoke(discoveryProvider, new object[] { }) as JsonObject;
-            var discoveryParameters = result;
-            if (discoveryParameters != null)
+            var m = deviceClass.GetRuntimeMethod("DiscoveryFilter", new Type[] { });
+            var discoveryFilter = m.Invoke(discoveryProvider, new object[] { }) as DiscoveryFilter;
+
+            if (discoveryFilter != null)
             {
-                var serviceFilter = discoveryParameters.GetNamedString("serviceId");
-
-                deviceClasses.Add(serviceFilter, deviceClass);
+                var serviceId = discoveryFilter.ServiceId;
+                deviceClasses.Add(serviceId, deviceClass);
+                if (discoveryProvider != null) discoveryProvider.AddDeviceFilter(discoveryFilter);
             }
-
-            if (discoveryProvider != null) discoveryProvider.AddDeviceFilter(discoveryParameters);
+            
         }
 
         public void UnregisterDeviceService(Type deviceClass, Type discoveryClass)
         {
-            if (deviceClass != typeof(DeviceService))
+            if (deviceClass != typeof (DeviceService))
                 return;
-            if (discoveryClass != typeof(IDiscoveryProvider))
+            if (discoveryClass != typeof (IDiscoveryProvider))
                 return;
 
-            IDiscoveryProvider discoveryProvider = discoveryProviders.FirstOrDefault(dp => dp.GetType() == discoveryClass);
+            IDiscoveryProvider discoveryProvider =
+                discoveryProviders.FirstOrDefault(dp => dp.GetType() == discoveryClass);
 
             if (discoveryProvider == null)
                 return;
 
-            var m = deviceClass.GetRuntimeMethod("discoveryParameters", new Type[] { });
-            var result = m.Invoke(discoveryProvider, new object[] { }) as JsonObject;
+            var m = deviceClass.GetRuntimeMethod("DiscoveryFilter", new Type[] { });
+            var discoveryFilter = m.Invoke(discoveryProvider, new object[] { }) as DiscoveryFilter;
 
-            var discoveryParameters = result;
-            if (discoveryParameters != null)
-            {
-                var serviceFilter = discoveryParameters.GetNamedString("serviceId");
-
-                deviceClasses.Remove(serviceFilter);
-            }
-
-            discoveryProvider.RemoveDeviceFilter(discoveryParameters);
+            discoveryProvider.RemoveDeviceFilter(discoveryFilter);
 
             if (!discoveryProvider.IsEmpty()) return;
             discoveryProvider.Stop();
@@ -284,18 +295,20 @@ namespace ConnectSdk.Windows.Discovery
                 RegisterDefaultDeviceTypes();
             }
 
-            if (mShouldResume)
+            if (Util.IsWirelessAvailable())
             {
-                mShouldResume = false;
+                foreach (var provider in discoveryProviders)
+                {
+                    provider.Start();
+                }
             }
             else
             {
-                RegisterBroadcastReceiver();
-            }
-
-            foreach (var provider in discoveryProviders)
-            {
-                provider.Start();
+                foreach (var discoveryManagerListener in discoveryListeners)
+                {
+                    discoveryManagerListener.OnDiscoveryFailed(this,
+                        new ServiceCommandError(0, null));
+                }
             }
         }
 
@@ -310,8 +323,6 @@ namespace ConnectSdk.Windows.Discovery
             {
                 provider.Stop();
             }
-            if (!mShouldResume)
-                UnregisterBroadcastReceiver();
         }
 
         public void SetConnectableDeviceStore(IConnectableDeviceStore connectableDeviceStoreParam)
@@ -372,18 +383,11 @@ namespace ConnectSdk.Windows.Discovery
 
         public bool IsNetcast(ServiceDescription description)
         {
-            var isNetcastTv = false;
-
             var modelName = description.ModelName;
             var modelDescription = description.ModelDescription;
 
             if (modelName == null || !modelName.ToUpper().Equals("LG TV")) return false;
-            if (modelDescription != null && !(modelDescription.ToUpper().Contains("WEBOS")))
-            {
-                isNetcastTv = true;
-            }
-
-            return isNetcastTv;
+            return modelDescription != null && !modelDescription.ToUpper().Contains("WEBOS");
         }
 
         public Dictionary<string, ConnectableDevice> GetAllDevices()
@@ -396,16 +400,6 @@ namespace ConnectSdk.Windows.Discovery
             return compatibleDevices;
         }
 
-        public PairingLevel GetPairingLevel()
-        {
-            return pairingLevel;
-        }
-
-        public void SetPairingLevel(PairingLevel pairingLevelParam)
-        {
-            pairingLevel = pairingLevelParam;
-        }
-
         public void OnDestroy()
         {
 
@@ -413,7 +407,17 @@ namespace ConnectSdk.Windows.Discovery
 
         public void OnServiceConfigUpdate(ServiceConfig serviceConfig)
         {
-
+            if (connectableDeviceStore == null)
+            {
+                return;
+            }
+            foreach (ConnectableDevice device in allDevices.Values)
+            {
+                if (null != device.GetServiceWithUuid(serviceConfig.ServiceUuid))
+                {
+                    connectableDeviceStore.UpdateDevice(device);
+                }
+            }
         }
 
         public void OnCapabilityUpdated(ConnectableDevice device, List<string> added, List<string> removed)
@@ -441,11 +445,12 @@ namespace ConnectSdk.Windows.Discovery
         {
             var deviceIsNew = !allDevices.ContainsKey(serviceDescription.IpAddress);
 
-            var device = (from d in allDevices where d.Key == serviceDescription.IpAddress select d.Value).FirstOrDefault();
-                
+            var device =
+                (from d in allDevices where d.Key == serviceDescription.IpAddress select d.Value).FirstOrDefault();
+
             if (device == null)
             {
-                device = new ConnectableDevice(serviceDescription) { IpAddress = serviceDescription.IpAddress };
+                device = new ConnectableDevice(serviceDescription) {IpAddress = serviceDescription.IpAddress};
                 allDevices.Add(serviceDescription.IpAddress, device);
                 deviceIsNew = true;
             }
@@ -493,52 +498,38 @@ namespace ConnectSdk.Windows.Discovery
 
         public void AddServiceDescriptionToDevice(ServiceDescription desc, ConnectableDevice device)
         {
-            Type deviceServiceClass;
-
-            if (IsNetcast(desc))
-            {
-                deviceServiceClass = typeof(NetcastTvService);
-                var m = deviceServiceClass.GetRuntimeMethod("discoveryParameters", new Type[] { });
-                var result = m.Invoke(null, new object[0]);
-
-                if (result == null)
-                    return;
-
-                var discoveryParameters = (JsonObject)result;
-                var serviceId = discoveryParameters.GetNamedString("serviceId");
-
-                if (serviceId.Length == 0)
-                    return;
-
-                desc.ServiceId = serviceId;
-            }
-            else
-            {
-                deviceServiceClass = deviceClasses[desc.ServiceId];
-            }
+            var deviceServiceClass = deviceClasses[desc.ServiceId];
 
             if (deviceServiceClass == null)
                 return;
 
-            if (typeof(DlnaService) == deviceServiceClass)
+            if (deviceServiceClass == typeof (DlnaService))
             {
-                const string netcast = "netcast";
-                const string webos = "webos";
-
-                var locNet = desc.LocationXml.IndexOf(netcast, StringComparison.Ordinal);
-                var locWeb = desc.LocationXml.IndexOf(webos, StringComparison.Ordinal);
-
-                if (locNet == -1 && locWeb == -1)
+                if (desc.LocationXml == null)
+                    return;
+            }
+            else if (deviceServiceClass == typeof (NetcastTvService))
+            {
+                if (!IsNetcast(desc))
                     return;
             }
 
-            var serviceConfig = new ServiceConfig(desc) {Listener = this};
+            ServiceConfig serviceConfig = null;
+
+            if (connectableDeviceStore != null)
+                serviceConfig = connectableDeviceStore.GetServiceConfig(desc.Uuid);
+
+            if (serviceConfig == null)
+                serviceConfig = new ServiceConfig(desc);
+
+            serviceConfig.Listener = this;
 
             var hasType = false;
             var hasService = false;
 
-            foreach (var service in device.GetServices().Where(service => service.ServiceDescription.ServiceId.Equals(desc.ServiceId)))
+            foreach (DeviceService service in device.GetServices())
             {
+                if (!service.ServiceDescription.ServiceId.Equals(desc.ServiceId)) continue;
                 hasType = true;
                 if (service.ServiceDescription.Uuid.Equals(desc.Uuid))
                 {
@@ -551,7 +542,7 @@ namespace ConnectSdk.Windows.Discovery
             {
                 if (hasService)
                 {
-                    device.SetServiceDescription(desc);
+                    device.ServiceDescription = desc;
 
                     var alreadyAddedService = device.GetServiceByName(desc.ServiceId);
 
@@ -565,8 +556,88 @@ namespace ConnectSdk.Windows.Discovery
             }
 
             var deviceService = DeviceService.GetService(deviceServiceClass, desc, serviceConfig);
+
+            if (deviceService == null) return;
+
             deviceService.ServiceDescription = desc;
             device.AddService(deviceService);
+
+
+            //    Type deviceServiceClass;
+
+            //    if (IsNetcast(desc))
+            //    {
+            //        deviceServiceClass = typeof(NetcastTvService);
+            //        var m = deviceServiceClass.GetRuntimeMethod("discoveryParameters", new Type[] { });
+            //        var result = m.Invoke(null, new object[0]);
+
+            //        if (result == null)
+            //            return;
+
+            //        var discoveryParameters = (JsonObject)result;
+            //        var serviceId = discoveryParameters.GetNamedString("serviceId");
+
+            //        if (serviceId.Length == 0)
+            //            return;
+
+            //        desc.ServiceId = serviceId;
+            //    }
+            //    else
+            //    {
+            //        deviceServiceClass = deviceClasses[desc.ServiceId];
+            //    }
+
+            //    if (deviceServiceClass == null)
+            //        return;
+
+            //    if (typeof(DlnaService) == deviceServiceClass)
+            //    {
+            //        const string netcast = "netcast";
+            //        const string webos = "webos";
+
+            //        var locNet = desc.LocationXml.IndexOf(netcast, StringComparison.Ordinal);
+            //        var locWeb = desc.LocationXml.IndexOf(webos, StringComparison.Ordinal);
+
+            //        if (locNet == -1 && locWeb == -1)
+            //            return;
+            //    }
+
+            //    var serviceConfig = new ServiceConfig(desc) {Listener = this};
+
+            //    var hasType = false;
+            //    var hasService = false;
+
+            //    foreach (var service in device.GetServices().Where(service => service.ServiceDescription.ServiceId.Equals(desc.ServiceId)))
+            //    {
+            //        hasType = true;
+            //        if (service.ServiceDescription.Uuid.Equals(desc.Uuid))
+            //        {
+            //            hasService = true;
+            //        }
+            //        break;
+            //    }
+
+            //    if (hasType)
+            //    {
+            //        if (hasService)
+            //        {
+            //            device.SetServiceDescription(desc);
+
+            //            var alreadyAddedService = device.GetServiceByName(desc.ServiceId);
+
+            //            if (alreadyAddedService != null)
+            //                alreadyAddedService.ServiceDescription = desc;
+
+            //            return;
+            //        }
+
+            //        device.RemoveServiceByName(desc.ServiceId);
+            //    }
+
+            //    var deviceService = DeviceService.GetService(deviceServiceClass, desc, serviceConfig);
+            //    deviceService.ServiceDescription = desc;
+            //    device.AddService(deviceService);
+            //}
         }
     }
 }

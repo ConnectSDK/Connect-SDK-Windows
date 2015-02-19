@@ -11,13 +11,41 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ConnectSdk.Demo.Shared", "C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectSdk.Demo.Windows", "ConnectSdk.Demo\ConnectSdk.Demo.Windows\ConnectSdk.Demo.Windows.csproj", "{7F59FB63-4870-41EB-BA3C-B9D1CE39415A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectSdk.Demo.WindowsPhone", "ConnectSdk.Demo\ConnectSdk.Demo.WindowsPhone\ConnectSdk.Demo.WindowsPhone.csproj", "{B06DC028-CB21-4878-874D-3220FE5E305B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectSdk.Windows.Test", "ConnectSdk.Windows.Test\ConnectSdk.Windows.Test.csproj", "{A9374CC3-D4DC-4527-98EA-F7F90F905625}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A4B1CBD4-9CCF-4306-9881-EC5D4E771199}"
+	ProjectSection(SolutionItems) = preProject
+		ConnectSdk.Windows..testsettings = ConnectSdk.Windows..testsettings
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		ConnectSdk.Demo\ConnectSdk.Demo.Shared\ConnectSdk.Demo.Shared.projitems*{7f59fb63-4870-41eb-ba3c-b9d1ce39415a}*SharedItemsImports = 4
 		ConnectSdk.Demo\ConnectSdk.Demo.Shared\ConnectSdk.Demo.Shared.projitems*{ed5cc1f3-ada9-4068-8646-9b3159b807d7}*SharedItemsImports = 13
-		ConnectSdk.Demo\ConnectSdk.Demo.Shared\ConnectSdk.Demo.Shared.projitems*{b06dc028-cb21-4878-874d-3220fe5e305b}*SharedItemsImports = 4
+	EndGlobalSection
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 6
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = https://sorins.visualstudio.com/defaultcollection
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = ConnectSdk.Windows\\ConnectSdk.Windows.csproj
+		SccProjectName1 = ConnectSdk.Windows
+		SccLocalPath1 = ConnectSdk.Windows
+		SccProjectUniqueName2 = ConnectSdk.Demo\\ConnectSdk.Demo.Shared\\ConnectSdk.Demo.Shared.shproj
+		SccProjectTopLevelParentUniqueName2 = ConnectSdk.sln
+		SccProjectName2 = ConnectSdk.Demo/ConnectSdk.Demo.Shared
+		SccLocalPath2 = ConnectSdk.Demo\\ConnectSdk.Demo.Shared
+		SccProjectUniqueName3 = ConnectSdk.Demo\\ConnectSdk.Demo.Windows\\ConnectSdk.Demo.Windows.csproj
+		SccProjectTopLevelParentUniqueName3 = ConnectSdk.sln
+		SccProjectName3 = ConnectSdk.Demo/ConnectSdk.Demo.Windows
+		SccLocalPath3 = ConnectSdk.Demo\\ConnectSdk.Demo.Windows
+		SccProjectUniqueName4 = ConnectSdk.Demo\\ConnectSdk.Demo.Shared\\ConnectSdk.Demo.Shared.projitems
+		SccProjectTopLevelParentUniqueName4 = ConnectSdk.sln
+		SccProjectName4 = ConnectSdk.Demo/ConnectSdk.Demo.Shared
+		SccLocalPath4 = ConnectSdk.Demo\\ConnectSdk.Demo.Shared
+		SccProjectUniqueName5 = ConnectSdk.Windows.Test\\ConnectSdk.Windows.Test.csproj
+		SccProjectName5 = ConnectSdk.Windows.Test
+		SccLocalPath5 = ConnectSdk.Windows.Test
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -64,26 +92,30 @@ Global
 		{7F59FB63-4870-41EB-BA3C-B9D1CE39415A}.Release|x86.ActiveCfg = Release|x86
 		{7F59FB63-4870-41EB-BA3C-B9D1CE39415A}.Release|x86.Build.0 = Release|x86
 		{7F59FB63-4870-41EB-BA3C-B9D1CE39415A}.Release|x86.Deploy.0 = Release|x86
-		{B06DC028-CB21-4878-874D-3220FE5E305B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B06DC028-CB21-4878-874D-3220FE5E305B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B06DC028-CB21-4878-874D-3220FE5E305B}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{B06DC028-CB21-4878-874D-3220FE5E305B}.Debug|ARM.ActiveCfg = Debug|ARM
-		{B06DC028-CB21-4878-874D-3220FE5E305B}.Debug|ARM.Build.0 = Debug|ARM
-		{B06DC028-CB21-4878-874D-3220FE5E305B}.Debug|ARM.Deploy.0 = Debug|ARM
-		{B06DC028-CB21-4878-874D-3220FE5E305B}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{B06DC028-CB21-4878-874D-3220FE5E305B}.Debug|x86.ActiveCfg = Debug|x86
-		{B06DC028-CB21-4878-874D-3220FE5E305B}.Debug|x86.Build.0 = Debug|x86
-		{B06DC028-CB21-4878-874D-3220FE5E305B}.Debug|x86.Deploy.0 = Debug|x86
-		{B06DC028-CB21-4878-874D-3220FE5E305B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B06DC028-CB21-4878-874D-3220FE5E305B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B06DC028-CB21-4878-874D-3220FE5E305B}.Release|Any CPU.Deploy.0 = Release|Any CPU
-		{B06DC028-CB21-4878-874D-3220FE5E305B}.Release|ARM.ActiveCfg = Release|ARM
-		{B06DC028-CB21-4878-874D-3220FE5E305B}.Release|ARM.Build.0 = Release|ARM
-		{B06DC028-CB21-4878-874D-3220FE5E305B}.Release|ARM.Deploy.0 = Release|ARM
-		{B06DC028-CB21-4878-874D-3220FE5E305B}.Release|x64.ActiveCfg = Release|Any CPU
-		{B06DC028-CB21-4878-874D-3220FE5E305B}.Release|x86.ActiveCfg = Release|x86
-		{B06DC028-CB21-4878-874D-3220FE5E305B}.Release|x86.Build.0 = Release|x86
-		{B06DC028-CB21-4878-874D-3220FE5E305B}.Release|x86.Deploy.0 = Release|x86
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Debug|ARM.ActiveCfg = Debug|ARM
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Debug|ARM.Build.0 = Debug|ARM
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Debug|ARM.Deploy.0 = Debug|ARM
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Debug|x64.ActiveCfg = Debug|x64
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Debug|x64.Build.0 = Debug|x64
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Debug|x64.Deploy.0 = Debug|x64
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Debug|x86.ActiveCfg = Debug|x86
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Debug|x86.Build.0 = Debug|x86
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Debug|x86.Deploy.0 = Debug|x86
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Release|ARM.ActiveCfg = Release|ARM
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Release|ARM.Build.0 = Release|ARM
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Release|ARM.Deploy.0 = Release|ARM
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Release|x64.ActiveCfg = Release|x64
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Release|x64.Build.0 = Release|x64
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Release|x64.Deploy.0 = Release|x64
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Release|x86.ActiveCfg = Release|x86
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Release|x86.Build.0 = Release|x86
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Release|x86.Deploy.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -91,6 +123,5 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{ED5CC1F3-ADA9-4068-8646-9B3159B807D7} = {E97B6AA0-61E0-4AFA-8FCD-64C72D215D8A}
 		{7F59FB63-4870-41EB-BA3C-B9D1CE39415A} = {E97B6AA0-61E0-4AFA-8FCD-64C72D215D8A}
-		{B06DC028-CB21-4878-874D-3220FE5E305B} = {E97B6AA0-61E0-4AFA-8FCD-64C72D215D8A}
 	EndGlobalSection
 EndGlobal

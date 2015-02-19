@@ -1,12 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using Windows.Data.Json;
+using ConnectSdk.Windows.Core;
 using ConnectSdk.Windows.Service.Capability.Listeners;
 
 namespace ConnectSdk.Windows.Service.Sessions
 {
-    public class LaunchSession
+    public class LaunchSession : IJsonSerializable, IJsonDeserializable
     {
+        public string AppId { get; set; }
+        public string AppName { get; set; }
+        public string SessionId { get; set; }
+        public object RawData { get; set; }
+        public DeviceService Service { get; set; }
+        public LaunchSessionType SessionType { get; set; }
+
         public static LaunchSession LaunchSessionForAppId(string appId)
         {
             var launchSession = new LaunchSession { AppId = appId };
@@ -65,19 +73,6 @@ namespace ConnectSdk.Windows.Service.Sessions
             return obj;
         }
 
-
-        public string AppId { get; set; }
-
-        public string AppName { get; set; }
-
-        public string SessionId { get; set; }
-
-        public object RawData { get; set; }
-
-        public DeviceService Service { get; set; }
-
-        public LaunchSessionType SessionType { get; set; }
-
         public void FromJsonObject(JsonObject obj)
         {
             AppId = obj.GetNamedString("appId");
@@ -87,6 +82,5 @@ namespace ConnectSdk.Windows.Service.Sessions
                 (LaunchSessionType)Enum.Parse(typeof(LaunchSessionType), obj.GetNamedString("sessionType"));
             RawData = obj.GetNamedString("rawData");
         }
-
     }
 }

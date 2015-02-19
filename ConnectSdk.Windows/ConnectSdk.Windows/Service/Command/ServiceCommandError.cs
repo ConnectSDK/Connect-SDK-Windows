@@ -9,10 +9,10 @@ namespace ConnectSdk.Windows.Service.Command
 
         public static ServiceCommandError NotSupported()
         {
-            return new ServiceCommandError(503, "not supported", null);
+            return new ServiceCommandError(503, null);
         }
 
-        public ServiceCommandError(int code, string desc, Object payload) 
+        public ServiceCommandError(int code, Object payload) 
         {
             this.code = code;
             this.payload = payload;
@@ -52,7 +52,7 @@ namespace ConnectSdk.Windows.Service.Command
                 desc = "Unknown Error";
             }
 
-            return new ServiceCommandError(code, desc, null);
+            return new ServiceCommandError(code, null);
         }
     }
 }

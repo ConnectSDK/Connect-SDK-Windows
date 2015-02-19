@@ -117,7 +117,7 @@ namespace ConnectSdk.Demo.Demo
         {
             if (mouseControlDevice == null)
                 mouseControlDevice = device.GetControl<IMouseControl>();
-            if (!mouseControlDevice.MouseConnected())
+            //if (!mouseControlDevice.)
                 mouseControlDevice.ConnectMouse();
             mouseControlDevice.Move(x, y);
         }
@@ -126,7 +126,7 @@ namespace ConnectSdk.Demo.Demo
         {
             if (mouseControlDevice == null)
                 mouseControlDevice = device.GetControl<IMouseControl>();
-            if (!mouseControlDevice.MouseConnected())
+            //if (!mouseControlDevice.MouseConnected())
                 mouseControlDevice.ConnectMouse();
             mouseControlDevice.Click();
         }
@@ -135,7 +135,7 @@ namespace ConnectSdk.Demo.Demo
         {
             if (mouseControlDevice == null)
                 mouseControlDevice = device.GetControl<IMouseControl>();
-            if (!mouseControlDevice.MouseConnected())
+            //if (!mouseControlDevice.MouseConnected())
                 mouseControlDevice.ConnectMouse();
             mouseControlDevice.Scroll(0, (int)direction);
         }

@@ -15,6 +15,15 @@
         public static string PlayStateSubscribe = "MediaControl.PlayState.Subscribe";
         public static string Position = "MediaControl.Position";
 
+        public static string Previous = "MediaControl.Previous";
+        public static string String = "MediaControl.Next";
+
+        public static int PlayerStateUnknown = 0;
+        public static int PlayerStateIdle = 1;
+        public static int PlayerStatePlaying = 2;
+        public static int PlayerStatePaused = 3;
+        public static int PlayerStateBuffering = 4;
+
         public static string[] Capabilities =
         {
             Play,

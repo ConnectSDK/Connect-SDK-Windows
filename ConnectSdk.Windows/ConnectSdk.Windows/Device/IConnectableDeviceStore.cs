@@ -1,8 +1,7 @@
 ﻿using Windows.Data.Json;
-using ConnectSdk.Windows.Device;
 using ConnectSdk.Windows.Service.Config;
 
-namespace MyRemote.ConnectSDK.Device
+namespace ConnectSdk.Windows.Device
 {
     /// <summary>
     ///  ConnectableDeviceStore is a interface which can be implemented to save key information about ConnectableDevices that have been connected to.  Any class which implements this interface can be used as DiscoveryManager's deviceStore.

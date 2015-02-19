@@ -6,7 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Xml;
 using ConnectSdk.Windows.Core.Upnp.Ssdp;
-using MyRemote.ConnectSDK.Core;
+using ConnectSdk.Windows.Discovery.Provider.ssdp;
 
 namespace ConnectSdk.Windows.Core.Upnp
 {
@@ -94,7 +94,7 @@ namespace ConnectSdk.Windows.Core.Upnp
         /// <summary>
         /// Optional
         /// </summary>
-        public List<Service.Service> ServiceList = new List<Service.Service>();
+        public List<Discovery.Provider.ssdp.Service> ServiceList = new List<Discovery.Provider.ssdp.Service>();
 
         public string SearchTarget;
         public string ApplicationUrl;
@@ -188,19 +188,19 @@ namespace ConnectSdk.Windows.Core.Upnp
                 if (xmlReader.Name == "service" && xmlReader.NodeType == XmlNodeType.Element)
                 {
                     if (device.ServiceList == null)
-                        device.ServiceList = new List<Service.Service>();
-                    device.ServiceList.Add(new Service.Service());
+                        device.ServiceList = new List<Discovery.Provider.ssdp.Service>();
+                    device.ServiceList.Add(new Discovery.Provider.ssdp.Service());
                 }
 
-                if (xmlReader.Name == Service.Service.TAG_SERVICE_TYPE)
+                if (xmlReader.Name == Discovery.Provider.ssdp.Service.TAG_SERVICE_TYPE)
                     device.ServiceList[device.ServiceList.Count - 1].ServiceType = xmlReader.ReadElementContentAsString();
-                if (xmlReader.Name == Service.Service.TAG_SERVICE_ID)
+                if (xmlReader.Name == Discovery.Provider.ssdp.Service.TAG_SERVICE_ID)
                     device.ServiceList[device.ServiceList.Count - 1].ServiceId = xmlReader.ReadElementContentAsString();
-                if (xmlReader.Name == Service.Service.TAG_SCPD_URL)
+                if (xmlReader.Name == Discovery.Provider.ssdp.Service.TAG_SCPD_URL)
                     device.ServiceList[device.ServiceList.Count - 1].ScpdUrl = xmlReader.ReadElementContentAsString();
-                if (xmlReader.Name == Service.Service.TAG_CONTROL_URL)
+                if (xmlReader.Name == Discovery.Provider.ssdp.Service.TAG_CONTROL_URL)
                     device.ServiceList[device.ServiceList.Count - 1].ControlUrl = xmlReader.ReadElementContentAsString();
-                if (xmlReader.Name == Service.Service.TAG_EVENTSUB_URL)
+                if (xmlReader.Name == Discovery.Provider.ssdp.Service.TAG_EVENTSUB_URL)
                     device.ServiceList[device.ServiceList.Count - 1].EventSubUrl = xmlReader.ReadElementContentAsString();
             }
             return device;

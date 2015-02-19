@@ -12,11 +12,11 @@ namespace ConnectSdk.Windows.Service.Capability.Listeners
             try
             {
                 var load = obj as ServiceCommandError;
-                Load = load ?? new ServiceCommandError(0, "", obj);
+                Load = load ?? new ServiceCommandError(0, obj);
             }
             catch
             {
-                Load = new ServiceCommandError(0, "", obj);
+                Load = new ServiceCommandError(0, obj);
             }
         }
     }

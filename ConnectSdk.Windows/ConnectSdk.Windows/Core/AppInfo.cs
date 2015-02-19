@@ -6,7 +6,7 @@ namespace ConnectSdk.Windows.Core
     /// Normalized reference object for information about a DeviceService's app. This object will, in most cases, be used to launch apps.
     /// In some cases, all that is needed to launch an app is the app id.
     /// </summary>
-    public class AppInfo 
+    public class AppInfo : IJsonSerializable
     {
         private string id;
 	    private string name;

@@ -1,4 +1,4 @@
-﻿using System.IO;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -60,12 +60,9 @@ namespace ConnectSdk.Windows.Etc.Helper
                         testThread.Wait(Timeout);
                     }
                 }
-                catch (IOException)
+                catch (Exception)
                 {
                     Unreachable();
-                }
-                catch
-                {
                 }
             }, cancelationToken);
 

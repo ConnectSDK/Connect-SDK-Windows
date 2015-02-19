@@ -2,7 +2,7 @@ using System.Text;
 
 namespace ConnectSdk.Windows.Core.Upnp.Ssdp
 {
-    public class SSDPSearchMsg
+    public class SsdpSearchMsg
     {
         static readonly string Host = "HOST: " + SSDP.Address + ":" + SSDP.Port;
         private const string Man = "MAN: \"ssdp:discover\"";
@@ -18,7 +18,7 @@ namespace ConnectSdk.Windows.Core.Upnp.Ssdp
         public string MSt { get; set; }
 
 
-        public SSDPSearchMsg(string st)
+        public SsdpSearchMsg(string st)
         {
             MSt = st;
         }

@@ -6,7 +6,6 @@ using ConnectSdk.Windows.Core;
 using ConnectSdk.Windows.Etc.Helper;
 using ConnectSdk.Windows.Service;
 using ConnectSdk.Windows.Service.Config;
-using MyRemote.ConnectSDK.Device;
 
 namespace ConnectSdk.Windows.Device
 {
@@ -14,8 +13,8 @@ namespace ConnectSdk.Windows.Device
     {
         // ReSharper disable InconsistentNaming
         private const int CURRENT_VERSION = 0;
-        public static string KEY_VERSION = "version";
 
+        public static string KEY_VERSION = "version";
         public static string KEY_CREATED = "created";
         public static string KEY_UPDATED = "updated";
         public static string KEY_DEVICES = "devices";
@@ -64,6 +63,33 @@ namespace ConnectSdk.Windows.Device
         private readonly Dictionary<string, ConnectableDevice> activeDevices = new Dictionary<string, ConnectableDevice>();
 
         private bool waitToWrite;
+
+        public DefaultConnectableDeviceStore()
+        {
+            //String dirPath;
+            //if (Environment. .getExternalStorageState().equals(Environment.MEDIA_MOUNTED))
+            //{
+            //    dirPath = Environment.getExternalStorageDirectory().getAbsolutePath();
+            //}
+            //else
+            //{
+            //    dirPath = Environment.MEDIA_UNMOUNTED;
+            //}
+            //fileFullPath = dirPath + DIRPATH + FILENAME;
+            //global::Windows.Storage.ApplicationData settings;
+
+
+            //try
+            //{
+            //    fileFullPath = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).applicationInfo.dataDir + "/" + FILENAME;
+            //}
+            //catch (NameNotFoundException e)
+            //{
+            //    e.printStackTrace();
+            //}
+
+            Load();
+        }
 
         public DefaultConnectableDeviceStore(string fileFullPath)
         {
@@ -118,9 +144,12 @@ namespace ConnectSdk.Windows.Device
                 return;
 
             storedDevice.SetNamedValue(ConnectableDevice.KEY_LAST_IP, JsonValue.CreateStringValue(device.LastKnownIpAddress));
-            storedDevice.SetNamedValue(ConnectableDevice.KEY_LAST_SEEN, JsonValue.CreateStringValue(device.LastSeenOnWifi));
-            storedDevice.SetNamedValue(ConnectableDevice.KEY_LAST_CONNECTED, JsonValue.CreateNumberValue(device.LastConnected));
-            storedDevice.SetNamedValue(ConnectableDevice.KEY_LAST_DETECTED, JsonValue.CreateNumberValue(device.LastDetection));
+            if (device.LastSeenOnWifi != null)
+                storedDevice.SetNamedValue(ConnectableDevice.KEY_LAST_SEEN, JsonValue.CreateStringValue(device.LastSeenOnWifi));
+            if (device.LastConnected > 0)
+                storedDevice.SetNamedValue(ConnectableDevice.KEY_LAST_CONNECTED, JsonValue.CreateNumberValue(device.LastConnected));
+            if (device.LastDetection > 0)
+                storedDevice.SetNamedValue(ConnectableDevice.KEY_LAST_DETECTED, JsonValue.CreateNumberValue(device.LastDetection));
 
             var services = storedDevice.GetNamedObject(ConnectableDevice.KEY_SERVICES) ?? new JsonObject();
 
@@ -222,6 +251,16 @@ namespace ConnectSdk.Windows.Device
             Updated = Util.GetTime();
 
             storedDevices = new JsonObject();
+
+            var value = Storage.Current.GetValueOrDefault(Storage.StoredDevicesKeyName, string.Empty);
+            JsonObject data;
+            if (!JsonObject.TryParse(value, out data)) return;
+
+            storedDevices = data.GetNamedObject(KEY_DEVICES, null) ?? new JsonObject();
+
+            Version = (int)data.GetNamedNumber(KEY_VERSION, CURRENT_VERSION);
+            Created = (long)data.GetNamedNumber(KEY_CREATED, 0);
+            Updated = (long)data.GetNamedNumber(KEY_UPDATED, 0);
         }
 
         private void Store()

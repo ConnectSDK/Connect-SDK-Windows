@@ -1,10 +1,13 @@
-﻿//using System;
-//using MyRemote.ConnectSDK.Service.Command;
+﻿using ConnectSdk.Windows.Service.Command;
 
-//namespace MyRemote.ConnectSDK.Service.Capability.Listeners
-//{
-//    public class ErrorListener
-//    {
-
-//    }
-//}
+namespace ConnectSdk.Windows.Service.Capability.Listeners
+{
+    public interface IErrorListener
+    {
+        /// <summary>
+        /// Method to return the error that was generated. Will pass an error object with a helpful status code and error message.
+        /// </summary>
+        /// <param name="error"></param>
+        void OnError(ServiceCommandError error);
+    }
+}

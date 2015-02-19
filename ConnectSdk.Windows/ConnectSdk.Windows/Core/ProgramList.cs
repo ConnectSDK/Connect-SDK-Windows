@@ -2,7 +2,7 @@ using Windows.Data.Json;
 
 namespace ConnectSdk.Windows.Core
 {
-    public class ProgramList
+    public class ProgramList : IJsonSerializable
     {
         public ChannelInfo Channel { get; private set; }
         public JsonArray ProgramsList { get; private set; }

@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Windows.Data.Json;
 using ConnectSdk.Windows.Core;
 using ConnectSdk.Windows.Discovery;
 using ConnectSdk.Windows.Service;
+using ConnectSdk.Windows.Service.Capability;
 using ConnectSdk.Windows.Service.Command;
 using ConnectSdk.Windows.Service.Config;
-using MyRemote.ConnectSDK.Device;
 
 namespace ConnectSdk.Windows.Device
 {
@@ -33,8 +34,7 @@ namespace ConnectSdk.Windows.Device
         // ReSharper restore InconsistentNaming
 
         private string id;
-        private ServiceDescription serviceDescription;
-        private readonly List<IConnectableDeviceListener> listeners = new List<IConnectableDeviceListener>();
+        private List<IConnectableDeviceListener> listeners = new List<IConnectableDeviceListener>();
         private readonly Dictionary<string, DeviceService> services = new Dictionary<string, DeviceService>();
 
         public bool FeaturesReady = false;
@@ -64,20 +64,19 @@ namespace ConnectSdk.Windows.Device
         }
 
         public string IpAddress { get; set; }
-
         public string FriendlyName { get; set; }
-
         public string ModelName { get; set; }
-
         public string ModelNumber { get; set; }
-
         public string LastKnownIpAddress { get; set; }
-
         public string LastSeenOnWifi { get; set; }
-
         public double LastConnected { get; set; }
-
         public double LastDetection { get; set; }
+        public ServiceDescription ServiceDescription { get; set; }
+
+        public ConnectableDevice()
+        {
+            services = new Dictionary<String, DeviceService>();
+        }
 
         public ConnectableDevice(string ipAddress, string friendlyName, string modelName, string modelNumber)
         {
@@ -103,21 +102,21 @@ namespace ConnectSdk.Windows.Device
             LastConnected = json.GetNamedNumber(KEY_LAST_CONNECTED);
             LastDetection = json.GetNamedNumber(KEY_LAST_DETECTED);
 
-            var jsonServices = json.GetNamedObject(KEY_SERVICES);
-            if (jsonServices != null)
-            {
-                foreach (var key in jsonServices.Keys)
-                {
-                    var jsonService = jsonServices.GetNamedObject(key);
+            //var jsonServices = json.GetNamedObject(KEY_SERVICES);
+            //if (jsonServices != null)
+            //{
+            //    foreach (var key in jsonServices.Keys)
+            //    {
+            //        var jsonService = jsonServices.GetNamedObject(key);
 
-                    if (jsonService != null)
-                    {
-                        var newService = DeviceService.GetService(jsonService);
-                        if (newService != null)
-                            AddService(newService);
-                    }
-                }
-            }
+            //        if (jsonService != null)
+            //        {
+            //            var newService = DeviceService.GetService(jsonService);
+            //            if (newService != null)
+            //                AddService(newService);
+            //        }
+            //    }
+            //}
         }
 
         public static ConnectableDevice CreateFromConfigstring(string ipAddress, string friendlyName, string modelName,
@@ -133,23 +132,13 @@ namespace ConnectSdk.Windows.Device
             return mDevice;
         }
 
-        public ServiceDescription GetServiceDescription()
-        {
-            return serviceDescription;
-        }
-
-        public virtual void SetServiceDescription(ServiceDescription sourceServiceDescription)
-        {
-            serviceDescription = sourceServiceDescription;
-        }
-
         /// <summary>
         /// Adds a DeviceService to the ConnectableDevice instance. Only one instance of each DeviceService type (webOS, Netcast, etc) may be attached to a single ConnectableDevice instance. If a device contains your service type already, your service will not be added.
         /// </summary>
         /// <param name="service">DeviceService to be added</param>
         public void AddService(DeviceService service)
         {
-            var added = getMismatchCapabilities(service.Capabilities, GetCapabilities());
+            var added = GetMismatchCapabilities(service.Capabilities, GetCapabilities());
 
             service.Listener = this;
 
@@ -183,13 +172,13 @@ namespace ConnectSdk.Windows.Device
 
             services.Remove(serviceId);
 
-            var removed = getMismatchCapabilities(service.Capabilities, GetCapabilities());
+            var removed = GetMismatchCapabilities(service.Capabilities, GetCapabilities());
 
             foreach (var listener in listeners)
                 listener.OnCapabilityUpdated(this, new List<string>(), removed);
         }
 
-        private List<string> getMismatchCapabilities(IEnumerable<string> capabilities, ICollection<string> allCapabilities)
+        private static List<string> GetMismatchCapabilities(IEnumerable<string> capabilities, ICollection<string> allCapabilities)
         {
             return capabilities.Where(cap => !allCapabilities.Contains(cap)).ToList();
         }
@@ -232,44 +221,44 @@ namespace ConnectSdk.Windows.Device
             return GetServices().FirstOrDefault(service => service.ServiceDescription.Uuid.Equals(serviceUuid));
         }
 
-        ///// <summary>
-        ///// Adds the ConnectableDeviceListener to the list of listeners for this ConnectableDevice to receive certain events.
-        ///// </summary>
-        ///// <param name="listener">ConnectableDeviceListener to listen to device events (connect, disconnect, ready, etc)</param>
-        //public void AddListener(IConnectableDeviceListener listener)
-        //{
-        //    if (listeners.Contains(listener) == false)
-        //    {
-        //        listeners.Add(listener);
-        //    }
-        //}
+        /// <summary>
+        /// Adds the ConnectableDeviceListener to the list of listeners for this ConnectableDevice to receive certain events.
+        /// </summary>
+        /// <param name="listener">ConnectableDeviceListener to listen to device events (connect, disconnect, ready, etc)</param>
+        public void AddListener(IConnectableDeviceListener listener)
+        {
+            if (listeners.Contains(listener) == false)
+            {
+                listeners.Add(listener);
+            }
+        }
 
-        ///// <summary>
-        ///// Clears the array of listeners and adds the provided `listener` to the array. If `listener` is null, the array will be empty.
-        ///// </summary>
-        ///// <param name="listener">ConnectableDeviceListener to listen to device events (connect, disconnect, ready, etc)</param>
-        //public void SetListener(IConnectableDeviceListener listener)
-        //{
-        //    listeners = new List<IConnectableDeviceListener>();
+        /// <summary>
+        /// Clears the array of listeners and adds the provided `listener` to the array. If `listener` is null, the array will be empty.
+        /// </summary>
+        /// <param name="listener">ConnectableDeviceListener to listen to device events (connect, disconnect, ready, etc)</param>
+        public void SetListener(IConnectableDeviceListener listener)
+        {
+            listeners = new List<IConnectableDeviceListener>();
 
-        //    if (listener != null)
-        //        listeners.Add(listener);
-        //}
+            if (listener != null)
+                listeners.Add(listener);
+        }
 
-        ///// <summary>
-        ///// Removes a previously added ConenctableDeviceListener from the list of listeners for this ConnectableDevice.
-        ///// 
-        ///// @param listener ConnectableDeviceListener to be removed
-        ///// </summary>
-        //public void RemoveListener(IConnectableDeviceListener listener)
-        //{
-        //    listeners.Remove(listener);
-        //}
+        /// <summary>
+        /// Removes a previously added ConenctableDeviceListener from the list of listeners for this ConnectableDevice.
+        /// 
+        /// @param listener ConnectableDeviceListener to be removed
+        /// </summary>
+        public void RemoveListener(IConnectableDeviceListener listener)
+        {
+            listeners.Remove(listener);
+        }
 
-        //public List<IConnectableDeviceListener> GetListeners()
-        //{
-        //    return listeners;
-        //}
+        public List<IConnectableDeviceListener> GetListeners()
+        {
+            return listeners;
+        }
 
         /// <summary>
         /// Enumerates through all DeviceServices and attempts to connect to each of them. When all of a ConnectableDevice's DeviceServices are ready to receive commands, the ConnectableDevice will send a onDeviceReady message to its listener.
@@ -313,6 +302,30 @@ namespace ConnectSdk.Windows.Device
         public bool IsConnectable()
         {
             return services.Values.Any(service => service.IsConnectable());
+        }
+
+
+        /// <summary>
+        /// Sends a pairing key to all discovered device services.
+        /// </summary>
+        /// <param name="pairingKey">Pairing key to send to services</param>
+        public void SendPairingKey(String pairingKey)
+        {
+            foreach (var service in services.Values)
+            {
+                service.SendPairingKey(pairingKey);
+            }
+        }
+
+        /// <summary>
+        /// Explicitly cancels pairing on all services that require pairing. In some services, this will hide a prompt that is displaying on the device.
+        /// </summary>
+        public void CancelPairing()
+        {
+            foreach (var service in services.Values)
+            {
+                service.CancelPairing();
+            }
         }
 
         /// <summary> 
@@ -376,6 +389,61 @@ namespace ConnectSdk.Windows.Device
             return foundKeyControl[0];
         }
 
+        public T GetApiController<T>(T controllerClass, string priorityMethod) where T : CapabilityMethods
+        {
+            T foundController = null;
+            foreach (var service in services.Values)
+            {
+                if (service.GetApi(controllerClass) == null)
+                    continue;
+
+                var controller = service.GetApi(controllerClass);
+
+                if (foundController == null)
+                {
+                    foundController = controller;
+                }
+                else
+                {
+                    var method = typeof(T).GetRuntimeMethods().FirstOrDefault(x => x.Name.Equals(priorityMethod));
+                    var controllerProirity =
+                        (CapabilityPriorityLevel)method.Invoke(controller, null);
+                    var foundControllerProirity =
+                        (CapabilityPriorityLevel)method.Invoke(foundController, null);
+                    if (controllerProirity > foundControllerProirity)
+                    {
+                        foundController = controller;
+                    }
+                }
+            }
+            return foundController;
+        }
+
+        /// <summary>
+        /// Gets the highest priority capability of a service
+        /// </summary>
+        /// <param name="clazz"></param>
+        /// <returns></returns>
+        public T GetCapability<T>(T clazz) where T : CapabilityMethods
+        {
+            var method = "";
+            if (clazz is Launcher) method = "getLauncherCapabilityLevel";
+            if (clazz is MediaPlayer) method = "getMediaPlayerCapabilityLevel";
+            if (clazz is MediaControl) method = "getMediaControlCapabilityLevel";
+            if (clazz is PlaylistControl) method = "getPlaylistControlCapabilityLevel";
+            if (clazz is VolumeControl) method = "getVolumeControlCapabilityLevel";
+            if (clazz is WebAppLauncher) method = "getWebAppLauncherCapabilityLevel";
+            if (clazz is TvControl) method = "getTVControlCapabilityLevel";
+            if (clazz is ToastControl) method = "getToastControlCapabilityLevel";
+            if (clazz is TextInputControl) method = "getTextInputControlCapabilityLevel";
+            if (clazz is MouseControl) method = "getMouseControlCapabilityLevel";
+
+            if (clazz is ExternalInputControl) method = "getExternalInputControlPriorityLevel";
+            if (clazz is PowerControl) method = "getPowerControlCapabilityLevel";
+            if (clazz is KeyControl) method = "getKeyControlCapabilityLevel";
+            return GetApiController(clazz, method);
+        }
+
         public string GetConnectedServiceNames()
         {
             var serviceCount = services.Count;
@@ -424,12 +492,11 @@ namespace ConnectSdk.Windows.Device
                 {KEY_LAST_IP, JsonValue.CreateStringValue(IpAddress)},
                 {KEY_LAST_SEEN, JsonValue.CreateStringValue(LastSeenOnWifi ?? Util.GetTime().ToString())},
                 {KEY_LAST_CONNECTED, JsonValue.CreateNumberValue(LastConnected)},
-                {KEY_LAST_DETECTED, JsonValue.CreateNumberValue(LastDetection)}
-            //deviceObject.Add(KEY_FRIENDLY, JsonValue.CreateStringValue(FriendlyName));
-            //deviceObject.Add(KEY_MODEL_NAME, JsonValue.CreateStringValue(ModelName));
-            //deviceObject.Add(KEY_MODEL_NUMBER, JsonValue.CreateStringValue(ModelNumber));
+                {KEY_LAST_DETECTED, JsonValue.CreateNumberValue(LastDetection)},
+                {KEY_FRIENDLY, JsonValue.CreateStringValue(FriendlyName)},
+                {KEY_MODEL_NAME, JsonValue.CreateStringValue(ModelName)},
+                {KEY_MODEL_NUMBER, JsonValue.CreateStringValue(ModelNumber)}
             };
-
 
             var jsonServices = new JsonObject();
             foreach (var service in services.Values)
@@ -483,7 +550,7 @@ namespace ConnectSdk.Windows.Device
         {
             foreach (var listener in listeners)
                 listener.OnConnectionFailed(this,
-                    new ServiceCommandError(0, "Failed to pair with service " + service.ServiceName, null));
+                    new ServiceCommandError(0, null));
         }
 
         public void OnPairingRequired(DeviceService service, PairingType pairingType, Object pairingData)
@@ -495,5 +562,25 @@ namespace ConnectSdk.Windows.Device
         public void OnPairingSuccess(DeviceService service)
         {
         }
+
+        //private int GetConnectedServiceCount()
+        //{
+        //    var count = 0;
+
+        //    foreach (var service in services.Values)
+        //    {
+        //        if (service.IsConnectable())
+        //        {
+        //            if (service.IsConnected())
+        //                count++;
+        //        }
+        //        else
+        //        {
+        //            count++;
+        //        }
+        //    }
+
+        //    return count;
+        //}
     }
 }

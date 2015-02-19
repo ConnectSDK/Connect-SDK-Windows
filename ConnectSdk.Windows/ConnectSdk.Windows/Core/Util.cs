@@ -49,7 +49,8 @@ namespace ConnectSdk.Windows.Core
         public static bool IsWirelessAvailable()
         {
             var hnames = NetworkInformation.GetHostNames();
-            return hnames.Where(hostName => hostName.IPInformation != null).Any(hostName => hostName.IPInformation.NetworkAdapter.IanaInterfaceType == 71);
+            // check also IanaInterfaceType = 6 because we might be in an emulator on a PC :)
+            return hnames.Where(hostName => hostName.IPInformation != null).Any(hostName => (hostName.IPInformation.NetworkAdapter.IanaInterfaceType == 71 || hostName.IPInformation.NetworkAdapter.IanaInterfaceType == 6));
         }
 
         /// <summary>
@@ -80,5 +81,70 @@ namespace ConnectSdk.Windows.Core
             stream.Position = 0;
             return stream;
         }
-	}
+
+        public static string ParseData(string response, string key)
+        {
+            string startTag = "<" + key + ">";
+            string endTag = "</" + key + ">";
+
+            int start = response.IndexOf(startTag, StringComparison.Ordinal);
+            int end = response.IndexOf(endTag, StringComparison.Ordinal);
+
+            string data = response.Substring(start + startTag.Length, end);
+
+            return data;
+        }
+
+        //public static string ParseData(String response, String key)
+        //{
+        //    throw new NotImplementedException();
+        //    //if (isXmlEncoded(response)) {
+        //    //    response = Html.fromHtml(response).toString();
+        //    //}
+        //    //XmlPullParser parser = Xml.newPullParser();
+        //    //try {
+        //    //    parser.setInput(new StringReader(response));
+        //    //    int event;
+        //    //    boolean isFound = false;
+        //    //    do {
+        //    //        event = parser.next();
+        //    //        if (event == XmlPullParser.START_TAG) {
+        //    //            String tag = parser.getName();
+        //    //            if (key.equals(tag)) {
+        //    //                isFound = true;
+        //    //            }
+        //    //        } else if (event == XmlPullParser.TEXT && isFound) {
+        //    //            return parser.getText();
+        //    //        }
+        //    //    } while (event != XmlPullParser.END_DOCUMENT);
+        //    //} catch (Exception e) {
+        //    //    e.printStackTrace();
+        //    //}
+        //    return "";
+        //}
+
+        public static long ConvertStrTimeFormatToLong(string strTime)
+        {
+            var tokens = strTime.Split(':');
+            long time = 0;
+
+            foreach (var token in tokens)
+            {
+                time *= 60;
+                time += int.Parse(token);
+            }
+
+            return time;
+        }
+
+        public static string DecToHex(string dec)
+        {
+            return !string.IsNullOrEmpty(dec) ? DecToHex(long.Parse(dec)) : null;
+        }
+
+        public static string DecToHex(long dec)
+        {
+            return dec.ToString("X");
+        }
+    }
 }

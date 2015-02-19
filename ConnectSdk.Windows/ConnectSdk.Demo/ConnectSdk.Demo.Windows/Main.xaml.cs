@@ -261,5 +261,26 @@ namespace ConnectSdk.Demo
                 }
             }
         }
+
+        private void ChannelListView_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var channelInfo = e.AddedItems[0] as ChannelInfo;
+            if (channelInfo != null)
+            {
+                var netCastService = (NetcastTvService)model.SelectedDevice.GetServiceByName(NetcastTvService.Id);
+                if (netCastService != null)
+                {
+                    ResponseListener listener = new ResponseListener();
+                    listener.Error += (o, error) =>
+                    {
+                        var msg =
+                            new MessageDialog(
+                                "Something went wrong; The application could not be started. Press 'Close' to continue");
+                        msg.ShowAsync();
+                    };
+                    netCastService.SetChannel(channelInfo, listener);
+                }
+            }
+        }
     }
 }

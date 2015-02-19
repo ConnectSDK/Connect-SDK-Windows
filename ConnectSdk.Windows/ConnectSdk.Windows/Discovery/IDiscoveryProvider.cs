@@ -1,6 +1,4 @@
-﻿using Windows.Data.Json;
-
-namespace ConnectSdk.Windows.Discovery
+﻿namespace ConnectSdk.Windows.Discovery
 {
     /// <summary>
     ///  ###Overview
@@ -30,6 +28,16 @@ namespace ConnectSdk.Windows.Discovery
         /// </summary>
         void Reset();
 
+        /// <summary>
+        /// Restarts the provider
+        /// </summary>
+        void Restart();
+
+        /// <summary>
+        /// Sends out discovery query without a full restart
+        /// </summary>
+        void Rescan();
+
         /// <summary> 
         /// Adds a DiscoveryProviderListener, which should be the DiscoveryManager 
         /// </summary>
@@ -45,13 +53,13 @@ namespace ConnectSdk.Windows.Discovery
         ///  Adds a device filter for a particular DeviceService.
         /// </summary>
         /// <param name="parameters">Parameters to be used for discovering a particular DeviceService</param>
-        void AddDeviceFilter(JsonObject parameters);
+        void AddDeviceFilter(DiscoveryFilter parameters);
 
         /// <summary>
         ///  Removes a device filter for a particular DeviceService. If the DiscoveryProvider has no other devices to be searching for, the DiscoveryProvider will be stopped and de-referenced.
         /// </summary>
         /// <param name="parameters">Parameters to be used for removing a particular DeviceService</param>
-        void RemoveDeviceFilter(JsonObject parameters);
+        void RemoveDeviceFilter(DiscoveryFilter parameters);
 
         /// <summary>
         ///  Whether or not the DiscoveryProvider has any services it is supposed to be searching for. If YES, then the DiscoveryProvider will be stopped and de-referenced by the DiscoveryManager.

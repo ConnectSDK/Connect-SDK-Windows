@@ -4,7 +4,7 @@ using ConnectSdk.Windows.Service.Capability.Listeners;
 
 namespace ConnectSdk.Windows.Service.Command
 {
-    public class UrlServiceSubscription : ServiceCommand, IServiceSubscription // where T : ResponseListener
+    public class UrlServiceSubscription :  ServiceCommand, IServiceSubscription
     {
         private readonly List<ResponseListener> listeners = new List<ResponseListener>();
 
@@ -35,6 +35,7 @@ namespace ConnectSdk.Windows.Service.Command
             {
                 HttpMethod = "subscribe";
             }
+            //todo: check this cast
             Service.SendCommand(this);
 
         }
@@ -42,7 +43,12 @@ namespace ConnectSdk.Windows.Service.Command
         public void Unsubscribe()
         {
             //todo fix this
-            //Service.Unsubscribe(this);
+            Service.Unsubscribe(this);
+        }
+
+        public List<ResponseListener> GetListeners()
+        {
+            throw new System.NotImplementedException();
         }
 
         public ResponseListener AddListener(ResponseListener listener)
@@ -62,9 +68,6 @@ namespace ConnectSdk.Windows.Service.Command
             listeners.Clear();
         }
 
-        public List<ResponseListener> GetListeners()
-        {
-            return listeners;
-        }
+
     }
 }

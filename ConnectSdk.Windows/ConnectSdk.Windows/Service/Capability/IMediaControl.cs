@@ -20,5 +20,8 @@ namespace ConnectSdk.Windows.Service.Capability
 
         void GetPlayState(ResponseListener listener);
         IServiceSubscription SubscribePlayState(ResponseListener listener);
+
+        void Next(ResponseListener listener);
+        void Previous(ResponseListener listener);
     }
 }

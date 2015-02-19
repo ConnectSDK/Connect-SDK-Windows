@@ -10,7 +10,12 @@ namespace ConnectSdk.Windows.Service.Capability
         public static string MessageReceive = "WebAppLauncher.Message.Receive";
         public static string MessageSendJson = "WebAppLauncher.Message.Send.JSON";
         public static string MessageReceiveJson = "WebAppLauncher.Message.Receive.JSON";
+
+        public static string Connect = "WebAppLauncher.Connect";
+        public static string Disconnect = "WebAppLauncher.Disconnect";
+        public static string Join = "WebAppLauncher.Join";
         public static string Close = "WebAppLauncher.Close";
+        public static string Pin = "WebAppLauncher.Pin";
 
         public static string[] Capabilities =
         {
@@ -20,7 +25,11 @@ namespace ConnectSdk.Windows.Service.Capability
             MessageReceive,
             MessageSendJson,
             MessageReceiveJson,
-            Close
+            Connect,
+            Disconnect,
+            Join,
+            Close,
+            Pin
         };
     }
 }

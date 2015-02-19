@@ -106,7 +106,7 @@
             </HubSection>
             <HubSection Header="Channels">
                 <DataTemplate>
-                    <ListView Width="300" ItemsSource="{Binding Path=Channels}" HorizontalContentAlignment="Stretch" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+                    <ListView Width="300" ItemsSource="{Binding Path=Channels}" HorizontalContentAlignment="Stretch" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" x:Name="ChannelListView" SelectionChanged="ChannelListView_OnSelectionChanged">
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <Grid Width="300">

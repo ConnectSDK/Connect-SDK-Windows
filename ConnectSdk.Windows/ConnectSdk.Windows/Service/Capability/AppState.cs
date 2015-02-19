@@ -1,5 +1,8 @@
 ﻿namespace ConnectSdk.Windows.Service.Capability
 {
+    /// <summary>
+    /// Helper class used with the AppStateListener to return the current state of an app.
+    /// </summary>
     public class AppState
     {
         /// <summary>

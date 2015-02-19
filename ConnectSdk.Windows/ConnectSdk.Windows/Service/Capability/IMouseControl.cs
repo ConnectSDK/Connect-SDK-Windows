@@ -9,7 +9,6 @@ namespace ConnectSdk.Windows.Service.Capability
 
         void ConnectMouse();
         void DisconnectMouse();
-        bool MouseConnected();
         void Click();
         void Move(double dx, double dy);
         void Move(Point distance);

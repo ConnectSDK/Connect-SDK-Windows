@@ -14,31 +14,8 @@ namespace ConnectSdk.Windows.Core
         public int MinorNumber { get; set; }
         public int MajorNumber { get; set; }
         public JsonObject RawData { get; set; }
-
-        public override bool Equals(Object obj)
-        {
-            var info = obj as ChannelInfo;
-            if (info != null)
-            {
-                var other = info;
-
-                if (ChannelId != null)
-                {
-                    if (ChannelId.Equals(other.ChannelId))
-                        return true;
-                }
-                else if (ChannelName != null && this.ChannelNumber != null)
-                {
-                    return ChannelName.Equals(other.ChannelName)
-                           && ChannelNumber.Equals(other.ChannelNumber)
-                           && MajorNumber == other.MajorNumber
-                           && MinorNumber == other.MinorNumber;
-                }
-                return false;
-            }
-
-            return base.Equals(obj);
-        }
+        public sbyte SourceIndex { get; set; }
+        public sbyte PhysicalNumber { get; set; }
 
         public JsonObject ToJsonObject()
         {
@@ -49,9 +26,38 @@ namespace ConnectSdk.Windows.Core
                 {"number", JsonValue.CreateStringValue(ChannelNumber)},
                 {"majorNumber", JsonValue.CreateNumberValue(MinorNumber)},
                 {"minorNumber", JsonValue.CreateNumberValue(MinorNumber)},
-                {"rawData", JsonValue.CreateStringValue(RawData.ToString())}
-            };
+                {"rawData", JsonValue.CreateStringValue(RawData.ToString())},
+                {"sourceIndex", JsonValue.CreateStringValue(PhysicalNumber.ToString())},
+                {"physicalNumber", JsonValue.CreateStringValue(SourceIndex.ToString())}};
             return obj;
+        }
+
+        public override bool Equals(Object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            return obj.GetType() == GetType() && Equals((ChannelInfo)obj);
+        }
+
+        protected bool Equals(ChannelInfo other)
+        {
+            return string.Equals(ChannelName, other.ChannelName) && string.Equals(ChannelId, other.ChannelId) && string.Equals(ChannelNumber, other.ChannelNumber) && MinorNumber == other.MinorNumber && MajorNumber == other.MajorNumber && Equals(RawData, other.RawData);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hashCode = (ChannelName != null ? ChannelName.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (ChannelId != null ? ChannelId.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (ChannelNumber != null ? ChannelNumber.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ MinorNumber;
+                hashCode = (hashCode * 397) ^ MajorNumber;
+                hashCode = (hashCode * 397) ^ PhysicalNumber;
+                hashCode = (hashCode * 397) ^ SourceIndex;
+                hashCode = (hashCode * 397) ^ (RawData != null ? RawData.GetHashCode() : 0);
+                return hashCode;
+            }
         }
     }
 }

@@ -18,6 +18,6 @@ namespace ConnectSdk.Windows.Service.Capability
 
         void ShowClickableToastForUrl(string message, string url, ResponseListener listener);
 
-        void ShowClickableToastForUrl(string message, string url, string iconData, string iconExtension,ResponseListener listener);
+        void ShowClickableToastForUrl(string message, string url, string iconData, string iconExtension, ResponseListener listener);
     }
 }

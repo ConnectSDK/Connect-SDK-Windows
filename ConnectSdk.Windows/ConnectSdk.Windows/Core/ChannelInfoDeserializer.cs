@@ -1,5 +1,5 @@
 ﻿
-namespace ConnectSdk.Windows.Core.ChannelListDeserializer
+namespace ConnectSdk.Windows.Core
 {
     /// <summary>
     /// These classes are generated from the xml sent from the NetCastTV and will be used for deserialization of the channel list

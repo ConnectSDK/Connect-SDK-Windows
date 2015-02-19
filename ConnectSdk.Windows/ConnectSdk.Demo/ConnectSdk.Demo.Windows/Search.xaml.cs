@@ -38,7 +38,7 @@ namespace ConnectSdk.Demo
                 DiscoveryManager.Init();
                 var discoveryManager = DiscoveryManager.GetInstance();
                 discoveryManager.AddListener(listener);
-                discoveryManager.SetPairingLevel(DiscoveryManager.PairingLevel.ON);
+                discoveryManager.PairingLevel = DiscoveryManager.PairingLevelEnum.On;
                 discoveryManager.Start();
             });
 
@@ -70,7 +70,7 @@ namespace ConnectSdk.Demo
 
             netCastServiceConfig.PairingKey = PairingKeyTextBox.Text;
 
-            netCastService.ServiceState = NetcastTvService.State.INITIAL;
+            netCastService.ServiceConnectionState = NetcastTvService.ConnectionState.Initial;
 
             tvdef.Connect();
             if (tvdef.IsConnected())

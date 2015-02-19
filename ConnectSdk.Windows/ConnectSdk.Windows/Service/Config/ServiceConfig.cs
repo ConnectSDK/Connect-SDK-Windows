@@ -17,6 +17,25 @@ namespace ConnectSdk.Windows.Service.Config
 
         private IServiceConfigListener listener;
 
+        public string ServiceUuid
+        {
+            get { return serviceUuid; }
+            set { serviceUuid = value; }
+        }
+
+        public double LastDetected
+        {
+            get { return lastDetected; }
+            set { lastDetected = value; }
+        }
+
+        public IServiceConfigListener Listener
+        {
+            get { return listener; }
+            set { listener = value; }
+        }
+
+
         public ServiceConfig(string serviceUuid)
         {
             if (serviceUuid == null) throw new ArgumentNullException("serviceUuid");
@@ -45,24 +64,6 @@ namespace ConnectSdk.Windows.Service.Config
         {
             ServiceUuid = json.GetNamedString(KeyUuid);
             LastDetected = json.GetNamedNumber(KeyLastDetect);
-        }
-
-        public string ServiceUuid
-        {
-            get { return serviceUuid; }
-            set { serviceUuid = value; }
-        }
-
-        public double LastDetected
-        {
-            get { return lastDetected; }
-            set { lastDetected = value; }
-        }
-
-        public IServiceConfigListener Listener
-        {
-            get { return listener; }
-            set { listener = value; }
         }
 
         public static ServiceConfig GetConfig(JsonObject json)
@@ -104,6 +105,7 @@ namespace ConnectSdk.Windows.Service.Config
                 jsonObj.Add(KeyLastDetect, JsonValue.CreateNumberValue(lastDetected));
                 jsonObj.Add(KeyUuid, JsonValue.CreateStringValue(serviceUuid));
             }
+            // ReSharper disable once EmptyGeneralCatchClause
             catch
             {
                 //e.printStackTrace();
@@ -112,6 +114,12 @@ namespace ConnectSdk.Windows.Service.Config
             return jsonObj;
         }
 
-
+        protected void NotifyUpdate()
+        {
+            if (listener != null)
+            {
+                listener.OnServiceConfigUpdate(this);
+            }
+        }
     }
 }

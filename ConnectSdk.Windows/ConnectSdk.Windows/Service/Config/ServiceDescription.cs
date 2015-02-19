@@ -67,7 +67,7 @@ namespace ConnectSdk.Windows.Service.Config
 
         public string Version { get; set; }
 
-        public List<Core.Upnp.Service.Service> ServiceList { get; set; }
+        public List<Discovery.Provider.ssdp.Service> ServiceList { get; set; }
 
         public string LocationXml { get; set; }
 
@@ -98,11 +98,34 @@ namespace ConnectSdk.Windows.Service.Config
                 jsonObj.Add(KeyVersion, JsonValue.CreateStringValue(Version));
                 jsonObj.Add(KeyServiceId, JsonValue.CreateStringValue(ServiceId));
             }
+            // ReSharper disable once EmptyGeneralCatchClause
             catch
             {
             }
 
             return jsonObj;
+        }
+
+        public ServiceDescription Clone()
+        {
+            var service = new ServiceDescription {Port = Port};
+
+            if (ServiceId != null) service.ServiceId = ServiceId;
+            if (IpAddress != null) service.IpAddress = IpAddress;
+            if (Uuid != null) service.Uuid = Uuid;
+            if (Version != null) service.Version = Version;
+            if (FriendlyName != null) service.FriendlyName = FriendlyName;
+            if (Manufacturer != null) service.Manufacturer = Manufacturer;
+            if (ModelName != null) service.ModelName = ModelName;
+            if (ModelNumber != null) service.ModelNumber = ModelNumber;
+            if (ModelDescription != null) service.ModelDescription = ModelDescription;
+            if (ApplicationUrl != null) service.ApplicationUrl = ApplicationUrl;
+            if (LocationXml != null) service.LocationXml = LocationXml;
+            if (ResponseHeaders != null) service.ResponseHeaders = ResponseHeaders;
+            if (ServiceList != null) service.ServiceList = ServiceList;
+            if (ServiceFilter != null) service.ServiceFilter = ServiceFilter;
+
+            return service;
         }
     }
 }

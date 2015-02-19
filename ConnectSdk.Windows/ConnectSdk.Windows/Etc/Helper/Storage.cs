@@ -28,33 +28,30 @@ namespace ConnectSdk.Windows.Etc.Helper
         /// <returns></returns>
         public bool AddOrUpdateValue(string key, Object value)
         {
-            var valueChanged = false;
+            bool valueChanged;
 
             // If the key exists
             if (settings.LocalSettings.Values.ContainsKey(key))
             {
                 // If the value has changed
-                if (settings.LocalSettings.Values[key] != value)
+                if (settings.LocalSettings.Values[key] == value) return false;
+                // Store the new value
+                try
                 {
-                    // Store the new value
-                    try
-                    {
-                        settings.LocalSettings.Values[key] = value;
-                    }
-                    catch
-                    {
+                    settings.LocalSettings.Values[key] = value;
+                }
+                // ReSharper disable once EmptyGeneralCatchClause
+                catch
+                {
                         
-                    }
-                    valueChanged = true;
                 }
             }
                 // Otherwise create the key.
             else
             {
                 settings.LocalSettings.Values.Add(key, value);
-                valueChanged = true;
             }
-            return valueChanged;
+            return true;
         }
 
         /// <summary>

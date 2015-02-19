@@ -13,8 +13,17 @@ namespace ConnectSdk.Windows.Service.Capability
             MediaControl = mediaControl;
         }
 
+        public MediaLaunchObject(LaunchSession launchSession, IMediaControl mediaControl, IPlayListControl playlistControl)
+        {
+            LaunchSession = launchSession;
+            MediaControl = mediaControl;
+            PlaylistControl = playlistControl;
+        }
+
         public LaunchSession LaunchSession { get; set; }
 
         public IMediaControl MediaControl { get; set; }
+
+        public IPlayListControl PlaylistControl { get; set; }
     }
 }

@@ -1,5 +1,4 @@
 using Windows.Data.Json;
-using MyRemote.ConnectSDK.Core;
 
 namespace ConnectSdk.Windows.Core
 {

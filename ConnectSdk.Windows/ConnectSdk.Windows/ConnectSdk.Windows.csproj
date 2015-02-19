@@ -15,6 +15,10 @@
     <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <TargetFrameworkProfile>Profile32</TargetFrameworkProfile>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -35,6 +39,7 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
+    <None Include="Migration to 1.4.x.xlsx" />
   </ItemGroup>
   <ItemGroup>
     <TargetPlatform Include="WindowsPhoneApp, Version=8.1" />
@@ -45,31 +50,41 @@
     <Compile Include="Core\ChannelInfo.cs" />
     <Compile Include="Core\ChannelInfoDeserializer.cs" />
     <Compile Include="Core\ExternalInputInfo.cs" />
+    <Compile Include="Core\IJsonDeserializable.cs" />
+    <Compile Include="Core\IJsonSerializable.cs" />
+    <Compile Include="Core\ImageInfo.cs" />
+    <Compile Include="Core\MediaInfo.cs" />
     <Compile Include="Core\ProgramInfo.cs" />
     <Compile Include="Core\ProgramList.cs" />
     <Compile Include="Core\TextInputStatusInfo.cs" />
     <Compile Include="Core\TextInputType.cs" />
     <Compile Include="Core\Upnp\Device.cs" />
-    <Compile Include="Core\Upnp\Icon.cs" />
-    <Compile Include="Core\Upnp\Service\Service.cs" />
+    <Compile Include="Discovery\Provider\ssdp\Icon.cs" />
+    <Compile Include="Discovery\Provider\ssdp\Service.cs" />
     <Compile Include="Core\Upnp\Ssdp\MessageReceivedArgs.cs" />
     <Compile Include="Core\Upnp\Ssdp\ParsedDatagram.cs" />
     <Compile Include="Core\Upnp\Ssdp\SSDP.cs" />
-    <Compile Include="Core\Upnp\Ssdp\SSDPSearchMsg.cs" />
-    <Compile Include="Core\Upnp\Ssdp\SSDPSocket.cs" />
+    <Compile Include="Core\Upnp\Ssdp\SsdpSearchMsg.cs" />
+    <Compile Include="Discovery\Provider\ssdp\Action.cs" />
+    <Compile Include="Discovery\Provider\ssdp\Argument.cs" />
+    <Compile Include="Discovery\Provider\ssdp\SsdpDevice.cs" />
+    <Compile Include="Discovery\Provider\ssdp\SsdpSocket.cs" />
     <Compile Include="Core\Util.cs" />
     <Compile Include="Device\ConnectableDevice.cs" />
     <Compile Include="Device\DefaultConnectableDeviceStore.cs" />
+    <Compile Include="Device\DefaultPlatform.cs" />
     <Compile Include="Device\IConnectableDeviceListener.cs" />
     <Compile Include="Device\IConnectableDeviceStore.cs" />
     <Compile Include="Device\Netcast\NetcastChannelParser.cs" />
     <Compile Include="Device\Netcast\VirtualKeycodes.cs" />
     <Compile Include="Discovery\CapabilityFilter.cs" />
+    <Compile Include="Discovery\DiscoveryFilter.cs" />
     <Compile Include="Discovery\DiscoveryManager.cs" />
     <Compile Include="Discovery\IDiscoveryManagerListener.cs" />
     <Compile Include="Discovery\IDiscoveryProvider.cs" />
     <Compile Include="Discovery\IDiscoveryProviderListener.cs" />
     <Compile Include="Discovery\Provider\SSDPDiscoveryProvider.cs" />
+    <Compile Include="Discovery\Provider\ssdp\StateVariable.cs" />
     <Compile Include="Etc\Helper\DeviceServiceReachability.cs" />
     <Compile Include="Etc\Helper\DeviceServiceReachabilityListener.cs" />
     <Compile Include="Etc\Helper\HttpMessage.cs" />
@@ -86,6 +101,7 @@
     <Compile Include="Service\Capability\IMediaControl.cs" />
     <Compile Include="Service\Capability\IMediaPlayer.cs" />
     <Compile Include="Service\Capability\IMouseControl.cs" />
+    <Compile Include="Service\Capability\IPlayListControl.cs" />
     <Compile Include="Service\Capability\IPowerControl.cs" />
     <Compile Include="Service\Capability\ITextInputControl.cs" />
     <Compile Include="Service\Capability\IToastControl.cs" />
@@ -95,13 +111,14 @@
     <Compile Include="Service\Capability\KeyControl.cs" />
     <Compile Include="Service\Capability\Launcher.cs" />
     <Compile Include="Service\Capability\Listeners\ErrorListener.cs" />
-    <Compile Include="Service\Capability\Listeners\ExternalInputListListener.cs" />
     <Compile Include="Service\Capability\Listeners\LoadEventArgs.cs" />
     <Compile Include="Service\Capability\Listeners\ResponseListener.cs" />
     <Compile Include="Service\Capability\MediaControl.cs" />
     <Compile Include="Service\Capability\MediaLaunchObject.cs" />
     <Compile Include="Service\Capability\MediaPlayer.cs" />
     <Compile Include="Service\Capability\MouseControl.cs" />
+    <Compile Include="Service\Capability\PlaylistControl.cs" />
+    <Compile Include="Service\Capability\PlayMode.cs" />
     <Compile Include="Service\Capability\PlayStateStatus.cs" />
     <Compile Include="Service\Capability\PowerControl.cs" />
     <Compile Include="Service\Capability\TextInputControl.cs" />
@@ -117,19 +134,25 @@
     <Compile Include="Service\Command\URLServiceSubscription.cs" />
     <Compile Include="Service\Config\NetcastTVServiceConfig.cs" />
     <Compile Include="Service\Config\ServiceConfig.cs" />
-    <Compile Include="Service\Config\ServiceConfigListener.cs" />
+    <Compile Include="Service\Config\IServiceConfigListener.cs" />
     <Compile Include="Service\Config\ServiceDescription.cs" />
     <Compile Include="Service\DeviceService.cs" />
     <Compile Include="Service\DlnaService.cs" />
     <Compile Include="Service\IDeviceServiceListener.cs" />
     <Compile Include="Service\NetcastTVService.cs" />
     <Compile Include="Service\PairingType.cs" />
-    <Compile Include="Service\ServiceCommand.cs" />
+    <Compile Include="Service\Command\ServiceCommand.cs" />
     <Compile Include="Service\Sessions\LaunchSession.cs" />
     <Compile Include="Service\Sessions\LaunchSessionType.cs" />
     <Compile Include="Service\Sessions\WebAppSession.cs" />
     <Compile Include="Service\Sessions\WebAppSessionListener.cs" />
     <Compile Include="Service\Sessions\WebAppStatus.cs" />
+    <Compile Include="Service\Upnp\DlnaMediaInfoParser.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Service\AirPlay\" />
+    <Folder Include="Service\NetCast\" />
+    <Folder Include="Service\WebOs\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
