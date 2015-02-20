@@ -3,17 +3,53 @@ using System.Collections.Generic;
 using Windows.Data.Json;
 using Windows.Foundation;
 using ConnectSdk.Windows.Core;
+using ConnectSdk.Windows.Discovery;
 using ConnectSdk.Windows.Service.Capability;
 using ConnectSdk.Windows.Service.Capability.Listeners;
 using ConnectSdk.Windows.Service.Command;
 using ConnectSdk.Windows.Service.Config;
 using ConnectSdk.Windows.Service.Sessions;
+using ConnectSdk.Windows.Service.WebOs;
 
 namespace ConnectSdk.Windows.Service
 {
     public class WebOstvService : DeviceService, IVolumeControl, ILauncher, IMediaControl, IMediaPlayer, ITvControl,
         IToastControl, IExternalInputControl, IMouseControl, ITextInputControl, IPowerControl, IKeyControl, IWebAppLauncher
     {
+        public static String[] WebOstvServiceOpenPermissionList =
+        {
+            "LAUNCH",
+            "LAUNCH_WEBAPP",
+            "APP_TO_APP",
+            "CONTROL_AUDIO",
+            "CONTROL_INPUT_MEDIA_PLAYBACK"
+        };
+
+        public static String[] WebOstvServiceProtectedPermissionList =
+        {
+            "CONTROL_POWER",
+            "READ_INSTALLED_APPS",
+            "CONTROL_DISPLAY",
+            "CONTROL_INPUT_JOYSTICK",
+            "CONTROL_INPUT_MEDIA_RECORDING",
+            "CONTROL_INPUT_TV",
+            "READ_INPUT_DEVICE_LIST",
+            "READ_NETWORK_STATE",
+            "READ_TV_CHANNEL_LIST",
+            "WRITE_NOTIFICATION_TOAST"
+        };
+
+        public static String[] WebOstvServicePersonalActivityPermissionList =
+        {
+            "CONTROL_INPUT_TEXT",
+            "CONTROL_MOUSE_AND_KEYBOARD",
+            "READ_CURRENT_CHANNEL",
+            "READ_RUNNING_APPS"
+        };
+
+
+        public static String Id = "webOS TV";
+
         private const string VolumeUrl = "ssap://audio/getVolume";
         private const string MuteUrl = "ssap://audio/getMute";
 
@@ -21,6 +57,9 @@ namespace ConnectSdk.Windows.Service
         public Dictionary<string, string> AppToAppIdMappings { get; set; }
         public Dictionary<string, WebOsWebAppSession> WebAppSessions { get; set; }
 
+        private WebOstvServiceSocketClient socket;
+
+        private List<String> permissions;
 
         public WebOstvService(ServiceDescription serviceDescription, ServiceConfig serviceConfig)
             : base(serviceDescription, serviceConfig)
@@ -50,6 +89,68 @@ namespace ConnectSdk.Windows.Service
 
             UpdateCapabilities();
         }
+
+        public new static DiscoveryFilter DiscoveryFilter()
+        {
+            return new DiscoveryFilter(Id, "urn:lge-com:service:webos-second-screen:1");
+        }
+
+        public override void SendCommand(ServiceCommand command)
+        {
+            if (socket != null)
+                socket.SendCommand(command);
+        }
+
+        public override bool IsConnected()
+        {
+            if (DiscoveryManager.GetInstance().PairingLevel == DiscoveryManager.PairingLevelEnum.On)
+            {
+                return socket != null && socket.IsConnected() &&
+                       (((WebOSTVServiceConfig)serviceConfig).getClientKey() != null);
+            }
+            return socket != null && socket.IsConnected();
+        }
+
+        public override void Connect()
+        {
+            if (socket == null)
+            {
+                socket = new WebOstvServiceSocketClient(this, WebOstvServiceSocketClient.GetUri(this));
+            }
+
+            if (!IsConnected())
+                socket.Connect();
+        }
+
+        public override void Disconnect()
+        {
+            //Log.d("Connect SDK", "attempting to disconnect to " + serviceDescription.getIpAddress());
+
+            if (Listener != null)
+                Listener.OnDisconnect(this, null);
+
+            if (socket != null)
+            {
+                socket.Listener = null;
+                socket.Disconnect();
+                socket = null;
+            }
+
+            if (AppToAppIdMappings != null)
+                AppToAppIdMappings.Clear();
+
+            if (WebAppSessions != null)
+            {
+                foreach (var pair in WebAppSessions)
+                {
+                    pair.Value.DisconnectFromWebApp();
+                }
+
+                WebAppSessions.Clear();
+            }
+        }
+
+
 
         #region Volume Control
 
@@ -717,47 +818,208 @@ namespace ConnectSdk.Windows.Service
 
         public IWebAppLauncher GetWebAppLauncher()
         {
-            throw new NotImplementedException();
+            return this;
         }
 
         public CapabilityPriorityLevel GetWebAppLauncherCapabilityLevel()
         {
-            throw new NotImplementedException();
+            return CapabilityPriorityLevel.High;
         }
 
         public void LaunchWebApp(string webAppId, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            LaunchWebApp(webAppId, null, true, listener);
         }
 
         public void LaunchWebApp(string webAppId, bool relaunchIfRunning, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            LaunchWebApp(webAppId, null, relaunchIfRunning, listener);
         }
 
         public void LaunchWebApp(string webAppId, JsonObject ps, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(webAppId))
+            {
+                Util.PostError(listener, new ServiceCommandError(-1, null));
+
+                return;
+            }
+
+            var webAppSession = WebAppSessions[webAppId];
+
+            const string uri = "ssap://webapp/launchWebApp";
+            var payload = new JsonObject();
+
+            try
+            {
+                payload.Add("webAppId", JsonValue.CreateStringValue(webAppId));
+
+                if (ps != null)
+                    payload.Add("urlps", ps);
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+
+            var responseListener = new ResponseListener();
+            responseListener.Success += (sender, o) =>
+            {
+                var obj = (JsonObject)o;
+
+                LaunchSession launchSession;
+
+                if (webAppSession != null)
+                    launchSession = webAppSession.LaunchSession;
+                else
+                {
+                    launchSession = LaunchSession.LaunchSessionForAppId(webAppId);
+                    webAppSession = new WebOsWebAppSession(launchSession, this);
+                    WebAppSessions.Add(webAppId,
+                        webAppSession);
+                }
+
+                launchSession.Service = this;
+                launchSession.SessionId = obj.GetNamedString("sessionId");
+                launchSession.SessionType = LaunchSessionType.WebApp;
+                launchSession.RawData = obj;
+
+                Util.PostSuccess(listener, webAppSession);
+            };
+            responseListener.Error += (sender, error) => Util.PostError(listener, error);
+
+
+            var request = new ServiceCommand(this, uri, payload, responseListener);
+            request.Send();
         }
 
         public void LaunchWebApp(string webAppId, JsonObject ps, bool relaunchIfRunning, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            if (webAppId == null)
+            {
+                Util.PostError(listener, new ServiceCommandError(0, null));
+                return;
+            }
+
+            if (relaunchIfRunning)
+            {
+                LaunchWebApp(webAppId, ps, listener);
+            }
+            else
+            {
+                var responseListener = new ResponseListener();
+
+                listener.Success += (sender, o) =>
+                {
+                    var appInfo = o as AppInfo;
+                    if (appInfo.Id.IndexOf(webAppId) != -1)
+                    {
+                        LaunchSession launchSession = LaunchSession.LaunchSessionForAppId(webAppId);
+                        launchSession.SessionType = LaunchSessionType.WebApp;
+                        launchSession.Service = this;
+                        launchSession.RawData = appInfo.RawData;
+
+                        WebOsWebAppSession webAppSession = WebAppSessionForLaunchSession(launchSession);
+
+                        Util.PostSuccess(listener, webAppSession);
+                    }
+                    else
+                    {
+                        LaunchWebApp(webAppId, ps, listener);
+                    }
+                };
+                listener.Error += (sender, error) => { };
+
+                GetLauncher().GetRunningApp(responseListener);
+            }
         }
 
         public void JoinWebApp(LaunchSession webAppLaunchSession, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            var webAppSession = WebAppSessionForLaunchSession(webAppLaunchSession);
+
+            webAppSession.Join(new ResponseListener());
         }
 
         public void JoinWebApp(string webAppId, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            var launchSession = LaunchSession.LaunchSessionForAppId(webAppId);
+            launchSession.SessionType = LaunchSessionType.WebApp;
+            launchSession.Service = this;
+
+            JoinWebApp(launchSession, listener);
         }
 
         public void CloseWebApp(LaunchSession launchSession, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            if (launchSession == null || launchSession.AppId == null || launchSession.AppId.Length == 0)
+            {
+                Util.PostError(listener, new ServiceCommandError(0, null));
+                return;
+            }
+
+            var webAppSession = WebAppSessions[launchSession.AppId];
+
+            if (webAppSession != null && webAppSession.IsConnected())
+            {
+                var serviceCommand = new JsonObject();
+                var closeCommand = new JsonObject();
+
+                try
+                {
+                    serviceCommand.Add("type", JsonValue.CreateStringValue("close"));
+
+                    closeCommand.Add("contentType", JsonValue.CreateStringValue("connectsdk.serviceCommand"));
+                    closeCommand.Add("serviceCommand", serviceCommand);
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+
+                    var responseListener = new ResponseListener();
+
+                    listener.Success += (sender, o) =>
+                    {
+                        webAppSession.DisconnectFromWebApp();
+
+                        if (Listener != null)
+                            listener.OnSuccess(o);
+                    };
+                    listener.Error += (sender, error) =>
+                    {
+                        webAppSession.DisconnectFromWebApp();
+
+                        if (Listener != null)
+                            listener.OnError(error);
+                    };
+
+
+                    webAppSession.SendMessage(closeCommand, new ResponseListener());
+            }
+            else
+            {
+                if (webAppSession != null)
+                    webAppSession.DisconnectFromWebApp();
+
+                const string uri = "ssap://webapp/closeWebApp";
+                var payload = new JsonObject();
+
+                try
+                {
+                    if (launchSession.AppId != null)
+                        payload.Add("webAppId", JsonValue.CreateStringValue(launchSession.AppId));
+                    if (launchSession.SessionId != null)
+                        payload.Add("sessionId", JsonValue.CreateStringValue(launchSession.SessionId));
+                }
+                catch (Exception e)
+                {
+                    throw e;
+                }
+
+                var request = new ServiceCommand(this, uri, payload, listener);
+                request.Send();
+            }
         }
 
         public void ConnectToWebApp(WebOsWebAppSession webAppSession, bool joinOnly,
@@ -784,17 +1046,71 @@ namespace ConnectSdk.Windows.Service
         public IServiceSubscription SubscribeIsWebAppPinned(string webAppId, ResponseListener listener)
         {
             throw new NotImplementedException();
-        } 
+        }
+
+        private WebOsWebAppSession WebAppSessionForLaunchSession(LaunchSession launchSession)
+        {
+            if (WebAppSessions == null)
+                WebAppSessions = new Dictionary<String, WebOsWebAppSession>();
+
+            if (launchSession.Service == null)
+                launchSession.Service = this;
+
+            WebOsWebAppSession webAppSession = WebAppSessions[launchSession.AppId];
+
+            if (webAppSession == null)
+            {
+                webAppSession = new WebOsWebAppSession(launchSession, this);
+                WebAppSessions.Add(launchSession.AppId, webAppSession);
+            }
+
+            return webAppSession;
+        }
         #endregion
 
         public List<String> GetPermissions()
         {
-            throw new NotImplementedException();
+            if (permissions != null)
+                return permissions;
+
+            var defaultPermissions = new List<String>();
+            foreach (String perm in WebOstvServiceOpenPermissionList)
+            {
+                defaultPermissions.Add(perm);
+            }
+
+            if (DiscoveryManager.GetInstance().PairingLevel == DiscoveryManager.PairingLevelEnum.On)
+            {
+                foreach (String perm in WebOstvServiceProtectedPermissionList)
+                {
+                    defaultPermissions.Add(perm);
+                }
+
+                foreach (String perm in WebOstvServicePersonalActivityPermissionList)
+                {
+                    defaultPermissions.Add(perm);
+                }
+            }
+            permissions = defaultPermissions;
+            return permissions;
         }
 
         public void SetPermissions(List<String> permissions)
         {
-            throw new NotImplementedException();
+            this.permissions = permissions;
+
+            var config = (WebOSTVServiceConfig)serviceConfig;
+
+            if (config.getClientKey() != null)
+            {
+                config.setClientKey(null);
+
+                if (IsConnected())
+                {
+                    //Log.w("Connect SDK", "Permissions changed -- you will need to re-pair to the TV.");
+                    Disconnect();
+                }
+            }
         }
     }
 }

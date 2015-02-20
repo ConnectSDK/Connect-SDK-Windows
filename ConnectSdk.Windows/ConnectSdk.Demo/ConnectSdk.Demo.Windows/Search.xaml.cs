@@ -65,20 +65,39 @@ namespace ConnectSdk.Demo
         private void PairOkButton_OnClick(object sender, RoutedEventArgs e)
         {
             var tvdef = model.SelectedDevice;
-            var netCastService = (NetcastTvService)tvdef.GetServiceByName("Netcast TV");
-            var netCastServiceConfig = (NetcastTvServiceConfig)netCastService.ServiceConfig;
-
-            netCastServiceConfig.PairingKey = PairingKeyTextBox.Text;
-
-            netCastService.ServiceConnectionState = NetcastTvService.ConnectionState.Initial;
-
-            tvdef.Connect();
-            if (tvdef.IsConnected())
+            var netCastService = (NetcastTvService)tvdef.GetServiceByName(NetcastTvService.Id);
+            if (netCastService != null)
             {
-                netCastService.RemovePairingKeyOnTv();
-                tvdef.OnConnectionSuccess(netCastService);
-                model.SelectedDevice = tvdef;
-                Frame.Navigate(typeof(Main));
+                var netCastServiceConfig = (NetcastTvServiceConfig) netCastService.ServiceConfig;
+
+                netCastServiceConfig.PairingKey = PairingKeyTextBox.Text;
+
+                netCastService.ServiceConnectionState = NetcastTvService.ConnectionState.Initial;
+
+                tvdef.Connect();
+                if (tvdef.IsConnected())
+                {
+                    netCastService.RemovePairingKeyOnTv();
+                    tvdef.OnConnectionSuccess(netCastService);
+                    model.SelectedDevice = tvdef;
+                    Frame.Navigate(typeof (Main));
+                }
+            }
+            else
+            {
+                var webOstvService = (WebOstvService)tvdef.GetServiceByName(WebOstvService.Id);
+                if (webOstvService != null)
+                {
+                    if (!(webOstvService.ServiceConfig is WebOSTVServiceConfig))
+                    {
+                        webOstvService.ServiceConfig = new WebOSTVServiceConfig(webOstvService.ServiceConfig.ServiceUuid);
+                    }
+                    var webOsServiceConfig = (WebOSTVServiceConfig)webOstvService.ServiceConfig;
+                    tvdef.Connect();
+                    tvdef.OnConnectionSuccess(webOstvService);
+                    model.SelectedDevice = tvdef;
+                    Frame.Navigate(typeof(Main));
+                }
             }
         }
 
