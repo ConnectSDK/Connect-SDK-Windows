@@ -1,0 +1,9 @@
+﻿# MoqaLate Excluded Files.
+# Add full or partial file names below and they will be excluded from mock file generation.
+# Wildcards such as * and ? are not currently supported.
+# Case insensitive.
+# Use # at the start of line for comments.
+
+xaml.cs
+assemblyinfo.cs
+.g.

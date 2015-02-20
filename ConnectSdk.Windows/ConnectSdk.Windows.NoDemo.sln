@@ -1,0 +1,72 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectSdk.Windows", "ConnectSdk.Windows\ConnectSdk.Windows.csproj", "{CC946AFF-1338-4A99-8BFA-3D028BDB1E38}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectSdk.Windows.Test", "ConnectSdk.Windows.Test\ConnectSdk.Windows.Test.csproj", "{A9374CC3-D4DC-4527-98EA-F7F90F905625}"
+EndProject
+Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 3
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = https://sorins.visualstudio.com/defaultcollection
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = ConnectSdk.Windows\\ConnectSdk.Windows.csproj
+		SccProjectName1 = ConnectSdk.Windows
+		SccLocalPath1 = ConnectSdk.Windows
+		SccProjectUniqueName2 = ConnectSdk.Windows.Test\\ConnectSdk.Windows.Test.csproj
+		SccProjectName2 = ConnectSdk.Windows.Test
+		SccLocalPath2 = ConnectSdk.Windows.Test
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|ARM = Debug|ARM
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|ARM = Release|ARM
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CC946AFF-1338-4A99-8BFA-3D028BDB1E38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC946AFF-1338-4A99-8BFA-3D028BDB1E38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC946AFF-1338-4A99-8BFA-3D028BDB1E38}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{CC946AFF-1338-4A99-8BFA-3D028BDB1E38}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CC946AFF-1338-4A99-8BFA-3D028BDB1E38}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CC946AFF-1338-4A99-8BFA-3D028BDB1E38}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC946AFF-1338-4A99-8BFA-3D028BDB1E38}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC946AFF-1338-4A99-8BFA-3D028BDB1E38}.Release|ARM.ActiveCfg = Release|Any CPU
+		{CC946AFF-1338-4A99-8BFA-3D028BDB1E38}.Release|x64.ActiveCfg = Release|Any CPU
+		{CC946AFF-1338-4A99-8BFA-3D028BDB1E38}.Release|x86.ActiveCfg = Release|Any CPU
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Debug|ARM.ActiveCfg = Debug|ARM
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Debug|ARM.Build.0 = Debug|ARM
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Debug|ARM.Deploy.0 = Debug|ARM
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Debug|x64.ActiveCfg = Debug|x64
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Debug|x64.Build.0 = Debug|x64
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Debug|x64.Deploy.0 = Debug|x64
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Debug|x86.ActiveCfg = Debug|x86
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Debug|x86.Build.0 = Debug|x86
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Debug|x86.Deploy.0 = Debug|x86
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Release|ARM.ActiveCfg = Release|ARM
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Release|ARM.Build.0 = Release|ARM
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Release|ARM.Deploy.0 = Release|ARM
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Release|x64.ActiveCfg = Release|x64
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Release|x64.Build.0 = Release|x64
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Release|x64.Deploy.0 = Release|x64
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Release|x86.ActiveCfg = Release|x86
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Release|x86.Build.0 = Release|x86
+		{A9374CC3-D4DC-4527-98EA-F7F90F905625}.Release|x86.Deploy.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
