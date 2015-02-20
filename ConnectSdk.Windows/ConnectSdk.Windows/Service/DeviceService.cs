@@ -50,8 +50,6 @@ namespace ConnectSdk.Windows.Service
         /// </summary>
         private List<string> capabilities;
 
-        protected IDeviceServiceListener listener;
-
         public List<ServiceCommand> Requests = new List<ServiceCommand>();
 
         public ServiceDescription ServiceDescription { get; set; }
@@ -62,11 +60,7 @@ namespace ConnectSdk.Windows.Service
             set { serviceConfig = value; }
         }
 
-        public IDeviceServiceListener Listener
-        {
-            get { return listener; }
-            set { listener = value; }
-        }
+        public IDeviceServiceListener Listener { get; set; }
 
         public List<string> Capabilities
         {
@@ -196,10 +190,10 @@ namespace ConnectSdk.Windows.Service
 
         protected void ReportConnected(bool ready)
         {
-            if (listener == null)
+            if (Listener == null)
                 return;
 
-            listener.OnConnectionSuccess(this);
+            Listener.OnConnectionSuccess(this);
         }
 
         public virtual void SendPairingKey(string pairingKey)
@@ -417,9 +411,9 @@ namespace ConnectSdk.Windows.Service
             var lostCapabilities = oldCapabilities.Where(capability => !newCapabilities.Contains(capability)).ToList();
             var addedCapabilities = newCapabilities.Where(capability => !oldCapabilities.Contains(capability)).ToList();
 
-            if (listener != null)
+            if (Listener != null)
             {
-                listener.OnCapabilitiesUpdated(this, addedCapabilities, lostCapabilities);
+                Listener.OnCapabilitiesUpdated(this, addedCapabilities, lostCapabilities);
             }
         }
     }

@@ -918,7 +918,7 @@ namespace ConnectSdk.Windows.Service
 
                             foreach (var ch in channelList)
                             {
-                                var rawData = ch.RawData;
+                                //var rawData = ch.RawData;
                                  
                                 var major = channelInfo.MajorNumber;
                                 var minor = channelInfo.MinorNumber;

@@ -19,7 +19,7 @@ namespace ConnectSdk.Windows.Service.Sessions
 
         public DeviceService Service { get; set; }
 
-        public IWebAppSessionListener WebAppListener { get; set; }
+        public IWebAppSessionListener WebAppSessionListener { get; set; }
 
         public IServiceSubscription SubscribeWebAppStatus(ResponseListener listener)
         {

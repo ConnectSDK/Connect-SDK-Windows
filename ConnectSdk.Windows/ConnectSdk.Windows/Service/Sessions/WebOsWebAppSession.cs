@@ -85,10 +85,10 @@ namespace ConnectSdk.Windows.Service.Sessions
                     mFullAppId = LaunchSession.AppId;
                 else
                 {
-                    foreach (var mapPair in service.getWebAppIdMappings())
+                    foreach (var mapPair in service.AppToAppIdMappings)
                     {
                     }
-                    foreach (var pair in service.getWebAppIdMappings())
+                    foreach (var pair in service.AppToAppIdMappings)
                     {
                         String mappedFullAppId = pair.Key;
                         String mappedAppId = pair.Value;
@@ -140,8 +140,8 @@ namespace ConnectSdk.Windows.Service.Sessions
 
         public void HandleMessage(Object message)
         {
-            if (WebAppSessionListener() != null)
-                WebAppSessionListener().onReceiveMessage(this, message);
+            if (WebAppSessionListener != null)
+                WebAppSessionListener.OnReceiveMessage(this, message);
         }
 
         public PlayStateStatus ParsePlayState(String playStateString)
@@ -207,7 +207,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                     if (MConnectionListener != null)
                         MConnectionListener.OnError(error1);
                 };
-                service.connectToWebApp(this, joinOnly, finalConnectionListener);
+                service.ConnectToWebApp(this, joinOnly, finalConnectionListener);
             };
             MConnectionListener.Error += (sender, error) =>
             {
@@ -712,7 +712,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                     else
                     {
                         if (webOsWebAppSession.WebAppSessionListener != null)
-                            webOsWebAppSession.WebAppSessionListener.onWebAppSessionDisconnect(webOsWebAppSession);
+                            webOsWebAppSession.WebAppSessionListener.OnWebAppSessionDisconnect(webOsWebAppSession);
                     }
                 }
 

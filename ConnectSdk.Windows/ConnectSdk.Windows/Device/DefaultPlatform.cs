@@ -9,8 +9,8 @@ namespace ConnectSdk.Windows.Device
     {
         public static Dictionary<Type, Type> GetDeviceServiceMap()
         {
-            Dictionary<Type, Type> devicesList = new Dictionary<Type, Type>();
-            //devicesList.Add(typeof(WebOsTvService), typeof(SsdpDiscoveryProvider));
+            var devicesList = new Dictionary<Type, Type>();
+            devicesList.Add(typeof(WebOstvService), typeof(SsdpDiscoveryProvider));
             devicesList.Add(typeof(NetcastTvService), typeof(SsdpDiscoveryProvider));
             //devicesList.Add(typeof(DLNAService), typeof(SsdpDiscoveryProvider));
             //devicesList.Add(typeof(DIALService), typeof(SsdpDiscoveryProvider));
