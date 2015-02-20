@@ -4,13 +4,11 @@ namespace ConnectSdk.Windows.Discovery.Provider.ssdp
 {
     public class Argument
     {
-        // ReSharper disable InconsistentNaming
-        public static String TAG = "argument";
-        public static String TAG_NAME = "name";
-        public static String TAG_DIRECTION = "direction";
-        public static String TAG_RETVAL = "retval";
-        public static String TAG_RELATED_STATE_VARIABLE = "relatedStateVariable";
-        // ReSharper restore InconsistentNaming
+        public static String Tag = "argument";
+        public static String TagName = "name";
+        public static String TagDirection = "direction";
+        public static String TagRetval = "retval";
+        public static String TagRelatedStateVariable = "relatedStateVariable";
 
         /// <summary>
         /// Required. Name of formal parameter.

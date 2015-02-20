@@ -60,7 +60,7 @@ namespace ConnectSdk.Windows.Service
 
         public CapabilityPriorityLevel GetVolumeControlCapabilityLevel()
         {
-            return CapabilityPriorityLevel.HIGH;
+            return CapabilityPriorityLevel.High;
         }
 
         public void VolumeUp()

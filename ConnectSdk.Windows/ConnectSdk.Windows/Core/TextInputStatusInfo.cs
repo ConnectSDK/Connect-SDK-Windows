@@ -30,25 +30,25 @@ namespace ConnectSdk.Windows.Core
         /** Gets the type of keyboard that should be displayed to the user. */
         public TextInputType GetTextInputType()
         {
-            var textInputType = TextInputType.DEFAULT;
+            var textInputType = TextInputType.Default;
 
             if (ContentType == null) return textInputType;
 
             if (ContentType.Equals("number"))
             {
-                textInputType = TextInputType.NUMBER;
+                textInputType = TextInputType.Number;
             }
             else if (ContentType.Equals("phonenumber"))
             {
-                textInputType = TextInputType.PHONE_NUMBER;
+                textInputType = TextInputType.PhoneNumber;
             }
             else if (ContentType.Equals("url"))
             {
-                textInputType = TextInputType.URL;
+                textInputType = TextInputType.Url;
             }
             else if (ContentType.Equals("email"))
             {
-                textInputType = TextInputType.EMAIL;
+                textInputType = TextInputType.Email;
             }
 
             return textInputType;
@@ -62,16 +62,16 @@ namespace ConnectSdk.Windows.Core
         {
             switch (textInputType)
             {
-                case TextInputType.NUMBER:
+                case TextInputType.Number:
                     ContentType = "number";
                     break;
-                case TextInputType.PHONE_NUMBER:
+                case TextInputType.PhoneNumber:
                     ContentType = "phonenumber";
                     break;
-                case TextInputType.URL:
+                case TextInputType.Url:
                     ContentType = "url";
                     break;
-                case TextInputType.EMAIL:
+                case TextInputType.Email:
                     ContentType = "number";
                     break;
                 default:

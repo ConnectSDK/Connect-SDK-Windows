@@ -11,19 +11,19 @@ namespace ConnectSdk.Windows.Service.Sessions
 {
     public class WebOsWebAppSession : WebAppSession
     {
-        private const String namespaceKey = "connectsdk.";
+        private const String NamespaceKey = "connectsdk.";
         private readonly Dictionary<String, ServiceCommand> mActiveCommands;
         private readonly WebOstvServiceSocketClientListener mSocketListener;
 
-        private int uid;
         public UrlServiceSubscription AppToAppSubscription;
         public bool Connected;
         public ResponseListener MConnectionListener;
+        public WebOstvServiceSocketClient Socket;
         private String mFullAppId;
         private IServiceSubscription mMessageSubscription;
         private IServiceSubscription mPlayStateSubscription;
-        protected WebOstvService service;
-        public WebOstvServiceSocketClient Socket;
+        protected new WebOstvService Service;
+        private int uid;
 
         public WebOsWebAppSession(LaunchSession launchSession, DeviceService service) :
             base(launchSession, service)
@@ -32,7 +32,7 @@ namespace ConnectSdk.Windows.Service.Sessions
             mActiveCommands = new Dictionary<String, ServiceCommand>();
             Connected = false;
 
-            this.service = (WebOstvService)service;
+            Service = (WebOstvService) service;
             mSocketListener = new WebOstvServiceSocketClientListener(this);
         }
 
@@ -53,27 +53,23 @@ namespace ConnectSdk.Windows.Service.Sessions
 
         public void HandleMediaEvent(JsonObject payload)
         {
-            String type = "";
-
-            type = payload.GetNamedString("type");
+            var type = payload.GetNamedString("type");
             if (type.Length == 0)
                 return;
 
-            if (type.Equals("playState"))
+            if (!type.Equals("playState")) return;
+            if (mPlayStateSubscription == null)
+                return;
+
+            var playStateString = payload.GetNamedString(type);
+            if (playStateString.Length == 0)
+                return;
+
+            var playState = ParsePlayState(playStateString);
+
+            foreach (var listener in mPlayStateSubscription.GetListeners())
             {
-                if (mPlayStateSubscription == null)
-                    return;
-
-                String playStateString = payload.GetNamedString(type);
-                if (playStateString.Length == 0)
-                    return;
-
-                PlayStateStatus playState = ParsePlayState(playStateString);
-
-                foreach (ResponseListener listener in mPlayStateSubscription.GetListeners())
-                {
-                    Util.PostSuccess(listener, playState);
-                }
+                Util.PostSuccess(listener, playState);
             }
         }
 
@@ -85,26 +81,23 @@ namespace ConnectSdk.Windows.Service.Sessions
                     mFullAppId = LaunchSession.AppId;
                 else
                 {
-                    foreach (var mapPair in service.AppToAppIdMappings)
+                    //foreach (var mapPair in service.AppToAppIdMappings)
+                    //{
+                    //}
+                    foreach (var pair in Service.AppToAppIdMappings)
                     {
-                    }
-                    foreach (var pair in service.AppToAppIdMappings)
-                    {
-                        String mappedFullAppId = pair.Key;
-                        String mappedAppId = pair.Value;
+                        //var mappedFullAppId = pair.Key;
+                        var mappedAppId = pair.Value;
 
-                        if (mappedAppId.Equals(LaunchSession.AppId))
-                        {
-                            mFullAppId = mappedAppId;
-                            break;
-                        }
+                        if (!mappedAppId.Equals(LaunchSession.AppId)) continue;
+
+                        mFullAppId = mappedAppId;
+                        break;
                     }
                 }
             }
 
-            if (mFullAppId == null)
-                return LaunchSession.AppId;
-            return mFullAppId;
+            return mFullAppId ?? LaunchSession.AppId;
         }
 
         public void SetFullAppId(String fullAppId)
@@ -112,19 +105,18 @@ namespace ConnectSdk.Windows.Service.Sessions
             mFullAppId = fullAppId;
         }
 
-
         public void HandleMediaCommandResponse(JsonObject payload)
         {
-            String requetID = payload.GetNamedString("requestId");
-            if (requetID.Length == 0)
+            var requestId = payload.GetNamedString("requestId");
+            if (requestId.Length == 0)
                 return;
 
-            ServiceCommand command = mActiveCommands[requetID];
+            var command = mActiveCommands[requestId];
 
             if (command == null)
                 return;
 
-            String mError = payload.GetNamedString("error");
+            var mError = payload.GetNamedString("error");
 
             if (mError.Length != 0)
             {
@@ -135,7 +127,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                 Util.PostSuccess(command.ResponseListenerValue, payload);
             }
 
-            mActiveCommands.Remove(requetID);
+            mActiveCommands.Remove(requestId);
         }
 
         public void HandleMessage(Object message)
@@ -154,30 +146,26 @@ namespace ConnectSdk.Windows.Service.Sessions
                 return PlayStateStatus.Idle;
             if (playStateString.Equals("buffering"))
                 return PlayStateStatus.Buffering;
-            if (playStateString.Equals("finished"))
-                return PlayStateStatus.Finished;
-
-            return PlayStateStatus.Unknown;
+            return playStateString.Equals("finished") ? PlayStateStatus.Finished : PlayStateStatus.Unknown;
         }
 
-        public void Connect(ResponseListener connectionListener)
+        public new void Connect(ResponseListener connectionListener)
         {
-            connect(false, connectionListener);
+            Connect(false, connectionListener);
         }
 
-        public void Join(ResponseListener connectionListener)
+        public new void Join(ResponseListener connectionListener)
         {
-            connect(true, connectionListener);
+            Connect(true, connectionListener);
         }
 
-        private void connect(bool joinOnly, ResponseListener connectionListener)
+        private void Connect(bool joinOnly, ResponseListener connectionListener)
         {
             if (Socket != null && Socket.State == State.Connecting)
             {
-                if (connectionListener != null) ;
-                connectionListener.OnError(new ServiceCommandError(0,
-                    "You have a connection request pending,  please wait until it has finished"));
-
+                if (connectionListener != null)
+                    connectionListener.OnError(new ServiceCommandError(0,
+                        "You have a connection request pending,  please wait until it has finished"));
                 return;
             }
 
@@ -185,7 +173,6 @@ namespace ConnectSdk.Windows.Service.Sessions
             {
                 if (connectionListener != null)
                     connectionListener.OnSuccess(null);
-
                 return;
             }
 
@@ -207,7 +194,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                     if (MConnectionListener != null)
                         MConnectionListener.OnError(error1);
                 };
-                service.ConnectToWebApp(this, joinOnly, finalConnectionListener);
+                Service.ConnectToWebApp(this, joinOnly, finalConnectionListener);
             };
             MConnectionListener.Error += (sender, error) =>
             {
@@ -233,13 +220,15 @@ namespace ConnectSdk.Windows.Service.Sessions
             }
             else
             {
-                Socket = new WebOstvServiceSocketClient(service, WebOstvServiceSocketClient.GetUri(service));
-                Socket.Listener = mSocketListener;
+                Socket = new WebOstvServiceSocketClient(Service, WebOstvServiceSocketClient.GetUri(Service))
+                {
+                    Listener = mSocketListener
+                };
                 Socket.Connect();
             }
         }
 
-        public void DisconnectFromWebApp()
+        public new void DisconnectFromWebApp()
         {
             Connected = false;
             MConnectionListener = null;
@@ -250,15 +239,14 @@ namespace ConnectSdk.Windows.Service.Sessions
                 AppToAppSubscription = null;
             }
 
-            if (Socket != null)
-            {
-                Socket.Listener = null;
-                Socket.Disconnect();
-                Socket = null;
-            }
+            if (Socket == null) return;
+
+            Socket.Listener = null;
+            Socket.Disconnect();
+            Socket = null;
         }
 
-        public void sendMessage(String message, ResponseListener listener)
+        public new void SendMessage(String message, ResponseListener listener)
         {
             if (string.IsNullOrEmpty(message))
             {
@@ -268,10 +256,10 @@ namespace ConnectSdk.Windows.Service.Sessions
                 return;
             }
 
-            sendP2PMessage(message, listener);
+            SendP2PMessage(message, listener);
         }
 
-        public void sendMessage(JsonObject message, ResponseListener listener)
+        public new void SendMessage(JsonObject message, ResponseListener listener)
         {
             if (message == null || message.Count == 0)
             {
@@ -280,25 +268,23 @@ namespace ConnectSdk.Windows.Service.Sessions
                 return;
             }
 
-            sendP2PMessage(message, listener);
+            SendP2PMessage(message, listener);
         }
 
-        private void sendP2PMessage(Object message, ResponseListener listener)
+        private void SendP2PMessage(Object message, ResponseListener listener)
         {
-            var _payload = new JsonObject();
+            var payload = new JsonObject();
 
             try
             {
-                _payload.Add("type", JsonValue.CreateStringValue("p2p"));
-                _payload.Add("to", JsonValue.CreateStringValue(GetFullAppId()));
-                _payload.Add("payload", JsonValue.CreateStringValue(message.ToString()));
+                payload.Add("type", JsonValue.CreateStringValue("p2p"));
+                payload.Add("to", JsonValue.CreateStringValue(GetFullAppId()));
+                payload.Add("payload", JsonValue.CreateStringValue(message.ToString()));
             }
             catch (Exception ex)
             {
                 throw ex;
             }
-
-            JsonObject payload = _payload;
 
             if (IsConnected())
             {
@@ -315,13 +301,13 @@ namespace ConnectSdk.Windows.Service.Sessions
                     if (listener != null)
                         listener.OnError(error);
                 };
-                connectListener.Success += (sender, o) => { sendP2PMessage(message, listener); };
+                connectListener.Success += (sender, o) => SendP2PMessage(message, listener);
 
                 Connect(connectListener);
             }
         }
 
-        public void close(ResponseListener listener)
+        public new void Close(ResponseListener listener)
         {
             mActiveCommands.Clear();
 
@@ -337,10 +323,10 @@ namespace ConnectSdk.Windows.Service.Sessions
                 mMessageSubscription = null;
             }
 
-            service.GetWebAppLauncher().CloseWebApp(LaunchSession, listener);
+            Service.GetWebAppLauncher().CloseWebApp(LaunchSession, listener);
         }
 
-        public void Seek(long position, ResponseListener listener)
+        public new void Seek(long position, ResponseListener listener)
         {
             if (position < 0)
             {
@@ -350,21 +336,22 @@ namespace ConnectSdk.Windows.Service.Sessions
                 return;
             }
 
-            int requestIdNumber = GetNextId();
-            String requestId = String.Format("req{0}", requestIdNumber);
+            var requestIdNumber = GetNextId();
+            var requestId = String.Format("req{0}", requestIdNumber);
 
             JsonObject message = null;
             try
             {
-                message = new JsonObject();
-                message.Add("contentType", JsonValue.CreateStringValue(namespaceKey + "mediaCommand"));
-                var mediaCommandObject = new JsonObject();
-                mediaCommandObject.Add("type", JsonValue.CreateStringValue("seek"));
-                mediaCommandObject.Add("position", JsonValue.CreateNumberValue(position / 1000));
-                mediaCommandObject.Add("requestId", JsonValue.CreateStringValue(requestId));
+                message = new JsonObject {{"contentType", JsonValue.CreateStringValue(NamespaceKey + "mediaCommand")}};
+                var mediaCommandObject = new JsonObject
+                {
+                    {"type", JsonValue.CreateStringValue("seek")},
+                    {"position", JsonValue.CreateNumberValue(position/1000)},
+                    {"requestId", JsonValue.CreateStringValue(requestId)}
+                };
                 message.Add("mediaCommand", mediaCommandObject);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 if (listener != null)
                     listener.OnError(new ServiceCommandError(0, null));
@@ -374,25 +361,26 @@ namespace ConnectSdk.Windows.Service.Sessions
 
             mActiveCommands.Add(requestId, command);
 
-            sendMessage(message, listener);
+            SendMessage(message, listener);
         }
 
-        public void getPosition(ResponseListener listener)
+        public new void GetPosition(ResponseListener listener)
         {
-            int requestIdNumber = GetNextId();
-            String requestId = String.Format("req{0}", requestIdNumber);
+            var requestIdNumber = GetNextId();
+            var requestId = String.Format("req{0}", requestIdNumber);
 
             JsonObject message = null;
             try
             {
-                message = new JsonObject();
-                message.Add("contentType", JsonValue.CreateStringValue(namespaceKey + "mediaCommand"));
-                var mediaCommandObject = new JsonObject();
-                mediaCommandObject.Add("type", JsonValue.CreateStringValue("getPosition"));
-                mediaCommandObject.Add("requestId", JsonValue.CreateStringValue(requestId));
+                message = new JsonObject {{"contentType", JsonValue.CreateStringValue(NamespaceKey + "mediaCommand")}};
+                var mediaCommandObject = new JsonObject
+                {
+                    {"type", JsonValue.CreateStringValue("getPosition")},
+                    {"requestId", JsonValue.CreateStringValue(requestId)}
+                };
                 message.Add("mediaCommand", mediaCommandObject);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 if (listener != null)
                     listener.OnError(new ServiceCommandError(0, null));
@@ -403,12 +391,12 @@ namespace ConnectSdk.Windows.Service.Sessions
             {
                 try
                 {
-                    double position = ((JsonObject)o).GetNamedNumber("position");
+                    var position = ((JsonObject) o).GetNamedNumber("position");
 
                     if (listener != null)
-                        listener.OnSuccess(position * 1000);
+                        listener.OnSuccess(position*1000);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     commandResponseListener.OnError(new ServiceCommandError(0, null));
                 }
@@ -419,10 +407,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                     listener.OnError(error);
             };
 
-
             var command = new ServiceCommand(null, null, null, commandResponseListener);
-
-
             mActiveCommands.Add(requestId, command);
             var messageResponseListener = new ResponseListener();
             messageResponseListener.Error += (sender, error) =>
@@ -431,26 +416,26 @@ namespace ConnectSdk.Windows.Service.Sessions
                     listener.OnError(error);
             };
             messageResponseListener.Success += (sender, o) => { };
-            sendMessage(message, messageResponseListener);
+            SendMessage(message, messageResponseListener);
         }
 
-        public void getDuration(ResponseListener listener)
+        public new void GetDuration(ResponseListener listener)
         {
-            int requestIdNumber = GetNextId();
-            String requestId = String.Format("req%d", requestIdNumber);
-
+            var requestIdNumber = GetNextId();
+            var requestId = String.Format("req{0}", requestIdNumber);
 
             JsonObject message = null;
             try
             {
-                message = new JsonObject();
-                message.Add("contentType", JsonValue.CreateStringValue(namespaceKey + "mediaCommand"));
-                var mediaCommandObject = new JsonObject();
-                mediaCommandObject.Add("type", JsonValue.CreateStringValue("getDuration"));
-                mediaCommandObject.Add("requestId", JsonValue.CreateStringValue(requestId));
+                message = new JsonObject {{"contentType", JsonValue.CreateStringValue(NamespaceKey + "mediaCommand")}};
+                var mediaCommandObject = new JsonObject
+                {
+                    {"type", JsonValue.CreateStringValue("getDuration")},
+                    {"requestId", JsonValue.CreateStringValue(requestId)}
+                };
                 message.Add("mediaCommand", mediaCommandObject);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 if (listener != null)
                     listener.OnError(new ServiceCommandError(0, null));
@@ -461,69 +446,12 @@ namespace ConnectSdk.Windows.Service.Sessions
             {
                 try
                 {
-                    double position = ((JsonObject)o).GetNamedNumber("duration");
+                    var position = ((JsonObject) o).GetNamedNumber("duration");
 
                     if (listener != null)
-                        listener.OnSuccess(position * 1000);
+                        listener.OnSuccess(position*1000);
                 }
-                catch (Exception e)
-                {
-                    commandResponseListener.OnError(new ServiceCommandError(0, null));
-                }
-            };
-            commandResponseListener.Error += (sender, error) =>
-            {
-                if (listener != null)
-                    listener.OnError(error);
-            };
-
-
-            var command = new ServiceCommand(null, null, null, commandResponseListener);
-
-            mActiveCommands.Add(requestId, command);
-            var messageResponseListener = new ResponseListener();
-            messageResponseListener.Error += (sender, error) =>
-            {
-                if (listener != null)
-                    listener.OnError(error);
-            };
-            messageResponseListener.Success += (sender, o) => { };
-            sendMessage(message, messageResponseListener);
-        }
-
-        public void getPlayState(ResponseListener listener)
-        {
-            int requestIdNumber = GetNextId();
-            String requestId = String.Format("req%d", requestIdNumber);
-
-
-            JsonObject message = null;
-            try
-            {
-                message = new JsonObject();
-                message.Add("contentType", JsonValue.CreateStringValue(namespaceKey + "mediaCommand"));
-                var mediaCommandObject = new JsonObject();
-                mediaCommandObject.Add("type", JsonValue.CreateStringValue("getPlayState"));
-                mediaCommandObject.Add("requestId", JsonValue.CreateStringValue(requestId));
-                message.Add("mediaCommand", mediaCommandObject);
-            }
-            catch (Exception e)
-            {
-                if (listener != null)
-                    listener.OnError(new ServiceCommandError(0, null));
-            }
-
-            var commandResponseListener = new ResponseListener();
-            commandResponseListener.Success += (sender, o) =>
-            {
-                try
-                {
-                    double position = ((JsonObject)o).GetNamedNumber("duration");
-
-                    if (listener != null)
-                        listener.OnSuccess(position * 1000);
-                }
-                catch (Exception e)
+                catch (Exception)
                 {
                     commandResponseListener.OnError(new ServiceCommandError(0, null));
                 }
@@ -545,10 +473,68 @@ namespace ConnectSdk.Windows.Service.Sessions
                     listener.OnError(error);
             };
             messageResponseListener.Success += (sender, o) => { };
-            sendMessage(message, messageResponseListener);
+            SendMessage(message, messageResponseListener);
         }
 
-        public IServiceSubscription SubscribePlayState(ResponseListener listener)
+        public new void GetPlayState(ResponseListener listener)
+        {
+            var requestIdNumber = GetNextId();
+            var requestId = String.Format("req{0}", requestIdNumber);
+
+
+            JsonObject message = null;
+            try
+            {
+                message = new JsonObject {{"contentType", JsonValue.CreateStringValue(NamespaceKey + "mediaCommand")}};
+                var mediaCommandObject = new JsonObject
+                {
+                    {"type", JsonValue.CreateStringValue("getPlayState")},
+                    {"requestId", JsonValue.CreateStringValue(requestId)}
+                };
+                message.Add("mediaCommand", mediaCommandObject);
+            }
+            catch (Exception)
+            {
+                if (listener != null)
+                    listener.OnError(new ServiceCommandError(0, null));
+            }
+
+            var commandResponseListener = new ResponseListener();
+            commandResponseListener.Success += (sender, o) =>
+            {
+                try
+                {
+                    var position = ((JsonObject) o).GetNamedNumber("duration");
+
+                    if (listener != null)
+                        listener.OnSuccess(position*1000);
+                }
+                catch (Exception)
+                {
+                    commandResponseListener.OnError(new ServiceCommandError(0, null));
+                }
+            };
+            commandResponseListener.Error += (sender, error) =>
+            {
+                if (listener != null)
+                    listener.OnError(error);
+            };
+
+
+            var command = new ServiceCommand(null, null, null, commandResponseListener);
+
+            mActiveCommands.Add(requestId, command);
+            var messageResponseListener = new ResponseListener();
+            messageResponseListener.Error += (sender, error) =>
+            {
+                if (listener != null)
+                    listener.OnError(error);
+            };
+            messageResponseListener.Success += (sender, o) => { };
+            SendMessage(message, messageResponseListener);
+        }
+
+        public new IServiceSubscription SubscribePlayState(ResponseListener listener)
         {
             if (mPlayStateSubscription == null)
                 mPlayStateSubscription = new UrlServiceSubscription(null, null, null, null);
@@ -567,107 +553,62 @@ namespace ConnectSdk.Windows.Service.Sessions
             return mPlayStateSubscription;
         }
 
-        /*****************
-	 * Media Control *
-	 *****************/
 
-        public IMediaControl GetMediaControl()
+        #region Media Control
+        public new IMediaControl GetMediaControl()
         {
             return this;
         }
 
-        public CapabilityPriorityLevel GetMediaControlCapabilityLevel()
+        public new CapabilityPriorityLevel GetMediaControlCapabilityLevel()
         {
-            return CapabilityPriorityLevel.HIGH;
-        }
+            return CapabilityPriorityLevel.High;
+        } 
+        #endregion
 
         /****************
          * Media Player *
          ****************/
 
-        public IMediaPlayer GetMediaPlayer()
+        public new IMediaPlayer GetMediaPlayer()
         {
             return this;
         }
 
-        public CapabilityPriorityLevel GetMediaPlayerCapabilityLevel()
+        public new CapabilityPriorityLevel GetMediaPlayerCapabilityLevel()
         {
-            return CapabilityPriorityLevel.HIGH;
+            return CapabilityPriorityLevel.High;
         }
 
-        public void DisplayImage(String url, String mimeType, String title, String description, String iconSrc,
+        public new void DisplayImage(String url, String mimeType, String title, String description, String iconSrc,
             ResponseListener listener)
         {
-            int requestIdNumber = GetNextId();
-            String requestId = String.Format("req{0}", requestIdNumber);
+            var requestIdNumber = GetNextId();
+            var requestId = String.Format("req{0}", requestIdNumber);
 
             JsonObject message = null;
             try
             {
-                message = new JsonObject();
-                message.Add("contentType", JsonValue.CreateStringValue(namespaceKey + "mediaCommand"));
-                var mediaCommandObject = new JsonObject();
-                mediaCommandObject.Add("type", JsonValue.CreateStringValue("getPlayState"));
-                mediaCommandObject.Add("mediaURL", JsonValue.CreateStringValue(url));
-                mediaCommandObject.Add("iconURL", JsonValue.CreateStringValue(iconSrc));
-                mediaCommandObject.Add("title", JsonValue.CreateStringValue(title));
-                mediaCommandObject.Add("description", JsonValue.CreateStringValue(description));
-                mediaCommandObject.Add("mimeType", JsonValue.CreateStringValue(mimeType));
-                mediaCommandObject.Add("requestId", JsonValue.CreateStringValue(requestId));
+                message = new JsonObject {{"contentType", JsonValue.CreateStringValue(NamespaceKey + "mediaCommand")}};
+                var mediaCommandObject = new JsonObject
+                {
+                    {"type", JsonValue.CreateStringValue("getPlayState")},
+                    {"mediaURL", JsonValue.CreateStringValue(url)},
+                    {"iconURL", JsonValue.CreateStringValue(iconSrc)},
+                    {"title", JsonValue.CreateStringValue(title)},
+                    {"description", JsonValue.CreateStringValue(description)},
+                    {"mimeType", JsonValue.CreateStringValue(mimeType)},
+                    {"requestId", JsonValue.CreateStringValue(requestId)}
+                };
                 message.Add("mediaCommand", mediaCommandObject);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 if (listener != null)
                     listener.OnError(new ServiceCommandError(0, null));
             }
             var responseListener = new ResponseListener();
-            responseListener.Error += (sender, error) => { Util.PostError(listener, error); };
-            responseListener.Success +=
-                (sender, o) => { Util.PostSuccess(listener, new MediaLaunchObject(LaunchSession, GetMediaControl())); };
-
-
-            var command = new ServiceCommand(Socket, null, null, responseListener);
-
-            mActiveCommands.Add(requestId, command);
-
-            var messageResponseListener = new ResponseListener();
-            messageResponseListener.Error += (sender, error) => { Util.PostError(listener, error); };
-            messageResponseListener.Success += (sender, o) => { };
-
-            sendP2PMessage(message, messageResponseListener);
-        }
-
-        public void playMedia(String url, String mimeType, String title, String description, String iconSrc,
-            bool shouldLoop, ResponseListener listener)
-        {
-            int requestIdNumber = GetNextId();
-            String requestId = String.Format("req{0}", requestIdNumber);
-
-            JsonObject message = null;
-            try
-            {
-                message = new JsonObject();
-                message.Add("contentType", JsonValue.CreateStringValue(namespaceKey + "mediaCommand"));
-                var mediaCommandObject = new JsonObject();
-                mediaCommandObject.Add("type", JsonValue.CreateStringValue("playMedia"));
-                mediaCommandObject.Add("mediaURL", JsonValue.CreateStringValue(url));
-                mediaCommandObject.Add("iconURL", JsonValue.CreateStringValue(iconSrc));
-                mediaCommandObject.Add("title", JsonValue.CreateStringValue(title));
-                mediaCommandObject.Add("description", JsonValue.CreateStringValue(description));
-                mediaCommandObject.Add("mimeType", JsonValue.CreateStringValue(mimeType));
-                mediaCommandObject.Add("shouldLoop", JsonValue.CreateBooleanValue(shouldLoop));
-                mediaCommandObject.Add("requestId", JsonValue.CreateStringValue(requestId));
-
-                message.Add("mediaCommand", mediaCommandObject);
-            }
-            catch (Exception e)
-            {
-                if (listener != null)
-                    listener.OnError(new ServiceCommandError(0, null));
-            }
-            var responseListener = new ResponseListener();
-            responseListener.Error += (sender, error) => { Util.PostError(listener, error); };
+            responseListener.Error += (sender, error) => Util.PostError(listener, error);
             responseListener.Success +=
                 (sender, o) => Util.PostSuccess(listener, new MediaLaunchObject(LaunchSession, GetMediaControl()));
 
@@ -677,10 +618,56 @@ namespace ConnectSdk.Windows.Service.Sessions
             mActiveCommands.Add(requestId, command);
 
             var messageResponseListener = new ResponseListener();
-            messageResponseListener.Error += (sender, error) => { Util.PostError(listener, error); };
+            messageResponseListener.Error += (sender, error) => Util.PostError(listener, error);
             messageResponseListener.Success += (sender, o) => { };
 
-            sendP2PMessage(message, messageResponseListener);
+            SendP2PMessage(message, messageResponseListener);
+        }
+
+        public new void PlayMedia(String url, String mimeType, String title, String description, String iconSrc,
+            bool shouldLoop, ResponseListener listener)
+        {
+            var requestIdNumber = GetNextId();
+            var requestId = String.Format("req{0}", requestIdNumber);
+
+            JsonObject message = null;
+            try
+            {
+                message = new JsonObject {{"contentType", JsonValue.CreateStringValue(NamespaceKey + "mediaCommand")}};
+                var mediaCommandObject = new JsonObject
+                {
+                    {"type", JsonValue.CreateStringValue("playMedia")},
+                    {"mediaURL", JsonValue.CreateStringValue(url)},
+                    {"iconURL", JsonValue.CreateStringValue(iconSrc)},
+                    {"title", JsonValue.CreateStringValue(title)},
+                    {"description", JsonValue.CreateStringValue(description)},
+                    {"mimeType", JsonValue.CreateStringValue(mimeType)},
+                    {"shouldLoop", JsonValue.CreateBooleanValue(shouldLoop)},
+                    {"requestId", JsonValue.CreateStringValue(requestId)}
+                };
+
+                message.Add("mediaCommand", mediaCommandObject);
+            }
+            catch (Exception)
+            {
+                if (listener != null)
+                    listener.OnError(new ServiceCommandError(0, null));
+            }
+            var responseListener = new ResponseListener();
+            responseListener.Error += (sender, error) => Util.PostError(listener, error);
+            responseListener.Success +=
+                (sender, o) => Util.PostSuccess(listener, new MediaLaunchObject(LaunchSession, GetMediaControl()));
+
+
+            var command = new ServiceCommand(Socket, null, null, responseListener);
+
+            mActiveCommands.Add(requestId, command);
+
+            var messageResponseListener = new ResponseListener();
+            messageResponseListener.Error += (sender, error) => Util.PostError(listener, error);
+            messageResponseListener.Success += (sender, o) => { };
+
+            SendP2PMessage(message, messageResponseListener);
         }
 
         public class WebOstvServiceSocketClientListener : IWebOstvServiceSocketClientListener
@@ -745,58 +732,49 @@ namespace ConnectSdk.Windows.Service.Sessions
 
             public bool OnReceiveMessage(JsonObject payload)
             {
-                String type = payload.GetNamedString("type");
+                var type = payload.GetNamedString("type");
 
-                if ("p2p".Equals(type))
-                {
-                    String fromAppId = null;
+                if (!"p2p".Equals(type)) return true;
 
-                    fromAppId = payload.GetNamedString("from");
+                string fromAppId = payload.GetNamedString("from");
 
-                    if (!fromAppId.Equals(webOsWebAppSession.GetFullAppId()))
-                        return false;
-
-                    Object message = payload.GetNamedObject("payload");
-
-                    if (message is JsonObject)
-                    {
-                        var messageJSON = (JsonObject)message;
-
-                        String contentType = messageJSON.GetNamedString("contentType");
-                        int contentTypeIndex = contentType.IndexOf("connectsdk.", StringComparison.OrdinalIgnoreCase);
-
-                        if (contentType != null && contentTypeIndex >= 0)
-                        {
-                            //String payloadKey = contentType.Split("connectsdk.",)[1];
-
-                            String payloadKey = contentType.Split('.')[3];
-                            if (payloadKey == null || payloadKey.Length == 0)
-                                return false;
-
-                            JsonObject messagePayload = messageJSON.GetNamedObject(payloadKey);
-
-                            if (messagePayload == null)
-                                return false;
-
-                            if (payloadKey.Equals("mediaEvent", StringComparison.OrdinalIgnoreCase))
-                                webOsWebAppSession.HandleMediaEvent(messagePayload);
-                            else if (payloadKey.Equals("mediaCommandResponse", StringComparison.OrdinalIgnoreCase))
-                                webOsWebAppSession.HandleMediaCommandResponse(messagePayload);
-                        }
-                        else
-                        {
-                            webOsWebAppSession.HandleMessage(messageJSON);
-                        }
-                    }
-                    else if (message is String)
-                    {
-                        webOsWebAppSession.HandleMessage(message);
-                    }
-
+                if (!fromAppId.Equals(webOsWebAppSession.GetFullAppId()))
                     return false;
+
+                Object message = payload.GetNamedObject("payload");
+
+                if (message != null)
+                {
+                    var messageJson = (JsonObject) message;
+
+                    var contentType = messageJson.GetNamedString("contentType");
+                    var contentTypeIndex = contentType.IndexOf("connectsdk.", StringComparison.OrdinalIgnoreCase);
+
+                    if (contentTypeIndex >= 0)
+                    {
+                        //String payloadKey = contentType.Split("connectsdk.",)[1];
+
+                        var payloadKey = contentType.Split('.')[3];
+                        if (string.IsNullOrEmpty(payloadKey))
+                            return false;
+
+                        var messagePayload = messageJson.GetNamedObject(payloadKey);
+
+                        if (messagePayload == null)
+                            return false;
+
+                        if (payloadKey.Equals("mediaEvent", StringComparison.OrdinalIgnoreCase))
+                            webOsWebAppSession.HandleMediaEvent(messagePayload);
+                        else if (payloadKey.Equals("mediaCommandResponse", StringComparison.OrdinalIgnoreCase))
+                            webOsWebAppSession.HandleMediaCommandResponse(messagePayload);
+                    }
+                    else
+                    {
+                        webOsWebAppSession.HandleMessage(messageJson);
+                    }
                 }
 
-                return true;
+                return false;
             }
         }
     }

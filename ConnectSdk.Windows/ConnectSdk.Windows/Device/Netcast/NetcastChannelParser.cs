@@ -10,22 +10,20 @@ namespace ConnectSdk.Windows.Device.Netcast
 
         public string Value;
 
-        // ReSharper disable InconsistentNaming
-        public string CHANNEL_TYPE = "chtype";
-        public string MAJOR = "major";
-        public string MINOR = "minor";
-        public string DISPLAY_MAJOR = "displayMajor";
-        public string DISPLAY_MINOR = "displayMinor";
-        public string SOURCE_INDEX = "sourceIndex";
-        public string PHYSICAL_NUM = "physicalNum";
-        public string CHANNEL_NAME = "chname";
-        public string PROGRAM_NAME = "progName";
-        public string AUDIO_CHANNEL = "audioCh";
-        public string INPUT_SOURCE_NAME = "inputSourceName";
-        public string INPUT_SOURCE_TYPE = "inputSourceType";
-        public string LABEL_NAME = "labelName";
-        public string INPUT_SOURCE_INDEX = "inputSourceIdx";
-        // ReSharper restore InconsistentNaming
+        public string ChannelType = "chtype";
+        public string Major = "major";
+        public string Minor = "minor";
+        public string DisplayMajor = "displayMajor";
+        public string DisplayMinor = "displayMinor";
+        public string SourceIndex = "sourceIndex";
+        public string PhysicalNum = "physicalNum";
+        public string ChannelName = "chname";
+        public string ProgramName = "progName";
+        public string AudioChannel = "audioCh";
+        public string InputSourceName = "inputSourceName";
+        public string InputSourceType = "inputSourceType";
+        public string LabelName = "labelName";
+        public string InputSourceIndex = "inputSourceIdx";
 
         public NetcastChannelParser()
         {

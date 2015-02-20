@@ -100,7 +100,7 @@ namespace ConnectSdk.Windows.Service.Sessions
 
         public CapabilityPriorityLevel GetMediaControlCapabilityLevel()
         {
-            return CapabilityPriorityLevel.VERY_LOW;
+            return CapabilityPriorityLevel.VeryLow;
         }
 
 
@@ -309,7 +309,7 @@ namespace ConnectSdk.Windows.Service.Sessions
 
         public CapabilityPriorityLevel GetMediaPlayerCapabilityLevel()
         {
-            return CapabilityPriorityLevel.VERY_LOW;
+            return CapabilityPriorityLevel.VeryLow;
         }
 
         //public IWebAppSessionListener GetWebAppSessionListener()

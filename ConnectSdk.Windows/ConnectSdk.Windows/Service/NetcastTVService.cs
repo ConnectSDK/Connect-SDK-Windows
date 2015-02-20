@@ -384,7 +384,7 @@ namespace ConnectSdk.Windows.Service
 
         public CapabilityPriorityLevel GetLauncherCapabilityLevel()
         {
-            return CapabilityPriorityLevel.HIGH;
+            return CapabilityPriorityLevel.High;
         }
 
         public void GetApplication(string appName, ResponseListener listener)
@@ -838,7 +838,7 @@ namespace ConnectSdk.Windows.Service
 
         public CapabilityPriorityLevel GetTvControlCapabilityLevel()
         {
-            return CapabilityPriorityLevel.HIGH;
+            return CapabilityPriorityLevel.High;
         }
 
         public void GetChannelList(ResponseListener listener)
@@ -891,12 +891,12 @@ namespace ConnectSdk.Windows.Service
 
         public void ChannelUp(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.CHANNEL_UP, listener);
+            SendKeyCode((int)VirtualKeycodes.ChannelUp, listener);
         }
 
         public void ChannelDown(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.CHANNEL_DOWN, listener);
+            SendKeyCode((int)VirtualKeycodes.ChannelDown, listener);
         }
 
         public void SetChannel(ChannelInfo channelInfo, ResponseListener listener)
@@ -1043,7 +1043,7 @@ namespace ConnectSdk.Windows.Service
             {
                 if (enabled != (bool)o)
                 {
-                    SendKeyCode((int)VirtualKeycodes.VIDEO_3D, listener);
+                    SendKeyCode((int)VirtualKeycodes.Video3D, listener);
                 }
             };
 
@@ -1097,17 +1097,17 @@ namespace ConnectSdk.Windows.Service
 
         public CapabilityPriorityLevel GetVolumeControlCapabilityLevel()
         {
-            return CapabilityPriorityLevel.HIGH;
+            return CapabilityPriorityLevel.High;
         }
 
         public void VolumeUp(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.VOLUME_UP, listener);
+            SendKeyCode((int)VirtualKeycodes.VolumeUp, listener);
         }
 
         public void VolumeDown(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.VOLUME_DOWN, listener);
+            SendKeyCode((int)VirtualKeycodes.VolumeDown, listener);
         }
 
         public void SetVolume(float volume, ResponseListener listener)
@@ -1128,7 +1128,7 @@ namespace ConnectSdk.Windows.Service
         public void SetMute(bool isMute, ResponseListener listener)
         {
             var responseListener = new ResponseListener();
-            responseListener.Success += (sender, o) => SendKeyCode((int)VirtualKeycodes.MUTE, listener);
+            responseListener.Success += (sender, o) => SendKeyCode((int)VirtualKeycodes.Mute, listener);
             responseListener.Error += (sender, o) => Util.PostError(listener, o);
             GetVolumeStatus(responseListener);
         }
@@ -1203,7 +1203,7 @@ namespace ConnectSdk.Windows.Service
 
         public CapabilityPriorityLevel GetExternalInputControlPriorityLevel()
         {
-            return CapabilityPriorityLevel.HIGH;
+            return CapabilityPriorityLevel.High;
         }
 
         public void LaunchInputPicker(ResponseListener pListener)
@@ -1259,7 +1259,7 @@ namespace ConnectSdk.Windows.Service
 
         public CapabilityPriorityLevel GetMediaPlayerCapabilityLevel()
         {
-            return CapabilityPriorityLevel.HIGH;
+            return CapabilityPriorityLevel.High;
         }
 
         public void DisplayImage(string url, string mimeType, string title, string description, string iconSrc,
@@ -1302,32 +1302,32 @@ namespace ConnectSdk.Windows.Service
 
         public CapabilityPriorityLevel GetMediaControlCapabilityLevel()
         {
-            return CapabilityPriorityLevel.NORMAL;
+            return CapabilityPriorityLevel.Normal;
         }
 
         public void Play(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.PLAY, listener);
+            SendKeyCode((int)VirtualKeycodes.Play, listener);
         }
 
         public void Pause(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.PAUSE, listener);
+            SendKeyCode((int)VirtualKeycodes.Pause, listener);
         }
 
         public void Stop(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.STOP, listener);
+            SendKeyCode((int)VirtualKeycodes.Stop, listener);
         }
 
         public void Rewind(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.REWIND, listener);
+            SendKeyCode((int)VirtualKeycodes.Rewind, listener);
         }
 
         public void FastForward(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.FAST_FORWARD, listener);
+            SendKeyCode((int)VirtualKeycodes.FastForward, listener);
         }
 
         public void Seek(long position, ResponseListener listener)
@@ -1365,7 +1365,7 @@ namespace ConnectSdk.Windows.Service
 
         public CapabilityPriorityLevel GetMouseControlCapabilityLevel()
         {
-            return CapabilityPriorityLevel.HIGH;
+            return CapabilityPriorityLevel.High;
         }
 
         private void SetMouseCursorVisible(bool visible, ResponseListener listener)
@@ -1513,7 +1513,7 @@ namespace ConnectSdk.Windows.Service
 
         public CapabilityPriorityLevel GetTextInputControlCapabilityLevel()
         {
-            return CapabilityPriorityLevel.HIGH;
+            return CapabilityPriorityLevel.High;
         }
 
         public IServiceSubscription SubscribeTextInputStatus(ResponseListener listener)
@@ -1539,7 +1539,7 @@ namespace ConnectSdk.Windows.Service
         {
             var responseListener = new ResponseListener();
             HandleKeyboardInput("EditEnd", keyboardstring.ToString());
-            SendKeyCode((int)VirtualKeycodes.RED, responseListener); // Send RED Key to enter the "ENTER" button
+            SendKeyCode((int)VirtualKeycodes.Red, responseListener); // Send RED Key to enter the "ENTER" button
         }
 
         public void SendDelete()
@@ -1581,42 +1581,42 @@ namespace ConnectSdk.Windows.Service
 
         public CapabilityPriorityLevel GetKeyControlCapabilityLevel()
         {
-            return CapabilityPriorityLevel.HIGH;
+            return CapabilityPriorityLevel.High;
         }
 
         public void Up(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.KEY_UP, listener);
+            SendKeyCode((int)VirtualKeycodes.KeyUp, listener);
         }
 
         public void Down(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.KEY_DOWN, listener);
+            SendKeyCode((int)VirtualKeycodes.KeyDown, listener);
         }
 
         public void Left(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.KEY_LEFT, listener);
+            SendKeyCode((int)VirtualKeycodes.KeyLeft, listener);
         }
 
         public void Right(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.KEY_RIGHT, listener);
+            SendKeyCode((int)VirtualKeycodes.KeyRight, listener);
         }
 
         public void Ok(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.OK, listener);
+            SendKeyCode((int)VirtualKeycodes.Ok, listener);
         }
 
         public void Back(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.BACK, listener);
+            SendKeyCode((int)VirtualKeycodes.Back, listener);
         }
 
         public void Home(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.HOME, listener);
+            SendKeyCode((int)VirtualKeycodes.Home, listener);
         }
 
         #endregion
@@ -1630,12 +1630,12 @@ namespace ConnectSdk.Windows.Service
 
         public CapabilityPriorityLevel GetPowerControlCapabilityLevel()
         {
-            return CapabilityPriorityLevel.HIGH;
+            return CapabilityPriorityLevel.High;
         }
 
         public void PowerOff(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.POWER, new ResponseListener());
+            SendKeyCode((int)VirtualKeycodes.Power, new ResponseListener());
         }
 
         public void PowerOn(ResponseListener listener)

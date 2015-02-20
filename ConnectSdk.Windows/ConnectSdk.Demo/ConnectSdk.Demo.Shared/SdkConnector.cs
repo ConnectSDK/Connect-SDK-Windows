@@ -48,48 +48,48 @@ namespace ConnectSdk.Demo.Demo
             {
                 switch (code)
                 {
-                    case VirtualKeycodes.VOLUME_UP:
+                    case VirtualKeycodes.VolumeUp:
                         if (volumeControlDevice != null) volumeControlDevice.VolumeUp(null); break;
-                    case VirtualKeycodes.VOLUME_DOWN:
+                    case VirtualKeycodes.VolumeDown:
                         if (volumeControlDevice != null) volumeControlDevice.VolumeDown(null); break;
-                    case VirtualKeycodes.MUTE:
+                    case VirtualKeycodes.Mute:
                         if (volumeControlDevice != null) volumeControlDevice.SetMute(true, null); break;
 
-                    case VirtualKeycodes.KEY_UP:
+                    case VirtualKeycodes.KeyUp:
                         if (keyControlDevice != null) keyControlDevice.Up(null); break;
-                    case VirtualKeycodes.KEY_DOWN:
+                    case VirtualKeycodes.KeyDown:
                         if (keyControlDevice != null) keyControlDevice.Down(null); break;
-                    case VirtualKeycodes.KEY_LEFT:
+                    case VirtualKeycodes.KeyLeft:
                         if (keyControlDevice != null) keyControlDevice.Left(null); break;
-                    case VirtualKeycodes.KEY_RIGHT:
+                    case VirtualKeycodes.KeyRight:
                         if (keyControlDevice != null) keyControlDevice.Right(null); break;
-                    case VirtualKeycodes.OK:
+                    case VirtualKeycodes.Ok:
                         if (keyControlDevice != null) keyControlDevice.Ok(null); break;
-                    case VirtualKeycodes.BACK:
+                    case VirtualKeycodes.Back:
                         if (keyControlDevice != null) keyControlDevice.Back(null); break;
-                    case VirtualKeycodes.HOME:
+                    case VirtualKeycodes.Home:
                         if (keyControlDevice != null) keyControlDevice.Home(null); break;
 
                     //case VirtualKeycodes.EXTERNAL_INPUT:
                     //    if (externalInputControlDevice != null) externalInputControlDevice.launchInputPicker(null); break;
 
-                    case VirtualKeycodes.PLAY:
+                    case VirtualKeycodes.Play:
                         if (mediaControlDevice != null) mediaControlDevice.Play(null); break;
-                    case VirtualKeycodes.PAUSE:
+                    case VirtualKeycodes.Pause:
                         if (mediaControlDevice != null) mediaControlDevice.Pause(null); break;
-                    case VirtualKeycodes.STOP:
+                    case VirtualKeycodes.Stop:
                         if (mediaControlDevice != null) mediaControlDevice.Stop(null); break;
-                    case VirtualKeycodes.REWIND:
+                    case VirtualKeycodes.Rewind:
                         if (mediaControlDevice != null) mediaControlDevice.Rewind(null); break;
-                    case VirtualKeycodes.FAST_FORWARD:
+                    case VirtualKeycodes.FastForward:
                         if (mediaControlDevice != null) mediaControlDevice.FastForward(null); break;
 
-                    case VirtualKeycodes.POWER:
+                    case VirtualKeycodes.Power:
                         if (powerControlDevice != null) powerControlDevice.PowerOff(null); break;
 
-                    case VirtualKeycodes.CHANNEL_UP:
+                    case VirtualKeycodes.ChannelUp:
                         if (tvControlDevice != null) tvControlDevice.ChannelUp(null); break;
-                    case VirtualKeycodes.CHANNEL_DOWN:
+                    case VirtualKeycodes.ChannelDown:
                         if (tvControlDevice != null) tvControlDevice.ChannelDown(null); break;
 
                     default:

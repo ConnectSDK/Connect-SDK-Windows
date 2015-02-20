@@ -21,17 +21,15 @@ namespace ConnectSdk.Windows.Device
     /// </summary>
     public class ConnectableDevice : IDeviceServiceListener
     {
-        // ReSharper disable InconsistentNaming
-        public static string KEY_ID = "id";
-        public static string KEY_LAST_IP = "lastKnownIPAddress";
-        public static string KEY_FRIENDLY = "friendlyName";
-        public static string KEY_MODEL_NAME = "modelName";
-        public static string KEY_MODEL_NUMBER = "modelNumber";
-        public static string KEY_LAST_SEEN = "lastSeenOnWifi";
-        public static string KEY_LAST_CONNECTED = "lastConnected";
-        public static string KEY_LAST_DETECTED = "lastDetection";
-        public static string KEY_SERVICES = "services";
-        // ReSharper restore InconsistentNaming
+        public static string KeyId = "id";
+        public static string KeyLastIp = "lastKnownIPAddress";
+        public static string KeyFriendly = "friendlyName";
+        public static string KeyModelName = "modelName";
+        public static string KeyModelNumber = "modelNumber";
+        public static string KeyLastSeen = "lastSeenOnWifi";
+        public static string KeyLastConnected = "lastConnected";
+        public static string KeyLastDetected = "lastDetection";
+        public static string KeyServices = "services";
 
         private string id;
         private List<IConnectableDeviceListener> listeners = new List<IConnectableDeviceListener>();
@@ -93,14 +91,14 @@ namespace ConnectSdk.Windows.Device
 
         public ConnectableDevice(JsonObject json)
         {
-            Id = json.GetNamedString(KEY_ID);
-            LastKnownIpAddress = json.GetNamedString(KEY_LAST_IP);
-            FriendlyName = json.GetNamedString(KEY_FRIENDLY);
-            ModelName = json.GetNamedString(KEY_MODEL_NAME);
-            ModelNumber = json.GetNamedString(KEY_MODEL_NUMBER);
-            LastSeenOnWifi = json.GetNamedString(KEY_LAST_SEEN);
-            LastConnected = json.GetNamedNumber(KEY_LAST_CONNECTED);
-            LastDetection = json.GetNamedNumber(KEY_LAST_DETECTED);
+            Id = json.GetNamedString(KeyId);
+            LastKnownIpAddress = json.GetNamedString(KeyLastIp);
+            FriendlyName = json.GetNamedString(KeyFriendly);
+            ModelName = json.GetNamedString(KeyModelName);
+            ModelNumber = json.GetNamedString(KeyModelNumber);
+            LastSeenOnWifi = json.GetNamedString(KeyLastSeen);
+            LastConnected = json.GetNamedNumber(KeyLastConnected);
+            LastDetection = json.GetNamedNumber(KeyLastDetected);
 
             //var jsonServices = json.GetNamedObject(KEY_SERVICES);
             //if (jsonServices != null)
@@ -488,14 +486,14 @@ namespace ConnectSdk.Windows.Device
         {
             var deviceObject = new JsonObject
             {
-                {KEY_ID, JsonValue.CreateStringValue(Id)},
-                {KEY_LAST_IP, JsonValue.CreateStringValue(IpAddress)},
-                {KEY_LAST_SEEN, JsonValue.CreateStringValue(LastSeenOnWifi ?? Util.GetTime().ToString())},
-                {KEY_LAST_CONNECTED, JsonValue.CreateNumberValue(LastConnected)},
-                {KEY_LAST_DETECTED, JsonValue.CreateNumberValue(LastDetection)},
-                {KEY_FRIENDLY, JsonValue.CreateStringValue(FriendlyName)},
-                {KEY_MODEL_NAME, JsonValue.CreateStringValue(ModelName)},
-                {KEY_MODEL_NUMBER, JsonValue.CreateStringValue(ModelNumber)}
+                {KeyId, JsonValue.CreateStringValue(Id)},
+                {KeyLastIp, JsonValue.CreateStringValue(IpAddress)},
+                {KeyLastSeen, JsonValue.CreateStringValue(LastSeenOnWifi ?? Util.GetTime().ToString())},
+                {KeyLastConnected, JsonValue.CreateNumberValue(LastConnected)},
+                {KeyLastDetected, JsonValue.CreateNumberValue(LastDetection)},
+                {KeyFriendly, JsonValue.CreateStringValue(FriendlyName)},
+                {KeyModelName, JsonValue.CreateStringValue(ModelName)},
+                {KeyModelNumber, JsonValue.CreateStringValue(ModelNumber)}
             };
 
             var jsonServices = new JsonObject();
@@ -505,7 +503,7 @@ namespace ConnectSdk.Windows.Device
 
                 jsonServices.Add(service.ServiceConfig.ServiceUuid, serviceObject);
             }
-            deviceObject.Add(KEY_SERVICES, jsonServices);
+            deviceObject.Add(KeyServices, jsonServices);
 
             return deviceObject;
         }

@@ -80,7 +80,7 @@ namespace ConnectSdk.Windows.Service
 
         public CapabilityPriorityLevel GetMediaControlCapabilityLevel()
         {
-            return CapabilityPriorityLevel.NORMAL;
+            return CapabilityPriorityLevel.Normal;
         }
 
         public void Play(ResponseListener listener)
@@ -140,7 +140,7 @@ namespace ConnectSdk.Windows.Service
 
         public CapabilityPriorityLevel GetPlaylistControlCapabilityLevel()
         {
-            return CapabilityPriorityLevel.NORMAL;
+            return CapabilityPriorityLevel.Normal;
         }
 
         public void Previous(ResponseListener listener)
@@ -438,7 +438,7 @@ namespace ConnectSdk.Windows.Service
 
         public CapabilityPriorityLevel GetMediaPlayerCapabilityLevel()
         {
-            return CapabilityPriorityLevel.NORMAL;
+            return CapabilityPriorityLevel.Normal;
         }
 
         public void GetMediaInfo(ResponseListener listener)
@@ -581,7 +581,7 @@ namespace ConnectSdk.Windows.Service
 
         public CapabilityPriorityLevel GetVolumeControlCapabilityLevel()
         {
-            return CapabilityPriorityLevel.NORMAL;
+            return CapabilityPriorityLevel.Normal;
         }
 
         public void VolumeUp(ResponseListener listener)

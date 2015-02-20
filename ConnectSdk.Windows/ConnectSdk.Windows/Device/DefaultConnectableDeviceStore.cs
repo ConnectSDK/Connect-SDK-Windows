@@ -11,39 +11,36 @@ namespace ConnectSdk.Windows.Device
 {
     public class DefaultConnectableDeviceStore : IConnectableDeviceStore
     {
-        // ReSharper disable InconsistentNaming
-        private const int CURRENT_VERSION = 0;
+        private const int CurrentVersion = 0;
 
-        public static string KEY_VERSION = "version";
-        public static string KEY_CREATED = "created";
-        public static string KEY_UPDATED = "updated";
-        public static string KEY_DEVICES = "devices";
+        public static string KeyVersion = "version";
+        public static string KeyCreated = "created";
+        public static string KeyUpdated = "updated";
+        public static string KeyDevices = "devices";
 
         // ReSharper disable UnusedField.Compiler
-        private static string DIRPATH = "/android/data/connect_sdk/";
-        private static string FILENAME = "StoredDevices";
+        private static string dirpath = "/android/data/connect_sdk/";
+        private static string filename = "StoredDevices";
 
-        private static string IP_ADDRESS = "ipAddress";
-        private static string FRIENDLY_NAME = "friendlyName";
-        private static string MODEL_NAME = "modelName";
-        private static string MODEL_NUMBER = "modelNumber";
-        private static string SERVICES = "services";
-        private static string DESCRIPTION = "description";
-        private static string CONFIG = "config";
+        private static string ipAddress = "ipAddress";
+        private static string friendlyName = "friendlyName";
+        private static string modelName = "modelName";
+        private static string modelNumber = "modelNumber";
+        private static string services = "services";
+        private static string description = "description";
+        private static string config = "config";
 
-        private static string FILTER = "filter";
-        private static string UUID = "uuid";
-        private static string PORT = "port";
+        private static string filter = "filter";
+        private static string uuid = "uuid";
+        private static string port = "port";
 
-        private static string SERVICE_UUID = "serviceUUID";
-        private static string CLIENT_KEY = "clientKey";
-        private static string SERVER_CERTIFICATE = "serverCertificate";
-        private static string PAIRING_KEY = "pairingKey";
+        private static string serviceUuid = "serviceUUID";
+        private static string clientKey = "clientKey";
+        private static string serverCertificate = "serverCertificate";
+        private static string pairingKey = "pairingKey";
 
-        private static string DEFAULT_SERVICE_WEBOSTV = "WebOSTVService";
-        private static string DEFAULT_SERVICE_NETCASTTV = "NetcastTVService";
-        // ReSharper restore UnusedField.Compiler
-        // ReSharper restore InconsistentNaming
+        private static string defaultServiceWebostv = "WebOSTVService";
+        private static string defaultServiceNetcasttv = "NetcastTVService";
 
         /** Date (in seconds from 1970) that the ConnectableDeviceStore was created. */
         public long Created;
@@ -143,15 +140,15 @@ namespace ConnectSdk.Windows.Device
             if (storedDevice == null)
                 return;
 
-            storedDevice.SetNamedValue(ConnectableDevice.KEY_LAST_IP, JsonValue.CreateStringValue(device.LastKnownIpAddress));
+            storedDevice.SetNamedValue(ConnectableDevice.KeyLastIp, JsonValue.CreateStringValue(device.LastKnownIpAddress));
             if (device.LastSeenOnWifi != null)
-                storedDevice.SetNamedValue(ConnectableDevice.KEY_LAST_SEEN, JsonValue.CreateStringValue(device.LastSeenOnWifi));
+                storedDevice.SetNamedValue(ConnectableDevice.KeyLastSeen, JsonValue.CreateStringValue(device.LastSeenOnWifi));
             if (device.LastConnected > 0)
-                storedDevice.SetNamedValue(ConnectableDevice.KEY_LAST_CONNECTED, JsonValue.CreateNumberValue(device.LastConnected));
+                storedDevice.SetNamedValue(ConnectableDevice.KeyLastConnected, JsonValue.CreateNumberValue(device.LastConnected));
             if (device.LastDetection > 0)
-                storedDevice.SetNamedValue(ConnectableDevice.KEY_LAST_DETECTED, JsonValue.CreateNumberValue(device.LastDetection));
+                storedDevice.SetNamedValue(ConnectableDevice.KeyLastDetected, JsonValue.CreateNumberValue(device.LastDetection));
 
-            var services = storedDevice.GetNamedObject(ConnectableDevice.KEY_SERVICES) ?? new JsonObject();
+            var services = storedDevice.GetNamedObject(ConnectableDevice.KeyServices) ?? new JsonObject();
 
             foreach (var service in device.GetServices())
             {
@@ -161,7 +158,7 @@ namespace ConnectSdk.Windows.Device
                     services.SetNamedValue(service.ServiceDescription.Uuid, serviceInfo);
             }
 
-            storedDevice.SetNamedValue(ConnectableDevice.KEY_SERVICES, services);
+            storedDevice.SetNamedValue(ConnectableDevice.KeyServices, services);
 
             storedDevices.SetNamedValue(device.Id, storedDevice);
             if (activeDevices.ContainsKey(device.Id))
@@ -222,7 +219,7 @@ namespace ConnectSdk.Windows.Device
 
             if (foundDevice != null) return foundDevice;
 
-            return (from pair in storedDevices select storedDevices.GetNamedObject(pair.Key) into device let services = device.GetNamedObject(ConnectableDevice.KEY_SERVICES) where services != null && services.ContainsKey(uuid) select device).FirstOrDefault();
+            return (from pair in storedDevices select storedDevices.GetNamedObject(pair.Key) into device let services = device.GetNamedObject(ConnectableDevice.KeyServices) where services != null && services.ContainsKey(uuid) select device).FirstOrDefault();
         }
 
         public ServiceConfig GetServiceConfig(string uuid)
@@ -232,7 +229,7 @@ namespace ConnectSdk.Windows.Device
 
             var device = GetStoredDevice(uuid);
             if (device == null) return null;
-            var services = device.GetNamedObject(ConnectableDevice.KEY_SERVICES);
+            var services = device.GetNamedObject(ConnectableDevice.KeyServices);
 
             if (services == null) return null;
             var service = services.GetNamedObject(uuid);
@@ -245,7 +242,7 @@ namespace ConnectSdk.Windows.Device
 
         private void Load()
         {
-            Version = CURRENT_VERSION;
+            Version = CurrentVersion;
 
             Created = Util.GetTime();
             Updated = Util.GetTime();
@@ -256,11 +253,11 @@ namespace ConnectSdk.Windows.Device
             JsonObject data;
             if (!JsonObject.TryParse(value, out data)) return;
 
-            storedDevices = data.GetNamedObject(KEY_DEVICES, null) ?? new JsonObject();
+            storedDevices = data.GetNamedObject(KeyDevices, null) ?? new JsonObject();
 
-            Version = (int)data.GetNamedNumber(KEY_VERSION, CURRENT_VERSION);
-            Created = (long)data.GetNamedNumber(KEY_CREATED, 0);
-            Updated = (long)data.GetNamedNumber(KEY_UPDATED, 0);
+            Version = (int)data.GetNamedNumber(KeyVersion, CurrentVersion);
+            Created = (long)data.GetNamedNumber(KeyCreated, 0);
+            Updated = (long)data.GetNamedNumber(KeyUpdated, 0);
         }
 
         private void Store()
@@ -269,10 +266,10 @@ namespace ConnectSdk.Windows.Device
 
             deviceStore = new JsonObject
             {
-                {KEY_VERSION, JsonValue.CreateNumberValue(Version)},
-                {KEY_CREATED, JsonValue.CreateNumberValue(Created)},
-                {KEY_UPDATED, JsonValue.CreateNumberValue(Updated)},
-                {KEY_DEVICES, storedDevices}
+                {KeyVersion, JsonValue.CreateNumberValue(Version)},
+                {KeyCreated, JsonValue.CreateNumberValue(Created)},
+                {KeyUpdated, JsonValue.CreateNumberValue(Updated)},
+                {KeyDevices, storedDevices}
             };
 
             if (!waitToWrite)

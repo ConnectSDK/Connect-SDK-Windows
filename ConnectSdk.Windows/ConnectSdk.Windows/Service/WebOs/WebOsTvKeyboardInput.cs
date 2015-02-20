@@ -1,35 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Threading.Tasks;
 using Windows.Data.Json;
 using ConnectSdk.Windows.Core;
 using ConnectSdk.Windows.Service.Capability.Listeners;
 using ConnectSdk.Windows.Service.Command;
-using UnicodeEncoding = System.Text.UnicodeEncoding;
 
 namespace ConnectSdk.Windows.Service.WebOs
 {
     class WebOsTvKeyboardInput
     {
-
-        WebOstvService service;
+        readonly WebOstvService service;
         bool waiting;
-        List<String> toSend;
+        readonly List<String> toSend;
 
-        static String KEYBOARD_INPUT = "ssap://com.webos.service.ime/registerRemoteKeyboard";
-        static String ENTER = "ENTER";
-        static String DELETE = "DELETE";
+        private const String KeyboardInputUrl = "ssap://com.webos.service.ime/registerRemoteKeyboard";
+        private const String EnterKey = "ENTER";
+        private const String DeleteKey = "DELETE";
+        public bool CanReplaceText { get; set; }
 
-        bool canReplaceText = false;
-
-        public WebOsTvKeyboardInput(WebOstvService service)
+        public WebOsTvKeyboardInput(WebOstvService service, bool canReplaceText)
         {
             this.service = service;
+            CanReplaceText = canReplaceText;
             waiting = false;
 
             toSend = new List<String>();
         }
+
 
         public void AddToQueue(String input)
         {
@@ -42,7 +40,7 @@ namespace ConnectSdk.Windows.Service.WebOs
 
         public void SendEnter()
         {
-            toSend.Add(ENTER);
+            toSend.Add(EnterKey);
             if (!waiting)
             {
                 SendData();
@@ -53,7 +51,7 @@ namespace ConnectSdk.Windows.Service.WebOs
         {
             if (toSend.Count == 0)
             {
-                toSend.Add(DELETE);
+                toSend.Add(DeleteKey);
                 if (!waiting)
                 {
                     SendData();
@@ -74,17 +72,17 @@ namespace ConnectSdk.Windows.Service.WebOs
 
             var payload = new JsonObject();
 
-            if (typeTest.Equals(ENTER))
+            if (typeTest.Equals(EnterKey))
             {
                 toSend.RemoveAt(0);
                 uri = "ssap://com.webos.service.ime/sendEnterKey";
             }
-            else if (typeTest.Equals(DELETE))
+            else if (typeTest.Equals(DeleteKey))
             {
                 uri = "ssap://com.webos.service.ime/deleteCharacters";
 
                 int count = 0;
-                while (toSend.Count > 0 && toSend[0].Equals(DELETE))
+                while (toSend.Count > 0 && toSend[0].Equals(DeleteKey))
                 {
                     toSend.RemoveAt(0);
                     count++;
@@ -104,7 +102,7 @@ namespace ConnectSdk.Windows.Service.WebOs
                 uri = "ssap://com.webos.service.ime/insertText";
                 var sb = new StringBuilder();
 
-                while (toSend.Count > 0 && !(toSend[0].Equals(DELETE) || toSend[0].Equals(ENTER)))
+                while (toSend.Count > 0 && !(toSend[0].Equals(DeleteKey) || toSend[0].Equals(EnterKey)))
                 {
                     var text = toSend[0];
                     sb.Append(text);
@@ -139,7 +137,7 @@ namespace ConnectSdk.Windows.Service.WebOs
             request.Send();
         }
 
-        public UrlServiceSubscription connect(ResponseListener listener)
+        public UrlServiceSubscription Connect(ResponseListener listener)
         {
             var responseListener = new ResponseListener();
             responseListener.Success += (sender, o) =>
@@ -152,7 +150,7 @@ namespace ConnectSdk.Windows.Service.WebOs
             };
             responseListener.Error += (sender, o) => Util.PostError(listener, o);
 
-            var subscription = new UrlServiceSubscription(service, KEYBOARD_INPUT, null, true,
+            var subscription = new UrlServiceSubscription(service, KeyboardInputUrl, null, true,
                 responseListener);
             subscription.Send();
 
@@ -169,8 +167,7 @@ namespace ConnectSdk.Windows.Service.WebOs
             var hiddenText = false;
             var focusChanged = false;
 
-            var keyboard = new TextInputStatusInfo();
-            keyboard.RawData = rawData;
+            var keyboard = new TextInputStatusInfo {RawData = rawData};
 
             try
             {
