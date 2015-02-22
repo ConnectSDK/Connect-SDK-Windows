@@ -1,10 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Windows.ApplicationModel;
 using Windows.Data.Json;
 using Windows.Networking.Sockets;
+using Windows.Security.ExchangeActiveSyncProvisioning;
 using Windows.Storage.Streams;
+using Windows.UI.Xaml;
 using ConnectSdk.Windows.Core;
+using ConnectSdk.Windows.Discovery;
 using ConnectSdk.Windows.Service.Capability.Listeners;
 using ConnectSdk.Windows.Service.Command;
 using ConnectSdk.Windows.Service.Config;
@@ -49,6 +53,8 @@ namespace ConnectSdk.Windows.Service.WebOs
             set { state = value; }
         }
 
+        private bool connected = false;
+
         private void CreateSocket()
         {
             messageWebSocket = new MessageWebSocket();
@@ -64,6 +70,10 @@ namespace ConnectSdk.Windows.Service.WebOs
 
                 }
                 OnMessage(read);
+                if (!connected)
+                {
+                    HandleConnected();
+                }
             };
             messageWebSocket.Closed += (sender, args) => OnClose(0, args.ToString());
         }
@@ -180,28 +190,29 @@ namespace ConnectSdk.Windows.Service.WebOs
 
             var type = message.GetNamedString("type");
             Object payload = message.GetNamedObject("payload");
-
-            int id;
-            try
-            {
-                id = (int)message.GetNamedNumber("id");
-            }
-            catch
-            {
-                var intstr = message.GetNamedString("id");
-                int.TryParse(intstr, out id);
-            }
             ServiceCommand request = null;
-
-
-            try
+            int id = 0;
+            if (message.ContainsKey("id"))
             {
-                request = Requests[id];
-            }
+                
+                try
+                {
+                    id = (int)message.GetNamedNumber("id");
+                }
+                catch
+                {
+                    var intstr = message.GetNamedString("id");
+                    int.TryParse(intstr, out id);
+                }
+                try
+                {
+                    request = Requests[id];
+                }
                 // ReSharper disable once EmptyGeneralCatchClause
-            catch
-            {
-                // since request is assigned to null, don't need to do anything here
+                catch
+                {
+                    // since request is assigned to null, don't need to do anything here
+                }
             }
 
             if (type.Length == 0)
@@ -237,7 +248,7 @@ namespace ConnectSdk.Windows.Service.WebOs
                         }
                     }
 
-                    if (!(request is UrlServiceSubscription))
+                    if (!(request is UrlServiceSubscription) && id >=0)
                     {
                         Requests.Remove(id);
                     }
@@ -330,17 +341,24 @@ namespace ConnectSdk.Windows.Service.WebOs
             //Context context = DiscoveryManager.getInstance().getContext();
             //PackageManager packageManager = context.getPackageManager();
 
-            //// app Id
-            //String packageName = context.getPackageName();
+            // app Id
+            
+            var packageName = Package.Current.Id.Name;
 
             //// SDK Version
-            //String sdkVersion = DiscoveryManager.CONNECT_SDK_VERSION;
+            String sdkVersion = DiscoveryManager.ConnectSdkVersion;
+
+            var deviceInfo = new EasClientDeviceInformation();
 
             //// Device Model
-            //String deviceModel = Build.MODEL;
+            var deviceModel = deviceInfo.FriendlyName;
+
+            
 
             //// OS Version
-            //String OSVersion = String.valueOf(android.os.Build.VERSION.SDK_INT);
+            var osVersion = deviceInfo.OperatingSystem;
+
+            
 
             //// resolution
             //WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
@@ -352,7 +370,7 @@ namespace ConnectSdk.Windows.Service.WebOs
             //@SuppressWarnings("deprecation")
             //int height = display.getHeight(); // deprecated, but still needed for supporting API levels 10-12
 
-            //String screenResolution = String.format("%dx%d", width, height); 
+            var screenResolution = String.Format("%{0}x%{1}", 1680, 1050); 
 
             //// app Name
             //ApplicationInfo applicationInfo;
@@ -367,38 +385,38 @@ namespace ConnectSdk.Windows.Service.WebOs
             //Locale current = context.getResources().getConfiguration().locale;
             //String appRegion = current.getDisplayCountry();
 
-            //JsonObject payload = new JsonObject();
-            //try
-            //{
-            //    payload.put("sdkVersion", sdkVersion);
-            //    payload.put("deviceModel", deviceModel);
-            //    payload.put("OSVersion", OSVersion);
-            //    payload.put("resolution", screenResolution);
-            //    payload.put("appId", packageName);
-            //    payload.put("appName", applicationName);
-            //    payload.put("appRegion", appRegion);
-            //}
-            //catch (Exception e)
-            //{
-            //    throw e;
-            //}
+            var payload = new JsonObject();
+            try
+            {
+                payload.SetNamedValue("sdkVersion", JsonValue.CreateStringValue(sdkVersion));
+                payload.SetNamedValue("deviceModel", JsonValue.CreateStringValue(deviceModel));
+                payload.SetNamedValue("OSVersion", JsonValue.CreateStringValue(osVersion));
+                //payload.SetNamedValue("resolution", JsonValue.CreateStringValue(resolution));
+                //payload.SetNamedValue("appId", JsonValue.CreateStringValue(appId));
+                payload.SetNamedValue("appName", JsonValue.CreateStringValue(packageName));
+                //payload.SetNamedValue("appRegion", JsonValue.CreateStringValue(appRegion));
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
 
-            //int dataId = this.nextRequestId++;
+            var dataId = this.nextRequestId++;
 
-            //JsonObject sendData = new JsonObject();
-            //try
-            //{
-            //    sendData.put("id", dataId);
-            //    sendData.put("type", "hello");
-            //    sendData.put("payload", payload);
-            //}
-            //catch (Exception e)
-            //{
-            //    throw e;
-            //}
+            var sendData = new JsonObject();
+            try
+            {
+                sendData.SetNamedValue("id", JsonValue.CreateNumberValue(dataId));
+                sendData.SetNamedValue("type", JsonValue.CreateStringValue("hello"));
+                sendData.SetNamedValue("payload", payload);
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
 
-            //ServiceCommand<ResponseListener<Object>> request = new ServiceCommand<ResponseListener<Object>>(this, null, sendData, true, null);
-            //this.sendCommandImmediately(request);
+            var request = new ServiceCommand(this, null, sendData, null);
+            SendCommandImmediately(request);
         }
 
         protected void SendRegister()
@@ -530,37 +548,52 @@ namespace ConnectSdk.Windows.Service.WebOs
         protected void SendCommandImmediately(ServiceCommand command)
         {
             var headers = new JsonObject();
-            var payload = (JsonObject)command.Payload;
+            var payload = (JsonObject) command.Payload;
             var payloadType = "";
 
-            if (payload != null)
+            try
             {
+                payloadType = payload.GetNamedString("type");
+            }
+            catch (Exception ex)
+            {
+                // ignore
+            }
+
+            if (payloadType == "p2p")
+            {
+                foreach (var key in payload.Select(pair => pair.Key))
+                {
+                    try
+                    {
+                        headers.Add(key, payload.GetNamedObject(key));
+                    }
+                        // ReSharper disable once EmptyGeneralCatchClause
+                    catch
+                    {
+                        // ignore
+                    }
+                }
+                SendMessage(headers, null);
+            }
+            else if (payloadType == "hello")
+            {
+                var message = payload.Stringify();
                 try
                 {
-                    payloadType = payload.GetNamedString("type");
+                    messageWebSocket.Control.MessageType = SocketMessageType.Utf8;
+                    messageWebSocket.OutputStream.FlushAsync().GetResults();
+                    if (dr == null)
+                        dr = new DataWriter(messageWebSocket.OutputStream);
+                    dr.WriteString(message);
+                    dr.StoreAsync();
                 }
-                    // ReSharper disable once EmptyGeneralCatchClause
+                // ReSharper disable once EmptyGeneralCatchClause
                 catch
                 {
+
                 }
 
-                if (payloadType == "p2p")
-                {
-                    foreach (var key in payload.Select(pair => pair.Key))
-                    {
-                        try
-                        {
-                            headers.Add(key, payload.GetNamedObject(key));
-                        }
-                            // ReSharper disable once EmptyGeneralCatchClause
-                        catch
-                        {
-                            // ignore
-                        }
-                    }
-                    SendMessage(headers, null);
-                }
-                else SendMessage(headers, payload);
             }
             else
             {
@@ -569,14 +602,17 @@ namespace ConnectSdk.Windows.Service.WebOs
                     headers.Add("type", JsonValue.CreateStringValue(command.HttpMethod));
                     headers.Add("id", JsonValue.CreateStringValue(command.RequestId.ToString()));
                     headers.Add("uri", JsonValue.CreateStringValue(command.Target));
+
                 }
-                    // ReSharper disable once EmptyGeneralCatchClause
-                catch
+                catch (Exception)
                 {
                     // TODO: handle this
                 }
+
+
                 SendMessage(headers, payload);
             }
+
         }
 
         public bool IsConnected()

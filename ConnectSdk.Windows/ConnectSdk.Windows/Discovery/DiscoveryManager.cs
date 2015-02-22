@@ -17,6 +17,7 @@ namespace ConnectSdk.Windows.Discovery
             Off,
             On
         }
+        public static String ConnectSdkVersion = "1.4";
 
         private static DiscoveryManager instance;
 

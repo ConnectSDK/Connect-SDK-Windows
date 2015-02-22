@@ -282,5 +282,22 @@ namespace ConnectSdk.Demo
                 }
             }
         }
+
+        private void BareMoon_Click(object sender, RoutedEventArgs e)
+        {
+            //var webappname = "BareMoon 2";
+            var webappname = "MediaPlayer";
+            
+            var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
+            ResponseListener listener = new ResponseListener();
+            listener.Error += (o, error) =>
+            {
+                var msg =
+                    new MessageDialog(
+                        "Something went wrong; The application could not be started. Press 'Close' to continue");
+                msg.ShowAsync();
+            };
+            webostvService.LaunchWebApp(webappname, listener);
+        }
     }
 }

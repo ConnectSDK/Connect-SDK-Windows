@@ -61,7 +61,7 @@
                         <Button Content="Channel down" Command="{Binding ExecuteCommand}" CommandParameter="28"></Button>
                         <Button Content="Home" Command="{Binding ExecuteCommand}" CommandParameter="21"></Button>
                         <Button Content="Back" Command="{Binding ExecuteCommand}" CommandParameter="23"></Button>
-
+                        <Button Content="BareMoon 2" Click="BareMoon_Click"></Button>
                     </controls:WrapPanel>
                 </DataTemplate>
             </HubSection>

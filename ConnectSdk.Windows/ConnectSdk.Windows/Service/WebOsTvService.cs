@@ -845,7 +845,7 @@ namespace ConnectSdk.Windows.Service
                 return;
             }
 
-            var webAppSession = WebAppSessions[webAppId];
+            var webAppSession = WebAppSessions.ContainsKey(webAppId)? WebAppSessions[webAppId] : null;
 
             const string uri = "ssap://webapp/launchWebApp";
             var payload = new JsonObject();
@@ -865,7 +865,10 @@ namespace ConnectSdk.Windows.Service
             var responseListener = new ResponseListener();
             responseListener.Success += (sender, o) =>
             {
-                var obj = (JsonObject)o;
+                JsonObject obj;
+                if (o is LoadEventArgs)
+                    obj = (o as LoadEventArgs).Load.GetPayload() as JsonObject;
+                else obj = (JsonObject)o;
 
                 LaunchSession launchSession;
 
@@ -886,7 +889,11 @@ namespace ConnectSdk.Windows.Service
 
                 Util.PostSuccess(listener, webAppSession);
             };
-            responseListener.Error += (sender, error) => Util.PostError(listener, error);
+            responseListener.Error += (sender, error) =>
+            {
+                Util.PostError(listener, error); 
+                
+            };
 
 
             var request = new ServiceCommand(this, uri, payload, responseListener);
