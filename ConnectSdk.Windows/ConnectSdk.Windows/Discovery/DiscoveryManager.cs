@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -23,7 +24,7 @@ namespace ConnectSdk.Windows.Discovery
 
         private IConnectableDeviceStore connectableDeviceStore;
 
-        private readonly Dictionary<string, ConnectableDevice> allDevices;
+        private readonly ConcurrentDictionary<string, ConnectableDevice> allDevices;
         private readonly Dictionary<string, ConnectableDevice> compatibleDevices;
 
         private readonly Dictionary<string, Type> deviceClasses;
@@ -69,7 +70,7 @@ namespace ConnectSdk.Windows.Discovery
         {
             this.connectableDeviceStore = connectableDeviceStore;
 
-            allDevices = new Dictionary<string, ConnectableDevice>();
+            allDevices = new ConcurrentDictionary<string, ConnectableDevice>();
             compatibleDevices = new Dictionary<string, ConnectableDevice>();
 
             deviceClasses = new Dictionary<string, Type>();
@@ -391,7 +392,7 @@ namespace ConnectSdk.Windows.Discovery
             return modelDescription != null && !modelDescription.ToUpper().Contains("WEBOS");
         }
 
-        public Dictionary<string, ConnectableDevice> GetAllDevices()
+        public ConcurrentDictionary<string, ConnectableDevice> GetAllDevices()
         {
             return allDevices;
         }
@@ -452,7 +453,7 @@ namespace ConnectSdk.Windows.Discovery
             if (device == null)
             {
                 device = new ConnectableDevice(serviceDescription) {IpAddress = serviceDescription.IpAddress};
-                allDevices.Add(serviceDescription.IpAddress, device);
+                allDevices.TryAdd(serviceDescription.IpAddress, device);
                 deviceIsNew = true;
             }
 
@@ -482,7 +483,8 @@ namespace ConnectSdk.Windows.Discovery
 
                 if (device.GetServices().Count == 0)
                 {
-                    allDevices.Remove(serviceDescription.IpAddress);
+                    ConnectableDevice dev;
+                    allDevices.TryRemove(serviceDescription.IpAddress,out dev);
 
                     HandleDeviceLoss(device);
                 }

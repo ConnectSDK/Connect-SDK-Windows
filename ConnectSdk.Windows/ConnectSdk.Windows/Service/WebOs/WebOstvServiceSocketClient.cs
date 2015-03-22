@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Windows.ApplicationModel;
 using Windows.Data.Json;
 using Windows.Networking.Sockets;
@@ -12,11 +13,13 @@ using ConnectSdk.Windows.Discovery;
 using ConnectSdk.Windows.Service.Capability.Listeners;
 using ConnectSdk.Windows.Service.Command;
 using ConnectSdk.Windows.Service.Config;
+using UnicodeEncoding = Windows.Storage.Streams.UnicodeEncoding;
 
 namespace ConnectSdk.Windows.Service.WebOs
 {
     public class WebOstvServiceSocketClient : IServiceCommandProcessor
     {
+        private StringBuilder log = new StringBuilder();
         readonly WebOstvService service;
 
         private static MessageWebSocket messageWebSocket;
@@ -67,6 +70,7 @@ namespace ConnectSdk.Windows.Service.WebOs
                 {
                     reader.UnicodeEncoding = UnicodeEncoding.Utf8;
                     read = reader.ReadString(reader.UnconsumedBufferLength);
+                    log.AppendLine(string.Format("{0} : {1} : {2}", DateTime.Now, "received", read));
 
                 }
                 OnMessage(read);
@@ -189,7 +193,15 @@ namespace ConnectSdk.Windows.Service.WebOs
                 return;
 
             var type = message.GetNamedString("type");
-            Object payload = message.GetNamedObject("payload");
+            Object payload =  1;
+            try
+            {
+                payload = message.GetNamedObject("payload");
+            }
+            catch
+            {
+                // we will fail when the type is error because payload is not retrievable
+            }
             ServiceCommand request = null;
             int id = 0;
             if (message.ContainsKey("id"))
@@ -248,7 +260,7 @@ namespace ConnectSdk.Windows.Service.WebOs
                         }
                     }
 
-                    if (!(request is UrlServiceSubscription) && id >=0)
+                    if (!(request is UrlServiceSubscription) && message.ContainsKey("pairingType"))
                     {
                         Requests.Remove(id);
                     }
@@ -295,9 +307,9 @@ namespace ConnectSdk.Windows.Service.WebOs
                 Util.PostError(request.ResponseListenerValue,
                     new ServiceCommandError(errorCode, payload));
 
-                if (!(request is UrlServiceSubscription))
-                    Requests.
-                        Remove(id);
+                if (errorCode != 409)
+                    if (!(request is UrlServiceSubscription))
+                        Requests.Remove(id);
 
                 if (errorCode == 403)
                 {
@@ -638,6 +650,7 @@ namespace ConnectSdk.Windows.Service.WebOs
             if (IsConnected())
             {
                 var message = packet.Stringify();
+                log.AppendLine(string.Format("{0} : {1} : {2}", DateTime.Now, "sent", message));
                 try
                 {
                     messageWebSocket.Control.MessageType = SocketMessageType.Utf8;
@@ -670,12 +683,12 @@ namespace ConnectSdk.Windows.Service.WebOs
             if (Listener != null)
                 Listener.OnCloseWithError(error);
 
-            for (int i = 0; i < Requests.Count; i++)
+            foreach (var serviceCommand in Requests)
             {
-                var request = Requests[i];
-
+                var request = serviceCommand.Value;
                 if (request != null)
                     Util.PostError(request.ResponseListenerValue, new ServiceCommandError(0, "connection lost"));
+
             }
 
             Requests.Clear();

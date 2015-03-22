@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -20,8 +21,8 @@ namespace ConnectSdk.Windows.Discovery.Provider
         //private readonly Dictionary<string, ServiceDescription> services;
         private readonly List<IDiscoveryProviderListener> serviceListeners;
 
-        private readonly Dictionary<string, ServiceDescription> foundServices = new Dictionary<string, ServiceDescription>();
-        private readonly Dictionary<string, ServiceDescription> discoveredServices = new Dictionary<string, ServiceDescription>();
+        private readonly ConcurrentDictionary<string, ServiceDescription> foundServices = new ConcurrentDictionary<string, ServiceDescription>();
+        private readonly ConcurrentDictionary<string, ServiceDescription> discoveredServices = new ConcurrentDictionary<string, ServiceDescription>();
 
         private readonly List<DiscoveryFilter> serviceFilters;
         private bool isRunning;
@@ -96,8 +97,9 @@ namespace ConnectSdk.Windows.Discovery.Provider
                     NotifyListenersOfLostService(service);
                 }
 
+                ServiceDescription fsrv = null;
                 if (foundServices.ContainsKey(key))
-                    foundServices.Remove(key);
+                    foundServices.TryRemove(key, out fsrv);
             }
             Rescan();
         }
@@ -209,7 +211,8 @@ namespace ConnectSdk.Windows.Discovery.Provider
 
                 if (service != null)
                 {
-                    foundServices.Remove(uuid);
+                    ServiceDescription fsrv = null;
+                    foundServices.TryRemove(uuid, out fsrv);
                     NotifyListenersOfLostService(service);
                 }
             }
@@ -233,9 +236,9 @@ namespace ConnectSdk.Windows.Discovery.Provider
                     var u = new Uri(location);
                     foundService.IpAddress = u.DnsSafeHost;//pd.dp.IpAddress.getHostAddress();
                     foundService.Port = u.Port;
-
+                    
                     if (!discoveredServices.ContainsKey(uuid))
-                        discoveredServices.Add(uuid, foundService);
+                        discoveredServices.TryAdd(uuid, foundService);
 
                     GetLocationData(location, uuid, serviceFilter);
                 }
@@ -273,14 +276,14 @@ namespace ConnectSdk.Windows.Discovery.Provider
                         service.ResponseHeaders = device.Headers;
                         service.LocationXml = device.LocationXml;
 
-                        foundServices.Add(uuid, service);
+                        foundServices.TryAdd(uuid, service);
 
                         NotifyListenersOfNewService(service);
                     }
                 }
             }
-
-            discoveredServices.Remove(uuid);
+            ServiceDescription srv;
+            discoveredServices.TryRemove(uuid, out srv);
         }
 
         public string ServiceIdForFilter(string filter)

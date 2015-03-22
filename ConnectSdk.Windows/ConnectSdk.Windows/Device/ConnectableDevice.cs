@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -33,7 +34,7 @@ namespace ConnectSdk.Windows.Device
 
         private string id;
         private List<IConnectableDeviceListener> listeners = new List<IConnectableDeviceListener>();
-        private readonly Dictionary<string, DeviceService> services = new Dictionary<string, DeviceService>();
+        private readonly ConcurrentDictionary<string, DeviceService> services = new ConcurrentDictionary<string, DeviceService>();
 
         public bool FeaturesReady = false;
 
@@ -73,7 +74,7 @@ namespace ConnectSdk.Windows.Device
 
         public ConnectableDevice()
         {
-            services = new Dictionary<String, DeviceService>();
+            services = new ConcurrentDictionary<String, DeviceService>();
         }
 
         public ConnectableDevice(string ipAddress, string friendlyName, string modelName, string modelNumber)
@@ -143,7 +144,7 @@ namespace ConnectSdk.Windows.Device
             foreach (var listener in listeners)
                 listener.OnCapabilityUpdated(this, added, new List<string>());
 
-            services.Add(service.ServiceName, service);
+            services.TryAdd(service.ServiceName, service);
         }
 
         /// <summary>
@@ -167,8 +168,8 @@ namespace ConnectSdk.Windows.Device
                 return;
 
             service.Disconnect();
-
-            services.Remove(serviceId);
+            DeviceService srv = null;
+            services.TryRemove(serviceId, out srv);
 
             var removed = GetMismatchCapabilities(service.Capabilities, GetCapabilities());
 

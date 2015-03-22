@@ -23,6 +23,7 @@ using ConnectSdk.Windows.Service;
 using ConnectSdk.Windows.Service.Capability.Listeners;
 using ConnectSdk.Windows.Service.Command;
 using ConnectSdk.Windows.Service.Config;
+using ConnectSdk.Windows.Service.Sessions;
 using UpdateControls.Collections;
 
 namespace ConnectSdk.Demo
@@ -283,10 +284,11 @@ namespace ConnectSdk.Demo
             }
         }
 
-        private void BareMoon_Click(object sender, RoutedEventArgs e)
+        WebOsWebAppSession launchSession = null;
+        private void OpenWebApp_Click(object sender, RoutedEventArgs e)
         {
             //var webappname = "BareMoon 2";
-            var webappname = "MediaPlayer";
+            var webappname = "YouTube";
             
             var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
             ResponseListener listener = new ResponseListener();
@@ -297,7 +299,52 @@ namespace ConnectSdk.Demo
                         "Something went wrong; The application could not be started. Press 'Close' to continue");
                 msg.ShowAsync();
             };
+
+            listener.Success += (o, param) =>
+            {
+                var v = param as LoadEventArgs;
+                if (v != null)
+                    try
+                    {
+                        launchSession = v.Load.GetPayload() as WebOsWebAppSession;
+                        
+                        
+                    }
+                    catch (Exception)
+                    {
+                        
+                        throw;
+                    }
+                    
+            };
+
             webostvService.LaunchWebApp(webappname, listener);
+
+            //webostvService.
+
+            //webostvService.CloseWebApp();
+        }
+
+        private void CloserWebApp_Click(object sender, RoutedEventArgs e)
+        {
+            var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
+            ResponseListener listener = new ResponseListener();
+            listener.Error += (o, error) =>
+            {
+                var msg =
+                    new MessageDialog(
+                        "Something went wrong; The application could not be stopped. Press 'Close' to continue");
+                msg.ShowAsync();
+            };
+
+            listener.Success += (o, param) =>
+            {
+                //var v = param as LoadEventArgs;
+                //if (v != null)
+                //    launchSession = v.Load.GetPayload() as LaunchSession;
+            };
+
+            webostvService.CloseWebApp(launchSession.LaunchSession, listener);
         }
     }
 }

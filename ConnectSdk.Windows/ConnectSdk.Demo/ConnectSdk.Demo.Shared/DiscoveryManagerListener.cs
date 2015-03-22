@@ -20,7 +20,7 @@ namespace ConnectSdk.Demo.Demo
 
         public void OnDeviceUpdated(DiscoveryManager manager, ConnectableDevice device)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         public void OnDeviceRemoved(DiscoveryManager manager, ConnectableDevice device)
