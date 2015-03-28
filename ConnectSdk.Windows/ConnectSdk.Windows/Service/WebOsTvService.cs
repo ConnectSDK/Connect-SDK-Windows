@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Windows.Data.Json;
 using Windows.Foundation;
 using ConnectSdk.Windows.Core;
@@ -70,7 +71,8 @@ namespace ConnectSdk.Windows.Service
             WebAppSessions = new Dictionary<String, WebOsWebAppSession>();
         }
 
-        public WebOstvService(ServiceConfig serviceConfig) : base(serviceConfig)
+        public WebOstvService(ServiceConfig serviceConfig)
+            : base(serviceConfig)
         {
         }
 
@@ -199,7 +201,7 @@ namespace ConnectSdk.Windows.Service
         {
             const string uri = "ssap://audio/setVolume";
             var payload = new JsonObject();
-            var intVolume = (int) Math.Round(volume*100.0f);
+            var intVolume = (int)Math.Round(volume * 100.0f);
 
             try
             {
@@ -227,9 +229,9 @@ namespace ConnectSdk.Windows.Service
             {
                 try
                 {
-                    var jsonObj = (JsonObject) o;
-                    var iVolume = (int) jsonObj.GetNamedNumber("volume");
-                    var fVolume = (float) (iVolume/100.0);
+                    var jsonObj = (JsonObject)o;
+                    var iVolume = (int)jsonObj.GetNamedNumber("volume");
+                    var fVolume = (float)(iVolume / 100.0);
 
                     Util.PostSuccess(listener, fVolume);
                 }
@@ -276,7 +278,7 @@ namespace ConnectSdk.Windows.Service
             {
                 try
                 {
-                    var jsonObj = (JsonObject) o;
+                    var jsonObj = (JsonObject)o;
                     var isMute = jsonObj.GetNamedBoolean("mute");
                     Util.PostSuccess(listener, isMute);
                 }
@@ -845,7 +847,7 @@ namespace ConnectSdk.Windows.Service
                 return;
             }
 
-            var webAppSession = WebAppSessions.ContainsKey(webAppId)? WebAppSessions[webAppId] : null;
+            var webAppSession = WebAppSessions.ContainsKey(webAppId) ? WebAppSessions[webAppId] : null;
 
             const string uri = "ssap://webapp/launchWebApp";
             var payload = new JsonObject();
@@ -883,17 +885,16 @@ namespace ConnectSdk.Windows.Service
                 }
 
                 launchSession.Service = this;
-                launchSession.SessionId = obj.GetNamedString("sessionId");
-                launchSession.SessionType = LaunchSessionType.WebApp;
-                launchSession.RawData = obj;
+                if (obj != null)
+                {
+                    launchSession.SessionId = obj.GetNamedString("sessionId");
+                    launchSession.SessionType = LaunchSessionType.WebApp;
+                    launchSession.RawData = obj;
+                }
 
                 Util.PostSuccess(listener, webAppSession);
             };
-            responseListener.Error += (sender, error) =>
-            {
-                Util.PostError(listener, error); 
-                
-            };
+            responseListener.Error += (sender, error) => Util.PostError(listener, error);
 
 
             var request = new ServiceCommand(this, uri, payload, responseListener);
@@ -919,14 +920,14 @@ namespace ConnectSdk.Windows.Service
                 listener.Success += (sender, o) =>
                 {
                     var appInfo = o as AppInfo;
-                    if (appInfo.Id.IndexOf(webAppId) != -1)
+                    if (appInfo != null && appInfo.Id.IndexOf(webAppId, StringComparison.Ordinal) != -1)
                     {
                         LaunchSession launchSession = LaunchSession.LaunchSessionForAppId(webAppId);
                         launchSession.SessionType = LaunchSessionType.WebApp;
                         launchSession.Service = this;
                         launchSession.RawData = appInfo.RawData;
 
-                        WebOsWebAppSession webAppSession = WebAppSessionForLaunchSession(launchSession);
+                        var webAppSession = WebAppSessionForLaunchSession(launchSession);
 
                         Util.PostSuccess(listener, webAppSession);
                     }
@@ -984,25 +985,25 @@ namespace ConnectSdk.Windows.Service
                     throw ex;
                 }
 
-                    var responseListener = new ResponseListener();
+                var responseListener = new ResponseListener();
 
-                    listener.Success += (sender, o) =>
-                    {
-                        webAppSession.DisconnectFromWebApp();
+                responseListener.Success += (sender, o) =>
+                {
+                    webAppSession.DisconnectFromWebApp();
 
-                        if (Listener != null)
-                            listener.OnSuccess(o);
-                    };
-                    listener.Error += (sender, error) =>
-                    {
-                        webAppSession.DisconnectFromWebApp();
+                    if (Listener != null)
+                        listener.OnSuccess(o);
+                };
+                responseListener.Error += (sender, error) =>
+                {
+                    webAppSession.DisconnectFromWebApp();
 
-                        if (Listener != null)
-                            listener.OnError(error);
-                    };
+                    if (Listener != null)
+                        listener.OnError(error);
+                };
 
 
-                    webAppSession.SendMessage(closeCommand, new ResponseListener());
+                webAppSession.SendMessage(closeCommand, new ResponseListener());
             }
             else
             {
@@ -1029,30 +1030,262 @@ namespace ConnectSdk.Windows.Service
             }
         }
 
-        public void ConnectToWebApp(WebOsWebAppSession webAppSession, bool joinOnly,
-            ResponseListener connectionListener)
+        public void ConnectToWebApp(WebOsWebAppSession webAppSession, bool joinOnly, ResponseListener connectionListener)
         {
-            throw new NotImplementedException();
+            if (WebAppSessions == null)
+                WebAppSessions = new Dictionary<string, WebOsWebAppSession>();
+
+            if (AppToAppIdMappings == null)
+                AppToAppIdMappings = new Dictionary<string, string>();
+
+            if (webAppSession == null || webAppSession.LaunchSession == null)
+            {
+                Util.PostError(connectionListener, new ServiceCommandError(0, "You must provide a valid LaunchSession object"));
+
+                return;
+            }
+
+            var tappId = webAppSession.LaunchSession.AppId;
+
+            var tidKey = webAppSession.LaunchSession.SessionType == LaunchSessionType.WebApp ? "webAppId" : "appId";
+
+            if (string.IsNullOrEmpty(tappId))
+            {
+                Util.PostError(connectionListener, new ServiceCommandError(-1, "You must provide a valid web app session"));
+
+                return;
+            }
+
+            var appId = tappId;
+            var idKey = tidKey;
+
+            const string uri = "ssap://webapp/connectToApp";
+            var payload = new JsonObject();
+
+            try
+            {
+                payload.Add(idKey, JsonValue.CreateStringValue(appId));
+
+            }
+            // ReSharper disable once EmptyGeneralCatchClause
+            catch (Exception)
+            {
+
+            }
+
+
+            var listener = new ResponseListener();
+
+            listener.Success += (sender, o) =>
+            {
+                var loadEventArgs = o as LoadEventArgs;
+                if (loadEventArgs != null)
+                {
+                    var jsonObj = (JsonObject)(loadEventArgs.Load.GetPayload());
+                    var state = jsonObj.GetNamedString("state");
+                    if (!state.Equals("Connected", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (joinOnly && state.Equals("WAITING_FOR_APP", StringComparison.OrdinalIgnoreCase))
+                        {
+                            Util.PostError(connectionListener,
+                                new ServiceCommandError(0, "Web app is not currently running"));
+                        }
+                        return;
+                    }
+                    var fullAppId = jsonObj.GetNamedString("appId");
+                    if (!string.IsNullOrEmpty(fullAppId))
+                    {
+                        if (webAppSession.LaunchSession.SessionType == LaunchSessionType.WebApp)
+                            AppToAppIdMappings.Add(fullAppId, appId);
+                        webAppSession.SetFullAppId(fullAppId);
+                    }
+                }
+                if (connectionListener != null)
+                    connectionListener.OnSuccess(o);
+            };
+            listener.Error += (sender, error) =>
+            {
+                webAppSession.DisconnectFromWebApp();
+                var appChannelDidClose = false;
+                if (error != null && error.GetPayload() != null)
+                    appChannelDidClose = error.GetPayload().ToString().Contains("app channel closed");
+
+                if (appChannelDidClose)
+                {
+                    if (webAppSession.WebAppSessionListener != null)
+                    {
+                        webAppSession.WebAppSessionListener.OnWebAppSessionDisconnect(webAppSession);
+                    }
+                }
+                else
+                {
+                    Util.PostError(connectionListener, error);
+
+                }
+            };
+
+
+            webAppSession.AppToAppSubscription = new UrlServiceSubscription(this, uri, payload, true, listener);
+            webAppSession.AppToAppSubscription.Subscribe();
+        }
+
+        private void NotifyPairingRequired()
+        {
+            if (Listener != null)
+            {
+                Listener.OnPairingRequired(this, PairingType.FIRST_SCREEN, null);
+            }
         }
 
         public void PinWebApp(string webAppId, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(webAppId))
+            {
+                if (listener != null)
+                {
+                    listener.OnError(new ServiceCommandError(-1, "You must provide a valid web app id"));
+                }
+                return;
+            }
+
+            const string uri = "ssap://webapp/pinWebApp";
+            var payload = new JsonObject();
+
+            try
+            {
+                payload.Add("webAppId", JsonValue.CreateStringValue(webAppId));
+            }
+            // ReSharper disable once EmptyGeneralCatchClause
+            catch (Exception)
+            {
+
+            }
+
+            var responseListener = new ResponseListener();
+
+            responseListener.Success += (sender, o) =>
+            {
+                var loadEventArgs = o as LoadEventArgs;
+                if (loadEventArgs == null) return;
+                var jsonObj = (JsonObject)(loadEventArgs.Load.GetPayload());
+                if (jsonObj.ContainsKey("pairingType"))
+                {
+                    NotifyPairingRequired();
+                }
+                else
+                {
+                    listener.OnSuccess(o);
+                }
+            };
+
+            responseListener.Error += (sender, error) => Util.PostError(listener, error);
+
+            ServiceCommand request =new UrlServiceSubscription(this, uri, payload, true, responseListener);
+            request.Send();
+
         }
 
         public void UnPinWebApp(string webAppId, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(webAppId))
+            {
+                if (listener != null)
+                {
+                    listener.OnError(new ServiceCommandError(-1, "You must provide a valid web app id"));
+                }
+                return;
+            }
+
+            const string uri = "ssap://webapp/removePinnedWebApp";
+            var payload = new JsonObject();
+
+            try
+            {
+                payload.Add("webAppId", JsonValue.CreateStringValue(webAppId));
+            }
+            // ReSharper disable once EmptyGeneralCatchClause
+            catch (Exception)
+            {
+
+            }
+
+            var responseListener = new ResponseListener();
+
+            responseListener.Success += (sender, o) =>
+            {
+                var loadEventArgs = o as LoadEventArgs;
+                if (loadEventArgs == null) return;
+                var jsonObj = (JsonObject)(loadEventArgs.Load.GetPayload());
+                if (jsonObj.ContainsKey("pairingType"))
+                {
+                    NotifyPairingRequired();
+                }
+                else
+                {
+                    listener.OnSuccess(o);
+                }
+            };
+
+            responseListener.Error += (sender, error) => Util.PostError(listener, error);
+
+            ServiceCommand request = new UrlServiceSubscription(this, uri, payload, true, responseListener);
+            request.Send();
         }
 
-        public void IsWebAppPinned(string webAppId, ResponseListener listener)
+        public ServiceCommand IsWebAppPinned(bool isSubscription, string webAppId, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(webAppId))
+            {
+                if (listener != null)
+                {
+                    listener.OnError(new ServiceCommandError(-1, "You must provide a valid web app id"));
+                }
+                return null;
+            }
+
+            const string uri = "ssap://webapp/isWebAppPinned";
+            var payload = new JsonObject();
+
+            try
+            {
+                payload.Add("webAppId", JsonValue.CreateStringValue(webAppId));
+            }
+            // ReSharper disable once EmptyGeneralCatchClause
+            catch (Exception)
+            {
+
+            }
+
+            var responseListener = new ResponseListener();
+
+            responseListener.Success += (sender, o) =>
+            {
+                var loadEventArgs = o as LoadEventArgs;
+                if (loadEventArgs == null) return;
+                var jsonObj = (JsonObject)(loadEventArgs.Load.GetPayload());
+
+                var status = jsonObj.GetNamedBoolean("pinned");
+
+                if (listener != null)
+                    listener.OnSuccess(status);
+            };
+
+            responseListener.Error += (sender, error) => Util.PostError(listener, error);
+
+            var request = isSubscription ? new UrlServiceSubscription(this, uri, payload, true, responseListener) : new ServiceCommand(this, uri, payload, responseListener);
+
+            request.Send();
+            return request;
+        }
+
+        public void IsWebAppPinned(String webAppId, ResponseListener listener)
+        {
+            IsWebAppPinned(false, webAppId, listener);
         }
 
         public IServiceSubscription SubscribeIsWebAppPinned(string webAppId, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            return (UrlServiceSubscription)IsWebAppPinned(true, webAppId, listener);
         }
 
         private WebOsWebAppSession WebAppSessionForLaunchSession(LaunchSession launchSession)
@@ -1080,43 +1313,31 @@ namespace ConnectSdk.Windows.Service
             if (permissions != null)
                 return permissions;
 
-            var defaultPermissions = new List<String>();
-            foreach (String perm in WebOstvServiceOpenPermissionList)
-            {
-                defaultPermissions.Add(perm);
-            }
+            var defaultPermissions = WebOstvServiceOpenPermissionList.ToList();
 
             if (DiscoveryManager.GetInstance().PairingLevel == DiscoveryManager.PairingLevelEnum.On)
             {
-                foreach (String perm in WebOstvServiceProtectedPermissionList)
-                {
-                    defaultPermissions.Add(perm);
-                }
+                defaultPermissions.AddRange(WebOstvServiceProtectedPermissionList);
 
-                foreach (String perm in WebOstvServicePersonalActivityPermissionList)
-                {
-                    defaultPermissions.Add(perm);
-                }
+                defaultPermissions.AddRange(WebOstvServicePersonalActivityPermissionList);
             }
             permissions = defaultPermissions;
             return permissions;
         }
 
-        public void SetPermissions(List<String> permissions)
+        public void SetPermissions(List<String> ppermissions)
         {
-            this.permissions = permissions;
+            permissions = ppermissions;
 
             var config = (WebOSTVServiceConfig)serviceConfig;
 
-            if (config.getClientKey() != null)
-            {
-                config.setClientKey(null);
+            if (config.getClientKey() == null) return;
+            config.setClientKey(null);
 
-                if (IsConnected())
-                {
-                    //Log.w("Connect SDK", "Permissions changed -- you will need to re-pair to the TV.");
-                    Disconnect();
-                }
+            if (IsConnected())
+            {
+                //Log.w("Connect SDK", "Permissions changed -- you will need to re-pair to the TV.");
+                Disconnect();
             }
         }
     }

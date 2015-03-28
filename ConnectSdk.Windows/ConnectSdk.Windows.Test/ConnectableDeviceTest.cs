@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Windows.Devices.Enumeration;
-using ConnectSdk.Windows.Device;
-using ConnectSdk.Windows.Service;
+﻿using ConnectSdk.Windows.Device;
 using ConnectSdk.Windows.Service.Capability;
-using FakeItEasy;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 
 namespace ConnectSdk.Windows.Test

@@ -54,16 +54,23 @@
         <Hub Grid.Row="1">
             <HubSection Header="Buttons">
                 <DataTemplate>
-                    <controls:WrapPanel Orientation="Horizontal" Width="400">
-                        <Button Content="Volume up" Command="{Binding ExecuteCommand}" CommandParameter="24"></Button>
-                        <Button Content="Volume down" Command="{Binding ExecuteCommand}" CommandParameter="25"></Button>
-                        <Button Content="Channel up" Command="{Binding ExecuteCommand}" CommandParameter="27"></Button>
-                        <Button Content="Channel down" Command="{Binding ExecuteCommand}" CommandParameter="28"></Button>
-                        <Button Content="Home" Command="{Binding ExecuteCommand}" CommandParameter="21"></Button>
-                        <Button Content="Back" Command="{Binding ExecuteCommand}" CommandParameter="23"></Button>
-                        <Button Content="Open webapp" Click="OpenWebApp_Click"></Button>
-                        <Button Content="Close webapp" Click="CloserWebApp_Click"></Button>
-                    </controls:WrapPanel>
+                    <StackPanel>
+                        <controls:WrapPanel Orientation="Horizontal" Width="400">
+                            <Button Content="Volume up" Command="{Binding ExecuteCommand}" CommandParameter="24"></Button>
+                            <Button Content="Volume down" Command="{Binding ExecuteCommand}" CommandParameter="25"></Button>
+                            <Button Content="Channel up" Command="{Binding ExecuteCommand}" CommandParameter="27"></Button>
+                            <Button Content="Channel down" Command="{Binding ExecuteCommand}" CommandParameter="28"></Button>
+                            <Button Content="Home" Command="{Binding ExecuteCommand}" CommandParameter="21"></Button>
+                            <Button Content="Back" Command="{Binding ExecuteCommand}" CommandParameter="23"></Button>
+                        </controls:WrapPanel>
+                        <controls:WrapPanel Orientation="Horizontal" Width="400">
+                            <TextBox Margin="5" x:Name="WebAppMessageBox"></TextBox>
+                            <Button Content="Send message" Click="SendMessage_Click"></Button>
+                            <Button Content="Open webapp" Click="OpenWebApp_Click"></Button>
+                            <Button Content="Close webapp" Click="CloserWebApp_Click"></Button>
+                            
+                        </controls:WrapPanel>
+                    </StackPanel>
                 </DataTemplate>
             </HubSection>
             <HubSection Header="Scrollpad">

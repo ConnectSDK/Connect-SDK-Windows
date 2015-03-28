@@ -25,6 +25,7 @@ using ConnectSdk.Windows.Service.Command;
 using ConnectSdk.Windows.Service.Config;
 using ConnectSdk.Windows.Service.Sessions;
 using UpdateControls.Collections;
+using WinRTXamlToolkit.Controls;
 
 namespace ConnectSdk.Demo
 {
@@ -288,7 +289,7 @@ namespace ConnectSdk.Demo
         private void OpenWebApp_Click(object sender, RoutedEventArgs e)
         {
             //var webappname = "BareMoon 2";
-            var webappname = "YouTube";
+            var webappname = "SampleWebApp";
             
             var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
             ResponseListener listener = new ResponseListener();
@@ -345,6 +346,33 @@ namespace ConnectSdk.Demo
             };
 
             webostvService.CloseWebApp(launchSession.LaunchSession, listener);
+        }
+
+        private void SendMessage_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            if (button != null)
+            {
+                var wrapPanel = button.Parent as WrapPanel;
+                if (wrapPanel != null)
+                {
+                    var webAppMessageBox = wrapPanel.Children[0] as TextBox;
+                    
+                    var listener = new ResponseListener();
+                    listener.Error += (o, error) =>
+                    {
+                        var msg =
+                            new MessageDialog(
+                                "Something went wrong; Could not send message. Press 'Close' to continue");
+                        msg.ShowAsync();
+                    };
+
+                    listener.Success += (o, param) =>
+                    {
+                    };
+                    if (webAppMessageBox != null) launchSession.SendMessage(webAppMessageBox.Text, listener);
+                }
+            }
         }
     }
 }
