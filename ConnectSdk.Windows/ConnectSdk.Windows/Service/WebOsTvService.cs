@@ -59,6 +59,7 @@ namespace ConnectSdk.Windows.Service
         public Dictionary<string, WebOsWebAppSession> WebAppSessions { get; set; }
 
         private WebOstvServiceSocketClient socket;
+        WebOstvMouseSocketConnection mouseSocket;
 
         private List<String> permissions;
 
@@ -742,22 +743,34 @@ namespace ConnectSdk.Windows.Service
 
         public IPowerControl GetPowerControl()
         {
-            throw new NotImplementedException();
+            return this;
         }
 
         public CapabilityPriorityLevel GetPowerControlCapabilityLevel()
         {
-            throw new NotImplementedException();
+            return CapabilityPriorityLevel.High;
         }
 
         public void PowerOff(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            var responseListener = new ResponseListener();
+            responseListener.Success += (sender, o) =>
+            {
+
+            };
+            responseListener.Error += (sender, error) =>
+            {
+
+            };
+            const string uri = "ssap://system/turnOff";
+            var request = new ServiceCommand(this, uri, null, responseListener);
+
+            request.Send();
         }
 
         public void PowerOn(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            Util.PostError(listener, ServiceCommandError.NotSupported());
         }
 
         #endregion
@@ -766,55 +779,116 @@ namespace ConnectSdk.Windows.Service
 
         public IKeyControl GetKeyControl()
         {
-            throw new NotImplementedException();
+            return this;
         }
 
         public CapabilityPriorityLevel GetKeyControlCapabilityLevel()
         {
-            throw new NotImplementedException();
+            return CapabilityPriorityLevel.High;
+        }
+
+        private void SendSpecialKey(String key)
+        {
+            if (mouseSocket != null)
+            {
+                mouseSocket.Button(key);
+            }
+            else
+            {
+                var listener = new ResponseListener();
+                listener.Success += (sender, o) =>
+                {
+                    JsonObject obj;
+                    if (o is LoadEventArgs)
+                        obj = (o as LoadEventArgs).Load.GetPayload() as JsonObject;
+                    else obj = (JsonObject)o;
+
+                    if (obj != null)
+                    {
+                        var socketPath = obj.GetNamedString("socketPath");
+                        mouseSocket = new WebOstvMouseSocketConnection(socketPath);
+                    }
+
+                    mouseSocket.Button(key);
+                };
+                listener.Error += (sender, error) =>
+                {
+
+                };
+
+                ConnectMouse();
+            }
         }
 
         public void Up(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            SendSpecialKey("UP");
         }
 
         public void Down(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            SendSpecialKey("DOWN");
         }
 
         public void Left(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            SendSpecialKey("LEFT");
         }
 
         public void Right(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            SendSpecialKey("RIGHT");
         }
 
         public void Ok(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            if (mouseSocket != null)
+            {
+                mouseSocket.Click();
+            }
+            else
+            {
+                var listener2 = new ResponseListener();
+                listener2.Success += (sender, o) =>
+                {
+                    JsonObject obj;
+                    if (o is LoadEventArgs)
+                        obj = (o as LoadEventArgs).Load.GetPayload() as JsonObject;
+                    else obj = (JsonObject)o;
+
+                    if (obj != null)
+                    {
+                        var socketPath = obj.GetNamedString("socketPath");
+                        mouseSocket = new WebOstvMouseSocketConnection(socketPath);
+                    }
+
+                    mouseSocket.Click();
+                };
+                listener2.Error += (sender, error) =>
+                {
+
+                };
+
+                ConnectMouse();
+            }
         }
 
         public void Back(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            SendSpecialKey("BACK");
         }
 
         public void Home(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            SendSpecialKey("HOME");
         }
 
         public void SendKeyCode(int keyCode, ResponseListener pListener)
         {
-            throw new NotImplementedException();
+            Util.PostError(pListener, ServiceCommandError.NotSupported());
         }
 
-        #endregion    }
+        #endregion
 
         #region Web App Launcher
 
@@ -1180,7 +1254,7 @@ namespace ConnectSdk.Windows.Service
 
             responseListener.Error += (sender, error) => Util.PostError(listener, error);
 
-            ServiceCommand request =new UrlServiceSubscription(this, uri, payload, true, responseListener);
+            ServiceCommand request = new UrlServiceSubscription(this, uri, payload, true, responseListener);
             request.Send();
 
         }
