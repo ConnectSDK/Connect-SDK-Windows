@@ -108,7 +108,7 @@ namespace ConnectSdk.Demo
                     model.Tap();
                 }
             }
-          
+
         }
 
         /// <summary>
@@ -213,9 +213,9 @@ namespace ConnectSdk.Demo
             model.TextInput = "";
             // ugly code but since we use the control in a datatemplate we have to find it as opposed to refference it
             var textBoxToSend = ((e.OriginalSource as Button).Parent as StackPanel).Children[0] as TextBox;
-;
+            ;
             if (textBoxToSend == null) return;
-            
+
             var binding = textBoxToSend.GetBindingExpression(TextBox.TextProperty);
             if (binding != null) binding.UpdateSource();
             textBoxToSend.Text = "";
@@ -239,7 +239,7 @@ namespace ConnectSdk.Demo
             }
             catch (Exception e)
             {
-                
+
             }
         }
 
@@ -290,9 +290,36 @@ namespace ConnectSdk.Demo
         {
             //var webappname = "BareMoon 2";
             var webappname = "SampleWebApp";
-            
+
             var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
-            ResponseListener listener = new ResponseListener();
+
+            var listener = new ResponseListener
+                (
+                (loadEventArg) =>
+                {
+                    var v = loadEventArg as LoadEventArgs;
+                    if (v != null)
+                        try
+                        {
+                            launchSession = v.Load.GetPayload() as WebOsWebAppSession;
+                        }
+                        catch (Exception)
+                        {
+
+                            throw;
+                        }
+                },
+                (serviceCommandError) =>
+                {
+                    var msg =
+                        new MessageDialog(
+                            "Something went wrong; The application could not be started. Press 'Close' to continue");
+                    msg.ShowAsync();
+                }
+                );
+
+
+/*            ResponseListener listener = new ResponseListener();
             listener.Error += (o, error) =>
             {
                 var msg =
@@ -308,26 +335,27 @@ namespace ConnectSdk.Demo
                     try
                     {
                         launchSession = v.Load.GetPayload() as WebOsWebAppSession;
-                        
-                        
+
+
                     }
                     catch (Exception)
                     {
-                        
+
                         throw;
                     }
-                    
-            };
 
+            };
+*/
             webostvService.LaunchWebApp(webappname, listener);
 
-            //webostvService.
-
-            //webostvService.CloseWebApp();
         }
 
         private void CloserWebApp_Click(object sender, RoutedEventArgs e)
         {
+
+
+
+
             var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
             ResponseListener listener = new ResponseListener();
             listener.Error += (o, error) =>
@@ -357,7 +385,7 @@ namespace ConnectSdk.Demo
                 if (wrapPanel != null)
                 {
                     var webAppMessageBox = wrapPanel.Children[0] as TextBox;
-                    
+
                     var listener = new ResponseListener();
                     listener.Error += (o, error) =>
                     {
@@ -373,6 +401,24 @@ namespace ConnectSdk.Demo
                     if (webAppMessageBox != null) launchSession.SendMessage(webAppMessageBox.Text, listener);
                 }
             }
+        }
+
+        private void Test(object sender, RoutedEvent e)
+        {
+
+            var listener = new ResponseListener
+            (
+                (loadEventArg) =>
+                {
+
+                },
+                (serviceCommandError) =>
+                {
+
+                }
+            );
+
+
         }
     }
 }

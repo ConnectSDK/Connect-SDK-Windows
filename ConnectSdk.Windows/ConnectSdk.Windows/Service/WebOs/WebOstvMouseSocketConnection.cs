@@ -172,10 +172,27 @@ namespace ConnectSdk.Windows.Service.WebOs
 
         private void Send(string sb)
         {
-            if (messageWriter == null)
-                messageWriter = new DataWriter(ws.OutputStream);
-            messageWriter.WriteString(sb);
-            messageWriter.StoreAsync().GetResults();
+            try
+            {
+                if (isConnected)
+                {
+                    ws.Control.MessageType = SocketMessageType.Utf8;
+                    ws.OutputStream.FlushAsync().GetResults();
+                    if (messageWriter == null)
+                        messageWriter = new DataWriter(ws.OutputStream);
+                    messageWriter.WriteString(sb);
+                    messageWriter.StoreAsync();
+                }
+                else
+                {
+                    
+                }
+            }
+            catch (Exception)
+            {
+                
+                throw;
+            }
         }
 
         public void Move(double dx, double dy)

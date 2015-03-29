@@ -670,7 +670,36 @@ namespace ConnectSdk.Windows.Service
 
         public void ConnectMouse()
         {
-            throw new NotImplementedException();
+
+            var listener = new ResponseListener
+                (
+                (loadEventArg) =>
+                {
+                    JsonObject obj;
+                    if (loadEventArg is LoadEventArgs)
+                        obj = (loadEventArg as LoadEventArgs).Load.GetPayload() as JsonObject;
+                    else obj = (JsonObject)loadEventArg;
+
+                    if (obj != null)
+                    {
+                        var socketPath = obj.GetNamedString("socketPath");
+                        mouseSocket = new WebOstvMouseSocketConnection(socketPath);
+                    }
+                },
+                (serviceCommandError) =>
+                {
+
+                }
+                );
+            ConnectMouse(listener);
+        }
+
+        private void ConnectMouse(ResponseListener listener)
+        {
+            const string uri = "ssap://com.webos.service.networkinput/getPointerInputSocket";
+
+            var request = new ServiceCommand(this, uri, null, listener);
+            request.Send();
         }
 
         public void DisconnectMouse()
