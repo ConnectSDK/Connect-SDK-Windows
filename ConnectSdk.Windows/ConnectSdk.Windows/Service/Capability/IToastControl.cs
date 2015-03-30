@@ -9,15 +9,15 @@ namespace ConnectSdk.Windows.Service.Capability
         IToastControl GetToastControl();
         CapabilityPriorityLevel GetToastControlCapabilityLevel();
 
-        void ShowToast(string message, ResponseListener listener);
-        void ShowToast(string message, string iconData, string iconExtension, ResponseListener listener);
+        void ShowToast(string message, ResponseListener<object> listener);
+        void ShowToast(string message, string iconData, string iconExtension, ResponseListener<object> listener);
 
-        void ShowClickableToastForApp(string message, AppInfo appInfo, JsonObject ps, ResponseListener listener);
+        void ShowClickableToastForApp(string message, AppInfo appInfo, JsonObject ps, ResponseListener<object> listener);
 
-        void ShowClickableToastForApp(string message, AppInfo appInfo, JsonObject ps, string iconData,string iconExtension, ResponseListener listener);
+        void ShowClickableToastForApp(string message, AppInfo appInfo, JsonObject ps, string iconData, string iconExtension, ResponseListener<object> listener);
 
-        void ShowClickableToastForUrl(string message, string url, ResponseListener listener);
+        void ShowClickableToastForUrl(string message, string url, ResponseListener<object> listener);
 
-        void ShowClickableToastForUrl(string message, string url, string iconData, string iconExtension, ResponseListener listener);
+        void ShowClickableToastForUrl(string message, string url, string iconData, string iconExtension, ResponseListener<object> listener);
     }
 }

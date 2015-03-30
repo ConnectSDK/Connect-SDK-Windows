@@ -218,7 +218,7 @@ namespace ConnectSdk.Windows.Service
         {
             EndPairing(null);
 
-            connected = false;
+            Connected = false;
 
             if (mServiceReachability != null)
                 mServiceReachability.Stop();
@@ -236,7 +236,7 @@ namespace ConnectSdk.Windows.Service
 
         public override bool IsConnected()
         {
-            return connected;
+            return Connected;
         }
 
         private void ConnectSuccess()
@@ -245,7 +245,7 @@ namespace ConnectSdk.Windows.Service
             //		mServiceReachability = DeviceServiceReachability.getReachability(serviceDescription.getIpAddress(), this);
             //		mServiceReachability.start();
 
-            connected = true;
+            Connected = true;
 
             // Pairing was successful, so report connected and ready
             ReportConnected(true);
@@ -253,7 +253,7 @@ namespace ConnectSdk.Windows.Service
 
         public override void OnLoseReachability(DeviceServiceReachability reachability)
         {
-            if (connected)
+            if (Connected)
             {
                 Disconnect();
             }

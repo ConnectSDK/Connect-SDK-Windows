@@ -4,19 +4,19 @@ using ConnectSdk.Windows.Service.Capability.Listeners;
 
 namespace ConnectSdk.Windows.Service.Command
 {
-    public class UrlServiceSubscription :  ServiceCommand, IServiceSubscription
+    public class UrlServiceSubscription<T> : ServiceCommand<T>, IServiceSubscription<T>
     {
-        private readonly List<ResponseListener> listeners = new List<ResponseListener>();
+        private readonly List<ResponseListener<T>> listeners = new List<ResponseListener<T>>();
 
         public UrlServiceSubscription(DeviceService service, string uri, JsonObject payload,
-            ResponseListener listener) :
+            ResponseListener<T> listener) :
                 base(service, uri, payload, listener)
         {
         }
 
 
         public UrlServiceSubscription(DeviceService service, string uri, JsonObject payload, bool isWebOs,
-            ResponseListener listener) :
+            ResponseListener<T> listener) :
                 base(service, uri, payload, listener)
         {
             if (isWebOs)
@@ -46,19 +46,19 @@ namespace ConnectSdk.Windows.Service.Command
             Service.Unsubscribe(this);
         }
 
-        public List<ResponseListener> GetListeners()
+        public List<ResponseListener<T>> GetListeners()
         {
             throw new System.NotImplementedException();
         }
 
-        public ResponseListener AddListener(ResponseListener listener)
+        public ResponseListener<T> AddListener(ResponseListener<T> listener)
         {
             listeners.Add(listener);
 
             return listener;
         }
 
-        public void RemoveListener(ResponseListener listener)
+        public void RemoveListener(ResponseListener<T> listener)
         {
             listeners.Remove(listener);
         }

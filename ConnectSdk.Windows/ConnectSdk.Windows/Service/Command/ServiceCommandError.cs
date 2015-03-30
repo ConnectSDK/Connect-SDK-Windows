@@ -30,26 +30,16 @@ namespace ConnectSdk.Windows.Service.Command
 
         public static ServiceCommandError GetError(int code)
         {
-            string desc = null;
-            if (code == 400)
+            switch (code)
             {
-                desc = "Bad Request";
-            }
-            else if (code == 401)
-            {
-                desc = "Unauthorized";
-            }
-            else if (code == 500)
-            {
-                desc = "Internal Server Error";
-            }
-            else if (code == 503)
-            {
-                desc = "Service Unavailable";
-            }
-            else
-            {
-                desc = "Unknown Error";
+                case 400:
+                    break;
+                case 401:
+                    break;
+                case 500:
+                    break;
+                case 503:
+                    break;
             }
 
             return new ServiceCommandError(code, null);

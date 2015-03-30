@@ -3,13 +3,13 @@ using ConnectSdk.Windows.Service.Command;
 
 namespace ConnectSdk.Windows.Service.Capability.Listeners
 {
-    public class ResponseListener
+    public class ResponseListener<T>
     {
-        public EventHandler<object> Success;
-        public EventHandler<ServiceCommandError> Error;
-        
+        //public EventHandler<object> Success;
+        //public EventHandler<ServiceCommandError> Error;
+
         // funcs to be sent as parameters
-        private readonly Action<object> onSuccessFunc;
+        private readonly Action<T> onSuccessFunc;
         private readonly Action<ServiceCommandError> onErrorFunc;
 
         public ResponseListener() { }
@@ -19,24 +19,24 @@ namespace ConnectSdk.Windows.Service.Capability.Listeners
         /// </summary>
         /// <param name="onSuccess">The action to be executed on success</param>
         /// <param name="onError">The action to be executed on error</param>
-        public ResponseListener(Action<object> onSuccess, Action<ServiceCommandError> onError)
+        public ResponseListener(Action<T> onSuccess, Action<ServiceCommandError> onError)
         {
             onSuccessFunc = onSuccess;
             onErrorFunc = onError;
         }
 
-        public void OnSuccess(object obj)
+        public void OnSuccess(T obj)
         {
-            if (Success != null)
-                Success(this, new LoadEventArgs(obj));
+            //if (Success != null)
+            //    Success(this, new LoadEventArgs(obj));
             if (onSuccessFunc != null)
-                onSuccessFunc(new LoadEventArgs(obj));
+                onSuccessFunc(obj);
         }
 
         public void OnError(ServiceCommandError obj)
         {
-            if (Error != null)
-                Error(this, obj);
+            //if (Error != null)
+            //    Error(this, obj);
             if (onErrorFunc != null)
                 onErrorFunc(obj);
         }

@@ -7,13 +7,13 @@ namespace ConnectSdk.Windows.Service.Capability
         IKeyControl GetKeyControl();
         CapabilityPriorityLevel GetKeyControlCapabilityLevel();
 
-        void Up(ResponseListener listener);
-        void Down(ResponseListener listener);
-        void Left(ResponseListener listener);
-        void Right(ResponseListener listener);
-        void Ok(ResponseListener listener);
-        void Back(ResponseListener listener);
-        void Home(ResponseListener listener);
-        void SendKeyCode(int keyCode, ResponseListener pListener);
+        void Up(ResponseListener<object> listener);
+        void Down(ResponseListener<object> listener);
+        void Left(ResponseListener<object> listener);
+        void Right(ResponseListener<object> listener);
+        void Ok(ResponseListener<object> listener);
+        void Back(ResponseListener<object> listener);
+        void Home(ResponseListener<object> listener);
+        void SendKeyCode(int keyCode, ResponseListener<object> pListener);
     }
 }

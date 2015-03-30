@@ -10,19 +10,19 @@ namespace ConnectSdk.Windows.Service.Capability
         IWebAppLauncher GetWebAppLauncher();
         CapabilityPriorityLevel GetWebAppLauncherCapabilityLevel();
 
-        void LaunchWebApp(string webAppId, ResponseListener listener);
-        void LaunchWebApp(string webAppId, bool relaunchIfRunning, ResponseListener listener);
-        void LaunchWebApp(string webAppId, JsonObject ps, ResponseListener listener);
-        void LaunchWebApp(string webAppId, JsonObject ps, bool relaunchIfRunning, ResponseListener listener);
+        void LaunchWebApp(string webAppId, ResponseListener<LaunchSession> listener);
+        void LaunchWebApp(string webAppId, bool relaunchIfRunning, ResponseListener<LaunchSession> listener);
+        void LaunchWebApp(string webAppId, JsonObject ps, ResponseListener<LaunchSession> listener);
+        void LaunchWebApp(string webAppId, JsonObject ps, bool relaunchIfRunning, ResponseListener<LaunchSession> listener);
 
-        void JoinWebApp(LaunchSession webAppLaunchSession, ResponseListener listener);
-        void JoinWebApp(string webAppId, ResponseListener listener);
-        void CloseWebApp(LaunchSession launchSession, ResponseListener listener);
+        void JoinWebApp(LaunchSession webAppLaunchSession, ResponseListener<LaunchSession> listener);
+        void JoinWebApp(string webAppId, ResponseListener<LaunchSession> listener);
+        void CloseWebApp(LaunchSession launchSession, ResponseListener<object> listener);
 
-        void PinWebApp(string webAppId, ResponseListener listener);
-        void UnPinWebApp(string webAppId, ResponseListener listener);
-        void IsWebAppPinned(string webAppId, ResponseListener listener);
-        IServiceSubscription SubscribeIsWebAppPinned(string webAppId, ResponseListener listener);
+        void PinWebApp(string webAppId, ResponseListener<object> listener);
+        void UnPinWebApp(string webAppId, ResponseListener<object> listener);
+        void IsWebAppPinned(string webAppId, ResponseListener<bool> listener);
+        IServiceSubscription SubscribeIsWebAppPinned(string webAppId, ResponseListener<bool> listener);
 
     }
 }

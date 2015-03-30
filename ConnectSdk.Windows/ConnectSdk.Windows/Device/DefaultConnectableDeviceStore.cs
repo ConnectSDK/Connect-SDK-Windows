@@ -235,7 +235,7 @@ namespace ConnectSdk.Windows.Device
             var service = services.GetNamedObject(uuid);
 
             if (service == null) return null;
-            var serviceConfigInfo = service.GetNamedObject(DeviceService.KEY_CONFIG);
+            var serviceConfigInfo = service.GetNamedObject(DeviceService.KeyConfig);
 
             return serviceConfigInfo != null ? ServiceConfig.GetConfig(serviceConfigInfo) : null;
         }
