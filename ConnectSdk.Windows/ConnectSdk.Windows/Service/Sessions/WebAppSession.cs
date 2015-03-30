@@ -7,21 +7,21 @@ using ConnectSdk.Windows.Service.Command;
 
 namespace ConnectSdk.Windows.Service.Sessions
 {
-   public class WebAppSession : IMediaControl, IMediaPlayer
+    public class WebAppSession<T> : IMediaControl, IMediaPlayer where T: ResponseListener<object>
     {
-        public WebAppSession(LaunchSession launchSession, DeviceService<object> service)
+        public WebAppSession(LaunchSession<T> launchSessionObject, DeviceService<T> service)
         {
-            LaunchSession = launchSession;
+            LaunchSessionObject = launchSessionObject;
             Service = service;
         }
 
-        public LaunchSession LaunchSession { get; set; }
+        public LaunchSession<T> LaunchSessionObject { get; set; }
 
-        public DeviceService<object> Service { get; set; }
+        public DeviceService<T> Service { get; set; }
 
-        public IWebAppSessionListener WebAppSessionListener { get; set; }
+        //public IWebAppSessionListener WebAppSessionListener { get; set; }
 
-        public IServiceSubscription<object> SubscribeWebAppStatus(ResponseListener<object> listener)
+        public IServiceSubscription<T> SubscribeWebAppStatus(ResponseListener<object> listener)
         {
             if (listener != null)
                 listener.OnError(ServiceCommandError.NotSupported());
@@ -109,8 +109,7 @@ namespace ConnectSdk.Windows.Service.Sessions
             Util.PostError(listener, ServiceCommandError.NotSupported());
         }
 
-
-        public IServiceSubscription<MediaInfo> SubscribeMediaInfo(ResponseListener<MediaInfo> listener)
+        public IServiceSubscription<ResponseListener<MediaInfo>> SubscribeMediaInfo(ResponseListener<MediaInfo> listener)
         {
             listener.OnError(ServiceCommandError.NotSupported());
             return null;
@@ -281,29 +280,29 @@ namespace ConnectSdk.Windows.Service.Sessions
            Util.PostError(listener, ServiceCommandError.NotSupported());
        }
 
-       public void CloseMedia(LaunchSession launchSession, ResponseListener<object> listener)
+        public void CloseMedia<T1>(LaunchSession<T1> launchSession, ResponseListener<object> listener) where T1 : ResponseListener<object>
         {
             Util.PostError(listener, ServiceCommandError.NotSupported());
         }
-
+        
         public void DisplayImage(String url, String mimeType, String title, String description, String iconSrc,
-            ResponseListener<LaunchSession> listener)
+            ResponseListener<LaunchSession<T>> listener)
         {
             Util.PostError(listener, ServiceCommandError.NotSupported());
         }
 
-        public void DisplayImage(MediaInfo mediaInfo, ResponseListener<LaunchSession> listener)
+        public void DisplayImage(MediaInfo mediaInfo, ResponseListener<LaunchSession<T>> listener)
         {
             Util.PostError(listener, ServiceCommandError.NotSupported());
         }
 
         public void PlayMedia(String url, String mimeType, String title, String description, String iconSrc,
-            bool shouldLoop, ResponseListener<LaunchSession> listener)
+            bool shouldLoop, ResponseListener<LaunchSession<T>> listener)
         {
             Util.PostError(listener, ServiceCommandError.NotSupported());
         }
 
-        public void PlayMedia(MediaInfo mediaInfo, bool shouldLoop, ResponseListener<LaunchSession> listener)
+        public void PlayMedia(MediaInfo mediaInfo, bool shouldLoop, ResponseListener<LaunchSession<T>> listener)
         {
             Util.PostError(listener, ServiceCommandError.NotSupported());
         }

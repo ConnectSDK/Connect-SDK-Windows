@@ -16,7 +16,7 @@ using ConnectSdk.Windows.Service.Sessions;
 
 namespace ConnectSdk.Windows.Service
 {
-    public class DlnaService<T> : DeviceService<T>, IMediaControl, IMediaPlayer, IVolumeControl, IPlayListControl where T:object
+    public class DlnaService : DeviceService, IMediaControl, IMediaPlayer, IVolumeControl, IPlayListControl 
     {
         // ReSharper disable InconsistentNaming
         public static string ID = "DLNA";
@@ -426,7 +426,7 @@ namespace ConnectSdk.Windows.Service
             throw new NotSupportedException();
         }
 
-        public override void Unsubscribe(UrlServiceSubscription<PlayStateStatus> subscription)
+        public void Unsubscribe(UrlServiceSubscription<PlayStateStatus> subscription)
         {
             // no server capability in winrt yet
             throw new NotSupportedException();
@@ -446,14 +446,15 @@ namespace ConnectSdk.Windows.Service
             return CapabilityPriorityLevel.Normal;
         }
 
-        public void GetMediaInfo(ResponseListener listener)
+        public void GetMediaInfo(ResponseListener<MediaInfo> listener)
         {
-            var responseListener = new ResponseListener();
 
-            responseListener.Success += (sender, args) =>
+            var responseListener = new ResponseListener<object>
+            (
+            loadEventArg =>
             {
                 throw new NotImplementedException();
-/*
+                /*
                 var positionInfoXml = args as string;
                 var trackMetaData = Util.ParseData(positionInfoXml, "TrackMetaData");
 
@@ -462,26 +463,29 @@ namespace ConnectSdk.Windows.Service
                 {
                     listener.OnSuccess(info);
                 }
-*/
-            };
-
-            responseListener.Error += (sender, args) =>
+                */
+            },
+            serviceCommandError =>
             {
                 if (listener != null)
-                    listener.OnError(args);
-            };
+                    listener.OnError(serviceCommandError);
+            }
+            );
+
+ 
+            GetPosition(responseListener);
         }
 
-        public IServiceSubscription SubscribeMediaInfo(ResponseListener listener)
+        public IServiceSubscription<MediaInfo> SubscribeMediaInfo(ResponseListener<MediaInfo> listener)
         {
-            var request = new UrlServiceSubscription(this, "info", null, null);
+            var request = new UrlServiceSubscription<MediaInfo>(this, "info", null, null);
             request.AddListener(listener);
             AddSubscription(request);
             return request;
         }
 
         public void DisplayMedia(string url, string mimeType, string title, string description, string iconSrc,
-             ResponseListener listener)
+             ResponseListener<LaunchSession> listener)
         {
 
             const string instanceId = "0";
@@ -499,35 +503,43 @@ namespace ConnectSdk.Windows.Service
             mediaFormat = "mp3".Equals(mediaFormat) ? "mpeg" : mediaFormat;
             var mMimeType = String.Format("{0}/{1}", mediaType, mediaFormat);
 
-            var responseListener = new ResponseListener();
-            responseListener.Success += (sender, args) =>
+
+            var responseListener = new ResponseListener<object>
+            (
+            loadEventArg =>
             {
                 const string playMethod = "Play";
 
-                var playParameters = new Dictionary<String, String> {{"Speed", "1"}};
+                var playParameters = new Dictionary<String, String> { { "Speed", "1" } };
 
                 var playPayload = GetMethodBody(AV_TRANSPORT_URN, playMethod, "0", playParameters);
 
-                var playResponseListener = new ResponseListener();
-
-                playResponseListener.Success += (sender2, args2) =>
+                var playResponseListener = new ResponseListener<object>
+                (
+                loadEventArg1 =>
                 {
-                    var launchSession = new LaunchSession {Service = this, SessionType = LaunchSessionType.Media};
+                    var launchSession = new LaunchSession { Service = this, SessionType = LaunchSessionType.Media };
 
-                    Util.PostSuccess(listener, new MediaLaunchObject(launchSession, this, this));
-                };
-                playResponseListener.Error += (sender2, args2) => Util.PostError(listener, args2);
+                    if (listener != null)
+                        listener.OnSuccess(launchSession);
+                    //Util.PostSuccess(listener, new MediaLaunchObject(launchSession, this, this));
+                },
+                serviceCommandError1 =>
+                {
+                    Util.PostError(listener, serviceCommandError1);
+                }
+                );
 
-                var playRequest = new ServiceCommand(this, playMethod, playPayload, playResponseListener);
+                var playRequest = new ServiceCommand<object>(this, playMethod, playPayload, playResponseListener);
                 playRequest.Send();
-
-            };
-
-            responseListener.Error += (sender, args) =>
+            },
+            serviceCommandError =>
             {
-                throw new Exception(args.ToString());
-            };
+                throw new Exception(serviceCommandError.ToString());
+            }
+            );
 
+    
             const string setTransportMethod = "SetAVTransportURI";
             var metadata = GetMetadata(url, mMimeType, title);
 
@@ -541,12 +553,12 @@ namespace ConnectSdk.Windows.Service
         }
 
         public void DisplayImage(string url, string mimeType, string title, string description, string iconSrc,
-            ResponseListener listener)
+            ResponseListener<LaunchSession> listener)
         {
             DisplayMedia(url, mimeType, title, description, iconSrc, listener);
         }
 
-        public void DisplayImage(MediaInfo mediaInfo, ResponseListener listener)
+        public void DisplayImage(MediaInfo mediaInfo, ResponseListener<LaunchSession> listener)
         {
             var imageInfo = mediaInfo.AllImages[0];
             var iconSrc = imageInfo.Url;
@@ -555,12 +567,12 @@ namespace ConnectSdk.Windows.Service
         }
 
         public void PlayMedia(string url, string mimeType, string title, string description, string iconSrc,
-            bool shouldLoop, ResponseListener listener)
+            bool shouldLoop, ResponseListener<LaunchSession> listener)
         {
             DisplayMedia(url, mimeType, title, description, iconSrc, listener);
         }
 
-        public void PlayMedia(MediaInfo mediaInfo, bool shouldLoop, ResponseListener listener)
+        public void PlayMedia(MediaInfo mediaInfo, bool shouldLoop, ResponseListener<LaunchSession>  listener)
         {
             var imageInfo = mediaInfo.AllImages[0];
             var iconSrc = imageInfo.Url;
@@ -568,9 +580,9 @@ namespace ConnectSdk.Windows.Service
             PlayMedia(mediaInfo.Url, mediaInfo.MimeType, mediaInfo.Title, mediaInfo.Description, iconSrc, shouldLoop, listener);
         }
 
-        public void CloseMedia(LaunchSession launchSession, ResponseListener listener)
+        public void CloseMedia(LaunchSession launchSession, ResponseListener<object> listener)
         {
-            var service = launchSession.Service as DlnaService;
+            var service = launchSession.Service as DlnaService<T>;
             if (service != null)
                 service.Stop(listener);
         }
@@ -589,18 +601,19 @@ namespace ConnectSdk.Windows.Service
             return CapabilityPriorityLevel.Normal;
         }
 
-        public void VolumeUp(ResponseListener listener)
+        public void VolumeUp(ResponseListener<object> listener)
         {
-            var responseListener = new ResponseListener();
 
-            responseListener.Success += (sender, args) =>
+            var responseListener = new ResponseListener<object>
+            (
+            loadEventArg =>
             {
-                var volume = (float)args;
+                var volume = (float)loadEventArg;
                 if (volume >= 1.0)
                 {
                     if (listener != null)
                     {
-                        listener.OnSuccess(args);
+                        listener.OnSuccess(loadEventArg);
                     }
                 }
                 else
@@ -614,29 +627,29 @@ namespace ConnectSdk.Windows.Service
 
                     Util.PostSuccess(listener, null);
                 }
-            };
-
-            responseListener.Error += (sender, args) =>
+            },
+            serviceCommandError =>
             {
                 if (listener != null)
-                    listener.OnError(args);
-            };
+                    listener.OnError(serviceCommandError);
+            }
+            );
 
             GetVolume(responseListener);
         }
 
-        public void VolumeDown(ResponseListener listener)
+        public void VolumeDown(ResponseListener<object> listener)
         {
-            var responseListener = new ResponseListener();
-
-            responseListener.Success += (sender, args) =>
+            var responseListener = new ResponseListener<object>
+            (
+            loadEventArg =>
             {
-                var volume = (float)args;
+                var volume = (float)loadEventArg;
                 if (volume <= 0.0)
                 {
                     if (listener != null)
                     {
-                        listener.OnSuccess(args);
+                        listener.OnSuccess(loadEventArg);
                     }
                 }
                 else
@@ -650,18 +663,18 @@ namespace ConnectSdk.Windows.Service
 
                     Util.PostSuccess(listener, null);
                 }
-            };
-
-            responseListener.Error += (sender, args) =>
+            },
+            serviceCommandError =>
             {
                 if (listener != null)
-                    listener.OnError(args);
-            };
+                    listener.OnError(serviceCommandError);
+            }
+            );
 
             GetVolume(responseListener);
         }
 
-        public void SetVolume(float volume, ResponseListener listener)
+        public void SetVolume(float volume, ResponseListener<object> listener)
         {
             const string method = "SetVolume";
             const string instanceId = "0";
@@ -676,7 +689,7 @@ namespace ConnectSdk.Windows.Service
             request.Send();
         }
 
-        public void GetVolume(ResponseListener listener)
+        public void GetVolume(ResponseListener<float> listener)
         {
             const string method = "GetVolume";
             const string instanceId = "0";
@@ -686,39 +699,39 @@ namespace ConnectSdk.Windows.Service
 
             var payload = GetMethodBody(RENDERING_CONTROL_URN, instanceId, method, parameters);
 
-            var responseListener = new ResponseListener();
 
-            responseListener.Success += (sender, args) =>
+            var responseListener = new ResponseListener<object>
+            (
+            loadEventArg =>
             {
-                var currentVolume = Util.ParseData((String)args, "CurrentVolume");
+                var currentVolume = Util.ParseData((String)loadEventArg, "CurrentVolume");
                 var iVolume = 0;
                 try
                 {
                     iVolume = int.Parse(currentVolume);
                 }
-                    // ReSharper disable once EmptyGeneralCatchClause
-                catch 
+                // ReSharper disable once EmptyGeneralCatchClause
+                catch
                 {
-                    
+
                 }
                 var fVolume = (float)(iVolume / 100.0);
 
                 Util.PostSuccess(listener, fVolume);
-            };
-
-            responseListener.Error += (sender, args) =>
+            },
+            serviceCommandError =>
             {
                 if (listener != null)
-                    listener.OnError(args);
-            };
-
+                    listener.OnError(serviceCommandError);
+            }
+            );
 
             var request = new ServiceCommand(this, method, payload, responseListener);
             request.Send();
 
         }
 
-        public void SetMute(bool isMute, ResponseListener listener)
+        public void SetMute(bool isMute, ResponseListener<bool> listener)
         {
             const string method = "SetVolume";
             const string instanceId = "0";
@@ -734,7 +747,7 @@ namespace ConnectSdk.Windows.Service
             request.Send();
         }
 
-        public void GetMute(ResponseListener listener)
+        public void GetMute(ResponseListener<object> listener)
         {
             const string method = "GetMute";
             const string instanceId = "0";
@@ -744,32 +757,34 @@ namespace ConnectSdk.Windows.Service
 
             var payload = GetMethodBody(RENDERING_CONTROL_URN, instanceId, method, parameters);
 
-            var responseListener = new ResponseListener();
 
-            responseListener.Success += (sender, args) =>
+            var responseListener = new ResponseListener<object>
+            (
+            loadEventArg =>
             {
-                var currentMute = Util.ParseData((String)args, "CurrentMute");
+                var currentMute = Util.ParseData((String)loadEventArg, "CurrentMute");
                 var isMute = bool.Parse(currentMute);
 
                 Util.PostSuccess(listener, isMute);
-            };
-
-            responseListener.Error += (sender, args) =>
+            },
+            serviceCommandError =>
             {
                 if (listener != null)
                     listener.OnError(args);
-            };
-            var request = new ServiceCommand(this, method, payload, responseListener);
+            }
+            );
+
+            var request = new ServiceCommand<object>(this, method, payload, responseListener);
             request.Send();
         }
 
-        public IServiceSubscription SubscribeVolume(ResponseListener listener)
+        public IServiceSubscription<float> SubscribeVolume(ResponseListener<float> listener)
         {
             // winrt does not support server
             throw new NotSupportedException();
         }
 
-        public IServiceSubscription SubscribeMute(ResponseListener listener)
+        public IServiceSubscription<bool> SubscribeMute(ResponseListener<bool> listener)
         {
             // winrt does not support server
             throw new NotSupportedException();
@@ -849,7 +864,7 @@ namespace ConnectSdk.Windows.Service
             return obj;
         }
 
-        public override void SendCommand(ServiceCommand command)
+        public void SendCommand(ServiceCommand<object> command)
         {
             var httpClient = new HttpClient();
 
@@ -970,70 +985,73 @@ namespace ConnectSdk.Windows.Service
         {
             Connected = false;
 
-            if (mServiceReachability != null)
-                mServiceReachability.Stop();
+            if (ServiceReachability != null)
+                ServiceReachability.Stop();
 
             if (Listener != null)
                 Listener.OnDisconnect(this, null);
         }
 
         // ReSharper disable once UnusedMember.Local
-        private void GetDeviceCapabilities(ResponseListener listener)
+        private void GetDeviceCapabilities(ResponseListener<object> listener)
         {
             const string method = "GetDeviceCapabilities";
             const string instanceId = "0";
 
             var payload = GetMethodBody(AV_TRANSPORT_URN, method, instanceId, null);
-            var responseListener = new ResponseListener();
 
-            responseListener.Success += (sender, o) =>
-            {
-                if (listener != null)
+
+
+            var responseListener = new ResponseListener<object>
+                (
+                (loadEventArg) =>
                 {
-                    listener.OnSuccess(o);
-                }
-            };
-
-            responseListener.Error += (sender, error) =>
-            {
-                if (listener != null)
+                    if (listener != null)
+                    {
+                        listener.OnSuccess(loadEventArg);
+                    }
+                },
+                (serviceCommandError) =>
                 {
-                    listener.OnError(error);
+                    if (listener != null)
+                    {
+                        listener.OnError(serviceCommandError);
+                    }
                 }
+                );
 
-            };
-
-            var request = new ServiceCommand(this, method, payload,responseListener);
+            var request = new ServiceCommand<object>(this, method, payload,responseListener);
             request.Send();
         }
 
         // ReSharper disable once UnusedMember.Local
-        private void GetProtocolInfo(ResponseListener listener)
+        private void GetProtocolInfo(ResponseListener<object> listener)
         {
             const string method = "GetProtocolInfo";
             const string instanceId = "0";
 
             var payload = GetMethodBody(AV_TRANSPORT_URN, method, instanceId, null);
-            var responseListener = new ResponseListener();
 
-            responseListener.Success += (sender, o) =>
+
+            var responseListener = new ResponseListener<object>
+            (
+            loadEventArg =>
             {
                 if (listener != null)
                 {
-                    listener.OnSuccess(o);
+                    listener.OnSuccess(loadEventArg);
                 }
-            };
-
-            responseListener.Error += (sender, error) =>
+            },
+            serviceCommandError =>
             {
                 if (listener != null)
                 {
-                    listener.OnError(error);
+                    listener.OnError(serviceCommandError);
                 }
+            }
+            );
 
-            };
-
-            var request = new ServiceCommand(this, method, payload, responseListener);
+            var request = new ServiceCommand<object>(this, method, payload, responseListener);
             request.Send();
         }
 
@@ -1046,7 +1064,7 @@ namespace ConnectSdk.Windows.Service
             }
             else
             {
-                mServiceReachability.Stop();
+                ServiceReachability.Stop();
             }
         }
 

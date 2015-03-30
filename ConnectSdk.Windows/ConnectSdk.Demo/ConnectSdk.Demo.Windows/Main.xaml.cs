@@ -373,7 +373,7 @@ namespace ConnectSdk.Demo
                 //    launchSession = v.Load.GetPayload() as LaunchSession;
             };
 
-            webostvService.CloseWebApp(launchSession.LaunchSession, listener);
+            webostvService.CloseWebApp(launchSession.LaunchSessionObject, listener);
         }
 
         private void SendMessage_Click(object sender, RoutedEventArgs e)

@@ -27,7 +27,7 @@ namespace ConnectSdk.Windows.Service
     /// Capabilities
     /// All DeviceService objects have a group of capabilities. These capabilities can be implemented by any object, and that object will be returned when you call the DeviceService's capability methods (launcher, mediaPlayer, volumeControl, etc).
     /// </summary>
-    public class DeviceService<T> : IDeviceServiceReachabilityListener, IServiceCommandProcessor<T>
+    public class DeviceService<T> : IDeviceServiceReachabilityListener, IServiceCommandProcessor<T> where T: ResponseListener<object>
     {
         // ReSharper disable StaticFieldInGenericType
         public static string KeyClass = "class";

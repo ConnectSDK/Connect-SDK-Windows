@@ -6,25 +6,25 @@ using ConnectSdk.Windows.Service.Capability.Listeners;
 
 namespace ConnectSdk.Windows.Service.Sessions
 {
-    public class LaunchSession : IJsonSerializable, IJsonDeserializable
+    public class LaunchSession<T> : IJsonSerializable, IJsonDeserializable where T: ResponseListener<object>
     {
         public string AppId { get; set; }
         public string AppName { get; set; }
         public string SessionId { get; set; }
         public object RawData { get; set; }
-        public DeviceService Service { get; set; }
+        public DeviceService<T> Service { get; set; }
         public LaunchSessionType SessionType { get; set; }
 
-        public static LaunchSession LaunchSessionForAppId(string appId)
+        public static LaunchSession<T> LaunchSessionForAppId(string appId)
         {
-            var launchSession = new LaunchSession { AppId = appId };
+            var launchSession = new LaunchSession<T> { AppId = appId };
 
             return launchSession;
         }
 
-        public static LaunchSession LaunchSessionFromJsonObject(JsonObject json)
+        public static LaunchSession<T> LaunchSessionFromJsonObject(JsonObject json)
         {
-            var launchSession = new LaunchSession();
+            var launchSession = new LaunchSession<T>();
             try
             {
                 launchSession.FromJsonObject(json);

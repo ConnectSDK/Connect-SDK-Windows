@@ -5,7 +5,7 @@ using ConnectSdk.Windows.Service.Capability.Listeners;
 
 namespace ConnectSdk.Windows.Service.Command
 {
-    public class ServiceCommand<T>
+    public class ServiceCommand<T> where T : ResponseListener<object>
     {
         public string TypeReq = "request";
         public string TypeSub = "subscribe";
@@ -23,13 +23,13 @@ namespace ConnectSdk.Windows.Service.Command
 
         public int RequestId { get; set; }
 
-        readonly ResponseListener<T> responseListener;
+        readonly ResponseListener<object> responseListener;
 
         public ServiceCommand()
         {
         }
 
-        public ServiceCommand(IServiceCommandProcessor<T> service, string targetUrl, object payload, ResponseListener<T> listener)
+        public ServiceCommand(IServiceCommandProcessor<T> service, string targetUrl, object payload, ResponseListener<object> listener)
         {
             Service = service;
             Target = targetUrl;
@@ -38,7 +38,7 @@ namespace ConnectSdk.Windows.Service.Command
             HttpMethod = TypePost;
         }
 
-        public ServiceCommand(IServiceCommandProcessor<T> service, string uri, JsonObject payload, ResponseListener<T> listener)
+        public ServiceCommand(IServiceCommandProcessor<T> service, string uri, JsonObject payload, ResponseListener<object> listener)
         {
             Service = service;
             Target = uri;
@@ -72,7 +72,7 @@ namespace ConnectSdk.Windows.Service.Command
             return HttpMethod.Equals(TypeDel) ? new HttpRequestMessage(System.Net.Http.HttpMethod.Delete, Target) : null;
         }
 
-        public ResponseListener<T> ResponseListenerValue
+        public ResponseListener<object> ResponseListenerValue
         {
             get { return responseListener; }
         }

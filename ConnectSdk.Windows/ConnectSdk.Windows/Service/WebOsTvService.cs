@@ -109,7 +109,7 @@ namespace ConnectSdk.Windows.Service
             if (DiscoveryManager.GetInstance().PairingLevel == DiscoveryManager.PairingLevelEnum.On)
             {
                 return socket != null && socket.IsConnected() &&
-                       (((WebOSTVServiceConfig)serviceConfig).getClientKey() != null);
+                       (((WebOstvServiceConfig)serviceConfig).GetClientKey() != null);
             }
             return socket != null && socket.IsConnected();
         }
@@ -978,7 +978,7 @@ namespace ConnectSdk.Windows.Service
                 LaunchSession launchSession;
 
                 if (webAppSession != null)
-                    launchSession = webAppSession.LaunchSession;
+                    launchSession = webAppSession.LaunchSessionObject;
                 else
                 {
                     launchSession = LaunchSession.LaunchSessionForAppId(webAppId);
@@ -1141,16 +1141,16 @@ namespace ConnectSdk.Windows.Service
             if (AppToAppIdMappings == null)
                 AppToAppIdMappings = new Dictionary<string, string>();
 
-            if (webAppSession == null || webAppSession.LaunchSession == null)
+            if (webAppSession == null || webAppSession.LaunchSessionObject == null)
             {
                 Util.PostError(connectionListener, new ServiceCommandError(0, "You must provide a valid LaunchSession object"));
 
                 return;
             }
 
-            var tappId = webAppSession.LaunchSession.AppId;
+            var tappId = webAppSession.LaunchSessionObject.AppId;
 
-            var tidKey = webAppSession.LaunchSession.SessionType == LaunchSessionType.WebApp ? "webAppId" : "appId";
+            var tidKey = webAppSession.LaunchSessionObject.SessionType == LaunchSessionType.WebApp ? "webAppId" : "appId";
 
             if (string.IsNullOrEmpty(tappId))
             {
@@ -1198,7 +1198,7 @@ namespace ConnectSdk.Windows.Service
                     var fullAppId = jsonObj.GetNamedString("appId");
                     if (!string.IsNullOrEmpty(fullAppId))
                     {
-                        if (webAppSession.LaunchSession.SessionType == LaunchSessionType.WebApp)
+                        if (webAppSession.LaunchSessionObject.SessionType == LaunchSessionType.WebApp)
                             AppToAppIdMappings.Add(fullAppId, appId);
                         webAppSession.SetFullAppId(fullAppId);
                     }
@@ -1432,10 +1432,10 @@ namespace ConnectSdk.Windows.Service
         {
             permissions = ppermissions;
 
-            var config = (WebOSTVServiceConfig)serviceConfig;
+            var config = (WebOstvServiceConfig)serviceConfig;
 
-            if (config.getClientKey() == null) return;
-            config.setClientKey(null);
+            if (config.GetClientKey() == null) return;
+            config.SetClientKey(null);
 
             if (IsConnected())
             {
