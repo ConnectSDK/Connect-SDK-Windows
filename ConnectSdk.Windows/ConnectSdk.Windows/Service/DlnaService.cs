@@ -16,7 +16,7 @@ using ConnectSdk.Windows.Service.Sessions;
 
 namespace ConnectSdk.Windows.Service
 {
-    public class DlnaService<T> : DeviceService<T>, IMediaControl, IMediaPlayer, IVolumeControl, IPlayListControl
+    public class DlnaService<T> : DeviceService<T>, IMediaControl, IMediaPlayer, IVolumeControl, IPlayListControl where T:object
     {
         // ReSharper disable InconsistentNaming
         public static string ID = "DLNA";
@@ -83,7 +83,7 @@ namespace ConnectSdk.Windows.Service
             return CapabilityPriorityLevel.Normal;
         }
 
-        public void Play(ResponseListener listener)
+        public void Play(ResponseListener<object> listener)
         {
             const string method = "Play";
             const string instanceId = "0";
@@ -92,38 +92,38 @@ namespace ConnectSdk.Windows.Service
 
             var payload = GetMethodBody(AV_TRANSPORT_URN, instanceId, method, parameters);
 
-            var request = new ServiceCommand(this, method, payload, listener);
+            var request = new ServiceCommand<object>(this, method, payload, listener);
             request.Send();
         }
 
-        public void Pause(ResponseListener listener)
+        public void Pause(ResponseListener<object> listener)
         {
             const string method = "Pause";
             const string instanceId = "0";
 
             var payload = GetMethodBody(AV_TRANSPORT_URN, instanceId, method, null);
 
-            var request = new ServiceCommand(this, method, payload, listener);
+            var request = new ServiceCommand<object>(this, method, payload, listener);
             request.Send();
         }
 
-        public void Stop(ResponseListener listener)
+        public void Stop(ResponseListener<object> listener)
         {
             const string method = "Stop";
             const string instanceId = "0";
 
             var payload = GetMethodBody(AV_TRANSPORT_URN, method, instanceId, null);
 
-            var request = new ServiceCommand(this, method, payload, listener);
+            var request = new ServiceCommand<object>(this, method, payload, listener);
             request.Send();
         }
 
-        public void Rewind(ResponseListener listener)
+        public void Rewind(ResponseListener<object> listener)
         {
             Util.PostError(listener, ServiceCommandError.NotSupported());
         }
 
-        public void FastForward(ResponseListener listener)
+        public void FastForward(ResponseListener<object> listener)
         {
             Util.PostError(listener, ServiceCommandError.NotSupported());
         }
@@ -143,36 +143,36 @@ namespace ConnectSdk.Windows.Service
             return CapabilityPriorityLevel.Normal;
         }
 
-        public void Previous(ResponseListener listener)
+        public void Previous(ResponseListener<object> listener)
         {
             const string method = "Previous";
             const string instanceId = "0";
 
             var payload = GetMethodBody(AV_TRANSPORT_URN, method, instanceId, null);
 
-            var request = new ServiceCommand(this, method, payload, listener);
+            var request = new ServiceCommand<object>(this, method, payload, listener);
             request.Send();
         }
 
-        public void Next(ResponseListener listener)
+        public void Next(ResponseListener<object> listener)
         {
             const string method = "Next";
             const string instanceId = "0";
 
             var payload = GetMethodBody(AV_TRANSPORT_URN, method, instanceId, null);
 
-            var request = new ServiceCommand(this, method, payload, listener);
+            var request = new ServiceCommand<object>(this, method, payload, listener);
             request.Send();
         }
 
-        public void JumpToTrack(long index, ResponseListener listener)
+        public void JumpToTrack(long index, ResponseListener<object> listener)
         {
             // DLNA requires start index from 1. 0 is a special index which means the end of media.
             ++index;
             Seek("TRACK_NR", index.ToString(), listener);
         }
 
-        public void SetPlayMode(PlayMode playMode, ResponseListener listener)
+        public void SetPlayMode(PlayMode playMode, ResponseListener<object> listener)
         {
             const string method = "SetPlayMode";
             const string instanceId = "0";
@@ -198,11 +198,11 @@ namespace ConnectSdk.Windows.Service
 
             var payload = GetMethodBody(AV_TRANSPORT_URN, method, instanceId, parameters);
 
-            var request = new ServiceCommand(this, method, payload, listener);
+            var request = new ServiceCommand<object>(this, method, payload, listener);
             request.Send();
         }
 
-        public void Seek(long position, ResponseListener listener)
+        public void Seek(long position, ResponseListener<object> listener)
         {
             long second = (position / 1000) % 60;
             long minute = (position / (1000 * 60)) % 60;
@@ -213,87 +213,88 @@ namespace ConnectSdk.Windows.Service
         }
 
 
-        private void GetPositionInfo(ResponseListener listener)
+        private void GetPositionInfo(ResponseListener<object> listener)
         {
             const string method = "GetPositionInfo";
             const string instanceId = "0";
 
             string payload = GetMethodBody(AV_TRANSPORT_URN, instanceId, method, null);
 
-            var responseListener = new ResponseListener();
-
-            responseListener.Success += (sender, args) =>
-            {
-                if (listener != null)
+            var responseListener = new ResponseListener<object>
+                (
+                loadEventArgs =>
                 {
-                    listener.OnSuccess(args);
+                    if (listener != null)
+                    {
+                        listener.OnSuccess(loadEventArgs);
+                    }
+                },
+                serviceCommandError =>
+                {
+                    if (listener != null)
+                        listener.OnError(serviceCommandError);
                 }
-            };
+                );
 
-            responseListener.Error += (sender, args) =>
-            {
-                if (listener != null)
-                    listener.OnError(args);
-            };
-            var request = new ServiceCommand(this, method, payload, responseListener);
+
+            var request = new ServiceCommand<object>(this, method, payload, responseListener);
             request.Send();
         }
 
-        public void GetDuration(ResponseListener listener)
+        public void GetDuration(ResponseListener<long> listener)
         {
-            var responseListener = new ResponseListener();
-
-            responseListener.Success += (sender, args) =>
-            {
-                var strDuration = Util.ParseData((string)args, "TrackDuration");
-                //string trackMetaData = Util.ParseData((string)args, "TrackMetaData");
-
-                var milliTimes = Util.ConvertStrTimeFormatToLong(strDuration) * 1000;
-
-                if (listener != null)
+            var responseListener = new ResponseListener<object>(
+                loadEventArgs =>
                 {
-                    listener.OnSuccess(milliTimes);
-                }
-            };
+                    var strDuration = Util.ParseData((string)loadEventArgs, "TrackDuration");
+                    //string trackMetaData = Util.ParseData((string)args, "TrackMetaData");
 
-            responseListener.Error += (sender, args) =>
-            {
-                if (listener != null)
+                    var milliTimes = Util.ConvertStrTimeFormatToLong(strDuration) * 1000;
+
+                    if (listener != null)
+                    {
+                        listener.OnSuccess(milliTimes);
+                    }
+                },
+                serviceCommandError =>
                 {
-                    listener.OnError(args);
+                    if (listener != null)
+                    {
+                        listener.OnError(serviceCommandError);
+                    }
                 }
-            };
+                );
             GetPositionInfo(responseListener);
         }
 
-        public void GetPosition(ResponseListener listener)
+        public void GetPosition(ResponseListener<long> listener)
         {
-            var responseListener = new ResponseListener();
-
-            responseListener.Success += (sender, args) =>
-            {
-                string strDuration = Util.ParseData((string)args, "RelTime");
-
-                long milliTimes = Util.ConvertStrTimeFormatToLong(strDuration) * 1000;
-
-                if (listener != null)
+            var responseListener = new ResponseListener<object>(
+                loadEventArgs =>
                 {
-                    listener.OnSuccess(milliTimes);
-                }
-            };
+                    string strDuration = Util.ParseData((string)loadEventArgs, "RelTime");
 
-            responseListener.Error += (sender, args) =>
-            {
-                if (listener != null)
+                    long milliTimes = Util.ConvertStrTimeFormatToLong(strDuration) * 1000;
+
+                    if (listener != null)
+                    {
+                        listener.OnSuccess(milliTimes);
+                    }
+                },
+                serviceCommandError =>
                 {
-                    listener.OnError(args);
+                    if (listener != null)
+                    {
+                        listener.OnError(serviceCommandError);
+                    }
                 }
-            };
+                );
+            
 
             GetPositionInfo(responseListener);
         }
 
-        protected void Seek(String unit, String target, ResponseListener listener)
+        protected void Seek(String unit, String target, ResponseListener<object> listener)
         {
             const string method = "Seek";
             const string instanceId = "0";
@@ -302,7 +303,7 @@ namespace ConnectSdk.Windows.Service
 
             var payload = GetMethodBody(AV_TRANSPORT_URN, method, instanceId, parameters);
 
-            var request = new ServiceCommand(this, method, payload, listener);
+            var request = new ServiceCommand<object>(this, method, payload, listener);
             request.Send();
         }
 
@@ -376,31 +377,35 @@ namespace ConnectSdk.Windows.Service
             return sb.ToString();
         }
 
-        public void GetPlayState(ResponseListener listener)
+        public void GetPlayState(ResponseListener<PlayStateStatus> listener)
         {
             const string method = "GetTransportInfo";
             const string instanceId = "0";
 
             var payload = GetMethodBody(AV_TRANSPORT_URN, method, instanceId, null);
 
-            var responseListener = new ResponseListener();
-            responseListener.Success += (sender, o) =>
-            {
-                var transportState = Util.ParseData((String)o, "CurrentTransportState");
-                var status = (PlayStateStatus)Enum.Parse(typeof(PlayStateStatus), transportState);
+            var responseListener = new ResponseListener<object>(
+                loadEventArgs =>
+                {
+                    var transportState = Util.ParseData((String)loadEventArgs, "CurrentTransportState");
+                    var status = (PlayStateStatus)Enum.Parse(typeof(PlayStateStatus), transportState);
 
-                Util.PostSuccess(listener, status);
-            };
-            responseListener.Error += (sender, error) => Util.PostError(listener, error);
+                    Util.PostSuccess(listener, status);
+                },
+                serviceCommandError =>
+                {
+                    Util.PostError(listener, serviceCommandError);
+                }
+                );
 
-            var request = new ServiceCommand(this, method, payload, responseListener);
+            var request = new ServiceCommand<object>(this, method, payload, responseListener);
 
             request.Send();
         }
 
-        public IServiceSubscription SubscribePlayState(ResponseListener listener)
+        public IServiceSubscription<PlayStateStatus> SubscribePlayState(ResponseListener<PlayStateStatus> listener)
         {
-            var request = new UrlServiceSubscription(this, PLAY_STATE, null, null);
+            var request = new UrlServiceSubscription<PlayStateStatus>(this, PLAY_STATE, null, null);
             request.AddListener(listener);
             AddSubscription(request);
             return request;
@@ -415,13 +420,13 @@ namespace ConnectSdk.Windows.Service
 
 
         // ReSharper disable once UnusedParameter.Local
-        private void AddSubscription(UrlServiceSubscription subscription)
+        private void AddSubscription(UrlServiceSubscription<PlayStateStatus> subscription)
         {
             // no server capability in winrt yet
             throw new NotSupportedException();
         }
 
-        public override void Unsubscribe(UrlServiceSubscription subscription)
+        public override void Unsubscribe(UrlServiceSubscription<PlayStateStatus> subscription)
         {
             // no server capability in winrt yet
             throw new NotSupportedException();
