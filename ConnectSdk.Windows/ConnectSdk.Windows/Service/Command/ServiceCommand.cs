@@ -5,15 +5,15 @@ using ConnectSdk.Windows.Service.Capability.Listeners;
 
 namespace ConnectSdk.Windows.Service.Command
 {
-    public class ServiceCommand<T>
+    public class ServiceCommand
     {
-        public string TypeReq = "request";
-        public string TypeSub = "subscribe";
-        public string TypeGet = "GET";
-        public string TypePost = "POST";
-        public string TypeDel = "DELETE";
+        public static string TypeReq = "request";
+        public static string TypeSub = "subscribe";
+        public static string TypeGet = "GET";
+        public static string TypePost = "POST";
+        public static string TypeDel = "DELETE";
 
-        public IServiceCommandProcessor<T> Service { get; set; }
+        public IServiceCommandProcessor Service { get; set; }
 
         public string HttpMethod { get; set; }  // WebOSTV: {request, subscribe}, NetcastTV: {GET, POST}
 
@@ -23,13 +23,13 @@ namespace ConnectSdk.Windows.Service.Command
 
         public int RequestId { get; set; }
 
-        readonly ResponseListener<T> responseListener;
+        readonly ResponseListener responseListener;
 
         public ServiceCommand()
         {
         }
 
-        public ServiceCommand(IServiceCommandProcessor<T> service, string targetUrl, object payload, ResponseListener<T> listener)
+        public ServiceCommand(IServiceCommandProcessor service, string targetUrl, object payload, ResponseListener listener)
         {
             Service = service;
             Target = targetUrl;
@@ -38,7 +38,7 @@ namespace ConnectSdk.Windows.Service.Command
             HttpMethod = TypePost;
         }
 
-        public ServiceCommand(IServiceCommandProcessor<T> service, string uri, JsonObject payload, ResponseListener<T> listener)
+        public ServiceCommand(IServiceCommandProcessor service, string uri, JsonObject payload, ResponseListener listener)
         {
             Service = service;
             Target = uri;
@@ -72,7 +72,7 @@ namespace ConnectSdk.Windows.Service.Command
             return HttpMethod.Equals(TypeDel) ? new HttpRequestMessage(System.Net.Http.HttpMethod.Delete, Target) : null;
         }
 
-        public ResponseListener<T> ResponseListenerValue
+        public ResponseListener ResponseListenerValue
         {
             get { return responseListener; }
         }

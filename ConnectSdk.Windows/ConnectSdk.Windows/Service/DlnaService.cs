@@ -16,7 +16,7 @@ using ConnectSdk.Windows.Service.Sessions;
 
 namespace ConnectSdk.Windows.Service
 {
-    public class DlnaService<T> : DeviceService<T>, IMediaControl, IMediaPlayer, IVolumeControl, IPlayListControl
+    public class DlnaService : DeviceService, IMediaControl, IMediaPlayer, IVolumeControl, IPlayListControl
     {
         // ReSharper disable InconsistentNaming
         public static string ID = "DLNA";
@@ -947,7 +947,7 @@ namespace ConnectSdk.Windows.Service
 
         public override bool IsConnected()
         {
-            return Connected;
+            return connected;
         }
 
         public override void Connect()
@@ -956,14 +956,14 @@ namespace ConnectSdk.Windows.Service
             //		mServiceReachability = DeviceServiceReachability.getReachability(serviceDescription.getIpAddress(), this);
             //		mServiceReachability.start();
 
-            Connected = true;
+            connected = true;
 
             ReportConnected(true);
         }
 
         public override void Disconnect()
         {
-            Connected = false;
+            connected = false;
 
             if (mServiceReachability != null)
                 mServiceReachability.Stop();
@@ -1035,7 +1035,7 @@ namespace ConnectSdk.Windows.Service
 
         public override void OnLoseReachability(DeviceServiceReachability reachability)
         {
-            if (Connected)
+            if (connected)
             {
                 Disconnect();
             }

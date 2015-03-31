@@ -29,14 +29,14 @@ namespace ConnectSdk.Windows.Core
             return DateTime.Now.Millisecond;
         }
 
-        public static void PostSuccess<T>(ResponseListener<T> listener, T obj)
+        public static void PostSuccess(ResponseListener listener, object obj)
         {
             if (listener == null)
                 return;
             listener.OnSuccess(obj);
         }
 
-        public static void PostError<T>(ResponseListener<T> listener, ServiceCommandError error)
+        public static void PostError(ResponseListener listener, ServiceCommandError error)
         {
             if (listener == null)
                 return;

@@ -120,43 +120,38 @@ namespace ConnectSdk.Windows.Service.WebOs
                 }
             }
 
-            var responseListener = new ResponseListener<object>
-             (
-                 loadEventArg =>
-                 {
-                     waiting = false;
-                     if (toSend.Count > 0)
-                         SendData();
-                 },
-                 serviceCommandError =>
-                 {
-                     throw new NotImplementedException();
-                 }
-             );
+            var responseListener = new ResponseListener();
+            responseListener.Success += (sender, o) =>
+            {
+                waiting = false;
+                if (toSend.Count > 0)
+                    SendData();
+            };
 
-            var request = new ServiceCommand<object>(service, uri, payload, responseListener);
+            responseListener.Error += (sender, o) =>
+            {
+                throw new NotImplementedException();
+            };
+
+            var request = new ServiceCommand(service, uri, payload, responseListener);
             request.Send();
         }
 
-        public UrlServiceSubscription<object> Connect(ResponseListener<TextInputStatusInfo> listener)
+        public UrlServiceSubscription Connect(ResponseListener listener)
         {
-            var responseListener = new ResponseListener<object>
-             (
-                 loadEventArg =>
-                 {
-                     var jsonObj = (JsonObject)loadEventArg;
+            var responseListener = new ResponseListener();
+            responseListener.Success += (sender, o) =>
+            {
+                var jsonObj = (JsonObject)o;
 
-                     var keyboard = parseRawKeyboardData(jsonObj);
+                var keyboard = parseRawKeyboardData(jsonObj);
 
-                     Util.PostSuccess(listener, keyboard);
-                 },
-                 serviceCommandError =>
-                 {
-                     Util.PostError(listener, serviceCommandError);
-                 }
-             );
+                Util.PostSuccess(listener, keyboard);
+            };
+            responseListener.Error += (sender, o) => Util.PostError(listener, o);
 
-            var subscription = new UrlServiceSubscription<object>(service, KeyboardInputUrl, null, true, responseListener);
+            var subscription = new UrlServiceSubscription(service, KeyboardInputUrl, null, true,
+                responseListener);
             subscription.Send();
 
             return subscription;

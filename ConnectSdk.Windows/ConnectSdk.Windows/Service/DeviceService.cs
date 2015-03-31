@@ -27,18 +27,18 @@ namespace ConnectSdk.Windows.Service
     /// Capabilities
     /// All DeviceService objects have a group of capabilities. These capabilities can be implemented by any object, and that object will be returned when you call the DeviceService's capability methods (launcher, mediaPlayer, volumeControl, etc).
     /// </summary>
-    public class DeviceService<T> : IDeviceServiceReachabilityListener, IServiceCommandProcessor<T>
+    public class DeviceService : IDeviceServiceReachabilityListener, IServiceCommandProcessor
     {
-        // ReSharper disable StaticFieldInGenericType
-        public static string KeyClass = "class";
-        public static string KeyConfig = "config";
-        public static string KeyDesc = "description";
+        // ReSharper disable InconsistentNaming
+        public static string KEY_CLASS = "class";
+        public static string KEY_CONFIG = "config";
+        public static string KEY_DESC = "description";
 
-        // ReSharper disable once InconsistentNaming
         protected ServiceConfig serviceConfig;
 
-        protected DeviceServiceReachability ServiceReachability;
-        protected bool Connected = false;
+        protected DeviceServiceReachability mServiceReachability;
+        protected bool connected = false;
+        // ReSharper restore InconsistentNaming
 
         /// <summary>
         /// An array of capabilities supported by the DeviceService. This array may change based off a number of factors.
@@ -50,7 +50,7 @@ namespace ConnectSdk.Windows.Service
         /// </summary>
         private List<string> capabilities;
 
-        public List<ServiceCommand<T>> Requests = new List<ServiceCommand<T>>();
+        public List<ServiceCommand> Requests = new List<ServiceCommand>();
 
         public ServiceDescription ServiceDescription { get; set; }
 
@@ -75,7 +75,6 @@ namespace ConnectSdk.Windows.Service
 
             capabilities = new List<string>();
 
-            // ReSharper disable once DoNotCallOverridableMethodsInConstructor
             UpdateCapabilities();
         }
 
@@ -84,18 +83,16 @@ namespace ConnectSdk.Windows.Service
             ServiceConfig = serviceConfig;
 
             capabilities = new List<string>();
-
-            // ReSharper disable once DoNotCallOverridableMethodsInConstructor
             UpdateCapabilities();
         }
 
-        public static DeviceService<T> GetService(JsonObject json)
+        public static DeviceService GetService(JsonObject json)
         {
-            DeviceService<T> newServiceClass = null;
+            DeviceService newServiceClass = null;
 
             try
             {
-                string className = json.GetNamedString(KeyClass);
+                string className = json.GetNamedString(KEY_CLASS);
 
                 if (className.Equals("DLNAService", StringComparison.OrdinalIgnoreCase))
                     return null;
@@ -103,12 +100,12 @@ namespace ConnectSdk.Windows.Service
                 if (className.Equals("Chromecast", StringComparison.OrdinalIgnoreCase))
                     return null;
 
-                var jsonConfig = json.GetNamedObject(KeyConfig);
+                var jsonConfig = json.GetNamedObject(KEY_CONFIG);
                 ServiceConfig serviceConfig = null;
                 if (jsonConfig != null)
                     serviceConfig = ServiceConfig.GetConfig(jsonConfig);
 
-                var jsonDescription = json.GetNamedObject(KeyDesc);
+                var jsonDescription = json.GetNamedObject(KEY_DESC);
                 ServiceDescription serviceDescription = null;
                 if (jsonDescription != null)
                     serviceDescription = ServiceDescription.GetDescription(jsonDescription);
@@ -141,22 +138,22 @@ namespace ConnectSdk.Windows.Service
             }
         }
 
-        public static DeviceService<T> GetService(Type clazz, ServiceConfig serviceConfig)
+        public static DeviceService GetService(Type clazz, ServiceConfig serviceConfig)
         {
-            return Activator.CreateInstance(clazz, new object[] { serviceConfig }) as DeviceService<T>;
+            return Activator.CreateInstance(clazz, new object[] { serviceConfig }) as DeviceService;
         }
 
-        public static DeviceService<T> GetService(Type clazz, ServiceDescription serviceDescription,
+        public static DeviceService GetService(Type clazz, ServiceDescription serviceDescription,
             ServiceConfig serviceConfig)
         {
-            return Activator.CreateInstance(clazz, new object[] { serviceDescription, serviceConfig }) as DeviceService<T>;
+            return Activator.CreateInstance(clazz, new object[] { serviceDescription, serviceConfig }) as DeviceService;
         }
 
-        public TL GetApi<TL>(TL clazz) where TL : CapabilityMethods
+        public T GetApi<T>(T clazz) where T : CapabilityMethods
         {
             // if this class is of the type given return it, otherwise null
             // ReSharper disable once SuspiciousTypeConversion.Global
-            var tt = this as TL;
+            var tt = this as T;
             return tt;
         }
 
@@ -204,17 +201,17 @@ namespace ConnectSdk.Windows.Service
 
         }
 
-        public virtual void Unsubscribe(UrlServiceSubscription<T> subscription)
+        public virtual void Unsubscribe(UrlServiceSubscription subscription)
         {
 
         }
 
-        public virtual void Unsubscribe(IServiceSubscription<T> subscription)
+        public virtual void Unsubscribe(IServiceSubscription subscription)
         {
 
         }
 
-        public virtual void SendCommand(ServiceCommand<T> command)
+        public virtual void SendCommand(ServiceCommand command)
         {
 
         }
@@ -278,7 +275,7 @@ namespace ConnectSdk.Windows.Service
 
             try
             {
-                jsonObj.Add(KeyClass, JsonValue.CreateStringValue(GetType().Name));
+                jsonObj.Add(KEY_CLASS, JsonValue.CreateStringValue(GetType().Name));
                 jsonObj.Add("description", ServiceDescription.ToJsonObject());
                 jsonObj.Add("config", ServiceConfig.ToJsonObject());
             }
@@ -298,7 +295,7 @@ namespace ConnectSdk.Windows.Service
             get { return ServiceDescription.ServiceId; }
         }
 
-        public void CloseLaunchSession(LaunchSession launchSession, ResponseListener<object> lst)
+        public void CloseLaunchSession(LaunchSession launchSession, ResponseListener lst)
         {
             if (launchSession == null)
             {

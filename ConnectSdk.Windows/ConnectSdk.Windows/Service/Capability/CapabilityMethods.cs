@@ -2,7 +2,7 @@
 
 namespace ConnectSdk.Windows.Service.Capability
 {
-    public class CapabilityMethods //: ResponseListener<T>
+    public class CapabilityMethods : ResponseListener
     {
         public static string AnyPattern = ".+\\.(?=Any)";
     }

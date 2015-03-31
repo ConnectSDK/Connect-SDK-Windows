@@ -183,10 +183,14 @@ namespace ConnectSdk.Windows.Service.WebOs
                     messageWriter.WriteString(sb);
                     messageWriter.StoreAsync();
                 }
+                else
+                {
+                    
+                }
             }
-            // ReSharper disable once RedundantCatchClause
-            catch
+            catch (Exception)
             {
+                
                 throw;
             }
         }

@@ -7,7 +7,7 @@ namespace ConnectSdk.Windows.Service.Capability
         IPowerControl GetPowerControl();
         CapabilityPriorityLevel GetPowerControlCapabilityLevel();
 
-        void PowerOff(ResponseListener<object> listener);
-        void PowerOn(ResponseListener<object> listener);
+        void PowerOff(ResponseListener listener);
+        void PowerOn(ResponseListener listener);
     }
 }

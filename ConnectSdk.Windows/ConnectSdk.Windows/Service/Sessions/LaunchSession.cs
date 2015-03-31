@@ -38,7 +38,7 @@ namespace ConnectSdk.Windows.Service.Sessions
             return launchSession;
         }
 
-        public void Close(ResponseListener<object> listener)
+        public void Close(ResponseListener listener)
         {
             Service.CloseLaunchSession(this, listener);
         }

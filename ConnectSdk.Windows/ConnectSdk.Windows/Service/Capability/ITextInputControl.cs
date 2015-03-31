@@ -1,5 +1,4 @@
-﻿using ConnectSdk.Windows.Core;
-using ConnectSdk.Windows.Service.Capability.Listeners;
+﻿using ConnectSdk.Windows.Service.Capability.Listeners;
 using ConnectSdk.Windows.Service.Command;
 
 namespace ConnectSdk.Windows.Service.Capability
@@ -9,7 +8,7 @@ namespace ConnectSdk.Windows.Service.Capability
         ITextInputControl GetTextInputControl();
         CapabilityPriorityLevel GetTextInputControlCapabilityLevel();
 
-        IServiceSubscription<TextInputStatusInfo> SubscribeTextInputStatus(ResponseListener<TextInputStatusInfo> listener);
+        IServiceSubscription SubscribeTextInputStatus(ResponseListener listener);
 
         void SendText(string input);
         void SendEnter();

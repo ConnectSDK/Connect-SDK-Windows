@@ -11,27 +11,27 @@ namespace ConnectSdk.Windows.Service.Capability
         /// Jump to previous track in the playlist
         /// </summary>
         /// <param name="listener"></param>
-        void Previous(ResponseListener<object> listener);
+        void Previous(ResponseListener listener);
 
         /// <summary>
         /// Jump to next track in the playlist
         /// </summary>
         /// <param name="listener"></param>
-        void Next(ResponseListener<object> listener);
+        void Next(ResponseListener listener);
 
         /// <summary>
         /// This method is used for playlist only and it allows to switch to another track by it's position
         /// </summary>
         /// <param name="index"></param>
         /// <param name="listener"></param>
-        void JumpToTrack(long index, ResponseListener<object> listener);
+        void JumpToTrack(long index, ResponseListener listener);
 
         /// <summary>
         /// Set order of playing tracks
         /// </summary>
         /// <param name="playMode"></param>
         /// <param name="listener"></param>
-        void SetPlayMode(PlayMode playMode, ResponseListener<object> listener);
+        void SetPlayMode(PlayMode playMode, ResponseListener listener);
 
     }
 }

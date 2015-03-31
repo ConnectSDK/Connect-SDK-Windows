@@ -9,11 +9,11 @@ namespace ConnectSdk.Windows.Service.Capability
         CapabilityPriorityLevel GetMediaPlayerCapabilityLevel();
 
         void DisplayImage(string url, string mimeType, string title, string description, string iconSrc,
-            ResponseListener<MediaLaunchObject> listener);
+            ResponseListener listener);
 
         void PlayMedia(string url, string mimeType, string title, string description, string iconSrc, bool shouldLoop,
-            ResponseListener<MediaLaunchObject> listener);
+            ResponseListener listener);
 
-        void CloseMedia(LaunchSession launchSession, ResponseListener<object> listener);
+        void CloseMedia(LaunchSession launchSession, ResponseListener listener);
     }
 }

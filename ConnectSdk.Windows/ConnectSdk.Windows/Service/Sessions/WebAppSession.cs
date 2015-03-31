@@ -21,7 +21,7 @@ namespace ConnectSdk.Windows.Service.Sessions
 
         public IWebAppSessionListener WebAppSessionListener { get; set; }
 
-        public IServiceSubscription<object> SubscribeWebAppStatus(ResponseListener<object> listener)
+        public IServiceSubscription SubscribeWebAppStatus(ResponseListener listener)
         {
             if (listener != null)
                 listener.OnError(ServiceCommandError.NotSupported());
@@ -29,12 +29,12 @@ namespace ConnectSdk.Windows.Service.Sessions
             return null;
         }
 
-        public void Connect(ResponseListener<object> connectionListener)
+        public void Connect(ResponseListener connectionListener)
         {
             Util.PostError(connectionListener, ServiceCommandError.NotSupported());
         }
 
-        public void Join(ResponseListener<object> connectionListener)
+        public void Join(ResponseListener connectionListener)
         {
             Util.PostError(connectionListener, ServiceCommandError.NotSupported());
         }
@@ -48,7 +48,7 @@ namespace ConnectSdk.Windows.Service.Sessions
         /// </summary>
         /// <param name="webAppId">NSString webAppId to be pinned.</param>
         /// <param name="listener"></param>
-        public void PinWebApp(String webAppId, ResponseListener<object> listener)
+        public void PinWebApp(String webAppId, ResponseListener listener)
         {
             Util.PostError(listener, ServiceCommandError.NotSupported());
         }
@@ -58,7 +58,7 @@ namespace ConnectSdk.Windows.Service.Sessions
         /// </summary>
         /// <param name="webAppId">NSString webAppId to be unpinned</param>
         /// <param name="listener"></param>
-        public void UnpinWebApp(String webAppId, ResponseListener<object> listener)
+        public void UnpinWebApp(String webAppId, ResponseListener listener)
         {
             Util.PostError(listener, ServiceCommandError.NotSupported());
         }
@@ -68,24 +68,24 @@ namespace ConnectSdk.Windows.Service.Sessions
         /// </summary>
         /// <param name="webAppId">NSString webAppId that is checked</param>
         /// <param name="listener"></param>
-        public void IsWebAppPinned(String webAppId, ResponseListener<bool> listener)
+        public void IsWebAppPinned(String webAppId, ResponseListener listener)
         {
             Util.PostError(listener, ServiceCommandError.NotSupported());
         }
 
-        public void Close(ResponseListener<object> listener)
+        public void Close(ResponseListener listener)
         {
             if (listener != null)
                 listener.OnError(ServiceCommandError.NotSupported());
         }
 
-        public void SendMessage(String message, ResponseListener<object> listener)
+        public void SendMessage(String message, ResponseListener listener)
         {
             if (listener != null)
                 listener.OnError(ServiceCommandError.NotSupported());
         }
 
-        public void SendMessage(JsonObject message, ResponseListener<object> listener)
+        public void SendMessage(JsonObject message, ResponseListener listener)
         {
             if (listener != null)
             {
@@ -104,19 +104,19 @@ namespace ConnectSdk.Windows.Service.Sessions
         }
 
 
-        public void GetMediaInfo(ResponseListener<MediaInfo> listener)
+        public void GetMediaInfo(ResponseListener listener)
         {
             Util.PostError(listener, ServiceCommandError.NotSupported());
         }
 
 
-        public IServiceSubscription<MediaInfo> SubscribeMediaInfo(ResponseListener<MediaInfo> listener)
+        public IServiceSubscription SubscribeMediaInfo(ResponseListener listener)
         {
             listener.OnError(ServiceCommandError.NotSupported());
             return null;
         }
 
-        public void Play(ResponseListener<object> listener)
+        public void Play(ResponseListener listener)
         {
             IMediaControl mediaControl = null;
 
@@ -129,7 +129,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                 listener.OnError(ServiceCommandError.NotSupported());
         }
 
-        public void Pause(ResponseListener<object> listener)
+        public void Pause(ResponseListener listener)
         {
             IMediaControl mediaControl = null;
 
@@ -142,7 +142,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                 listener.OnError(ServiceCommandError.NotSupported());
         }
 
-        public void Stop(ResponseListener<object> listener)
+        public void Stop(ResponseListener listener)
         {
             IMediaControl mediaControl = null;
 
@@ -155,7 +155,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                 listener.OnError(ServiceCommandError.NotSupported());
         }
 
-        public void Rewind(ResponseListener<object> listener)
+        public void Rewind(ResponseListener listener)
         {
             IMediaControl mediaControl = null;
 
@@ -168,7 +168,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                 listener.OnError(ServiceCommandError.NotSupported());
         }
 
-        public void FastForward(ResponseListener<object> listener)
+        public void FastForward(ResponseListener listener)
         {
             IMediaControl mediaControl = null;
 
@@ -181,7 +181,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                 listener.OnError(ServiceCommandError.NotSupported());
         }
 
-        public void Previous(ResponseListener<object> listener)
+        public void Previous(ResponseListener listener)
         {
             IMediaControl mediaControl = null;
 
@@ -194,7 +194,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                 listener.OnError(ServiceCommandError.NotSupported());
         }
 
-        public void Next(ResponseListener<object> listener)
+        public void Next(ResponseListener listener)
         {
             IMediaControl mediaControl = null;
 
@@ -207,7 +207,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                 listener.OnError(ServiceCommandError.NotSupported());
         }
 
-        public void Seek(long position, ResponseListener<object> listener)
+        public void Seek(long position, ResponseListener listener)
         {
             IMediaControl mediaControl = null;
 
@@ -220,7 +220,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                 listener.OnError(ServiceCommandError.NotSupported());
         }
 
-        public void GetDuration(ResponseListener<long> listener)
+        public void GetDuration(ResponseListener listener)
         {
             IMediaControl mediaControl = null;
 
@@ -233,7 +233,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                 listener.OnError(ServiceCommandError.NotSupported());
         }
 
-        public void GetPosition(ResponseListener<long> listener)
+        public void GetPosition(ResponseListener listener)
         {
             IMediaControl mediaControl = null;
 
@@ -246,7 +246,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                 listener.OnError(ServiceCommandError.NotSupported());
         }
 
-        public void GetPlayState(ResponseListener<PlayStateStatus> listener)
+        public void GetPlayState(ResponseListener listener)
         {
             IMediaControl mediaControl = null;
 
@@ -259,7 +259,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                 listener.OnError(ServiceCommandError.NotSupported());
         }
 
-        public IServiceSubscription<PlayStateStatus> SubscribePlayState(ResponseListener<PlayStateStatus> listener)
+        public IServiceSubscription SubscribePlayState(ResponseListener listener)
         {
             IMediaControl mediaControl = null;
 
@@ -275,35 +275,29 @@ namespace ConnectSdk.Windows.Service.Sessions
         }
 
 
-       public void PlayMedia(string url, string mimeType, string title, string description, string iconSrc, bool shouldLoop,
-           ResponseListener<MediaLaunchObject> listener)
-       {
-           Util.PostError(listener, ServiceCommandError.NotSupported());
-       }
-
-       public void CloseMedia(LaunchSession launchSession, ResponseListener<object> listener)
+        public void CloseMedia(LaunchSession launchSession, ResponseListener listener)
         {
             Util.PostError(listener, ServiceCommandError.NotSupported());
         }
 
         public void DisplayImage(String url, String mimeType, String title, String description, String iconSrc,
-            ResponseListener<LaunchSession> listener)
+            ResponseListener listener)
         {
             Util.PostError(listener, ServiceCommandError.NotSupported());
         }
 
-        public void DisplayImage(MediaInfo mediaInfo, ResponseListener<LaunchSession> listener)
+        public void DisplayImage(MediaInfo mediaInfo, ResponseListener listener)
         {
             Util.PostError(listener, ServiceCommandError.NotSupported());
         }
 
         public void PlayMedia(String url, String mimeType, String title, String description, String iconSrc,
-            bool shouldLoop, ResponseListener<LaunchSession> listener)
+            bool shouldLoop, ResponseListener listener)
         {
             Util.PostError(listener, ServiceCommandError.NotSupported());
         }
 
-        public void PlayMedia(MediaInfo mediaInfo, bool shouldLoop, ResponseListener<LaunchSession> listener)
+        public void PlayMedia(MediaInfo mediaInfo, bool shouldLoop, ResponseListener listener)
         {
             Util.PostError(listener, ServiceCommandError.NotSupported());
         }
@@ -318,13 +312,7 @@ namespace ConnectSdk.Windows.Service.Sessions
             return CapabilityPriorityLevel.VeryLow;
         }
 
-       public void DisplayImage(string url, string mimeType, string title, string description, string iconSrc,
-           ResponseListener<MediaLaunchObject> listener)
-       {
-           Util.PostError(listener, ServiceCommandError.NotSupported());
-       }
-
-       //public IWebAppSessionListener GetWebAppSessionListener()
+        //public IWebAppSessionListener GetWebAppSessionListener()
         //{
         //    return webAppListener;
         //}

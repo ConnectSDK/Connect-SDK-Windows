@@ -1,9 +1,9 @@
 ﻿namespace ConnectSdk.Windows.Service.Command
 {
-    public interface IServiceCommandProcessor<T>
+    public interface IServiceCommandProcessor
     {
-        void Unsubscribe(UrlServiceSubscription<T> subscription);
-        void Unsubscribe(IServiceSubscription<T> subscription);
-        void SendCommand(ServiceCommand<T> command);
+        void Unsubscribe(UrlServiceSubscription subscription);
+        void Unsubscribe(IServiceSubscription subscription);
+        void SendCommand(ServiceCommand command);
     }
 }

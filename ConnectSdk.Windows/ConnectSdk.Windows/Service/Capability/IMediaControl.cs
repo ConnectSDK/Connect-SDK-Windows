@@ -8,20 +8,20 @@ namespace ConnectSdk.Windows.Service.Capability
         IMediaControl GetMediaControl();
         CapabilityPriorityLevel GetMediaControlCapabilityLevel();
 
-        void Play(ResponseListener<object> listener);
-        void Pause(ResponseListener<object> listener);
-        void Stop(ResponseListener<object> listener);
-        void Rewind(ResponseListener<object> listener);
-        void FastForward(ResponseListener<object> listener);
+        void Play(ResponseListener listener);
+        void Pause(ResponseListener listener);
+        void Stop(ResponseListener listener);
+        void Rewind(ResponseListener listener);
+        void FastForward(ResponseListener listener);
 
-        void Seek(long position, ResponseListener<object> listener);
-        void GetDuration(ResponseListener<long> listener);
-        void GetPosition(ResponseListener<long> listener);
+        void Seek(long position, ResponseListener listener);
+        void GetDuration(ResponseListener listener);
+        void GetPosition(ResponseListener listener);
 
-        void GetPlayState(ResponseListener<PlayStateStatus> listener);
-        IServiceSubscription<PlayStateStatus> SubscribePlayState(ResponseListener<PlayStateStatus> listener);
+        void GetPlayState(ResponseListener listener);
+        IServiceSubscription SubscribePlayState(ResponseListener listener);
 
-        void Next(ResponseListener<object> listener);
-        void Previous(ResponseListener<object> listener);
+        void Next(ResponseListener listener);
+        void Previous(ResponseListener listener);
     }
 }
