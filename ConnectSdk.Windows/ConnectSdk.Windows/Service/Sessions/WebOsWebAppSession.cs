@@ -176,39 +176,45 @@ namespace ConnectSdk.Windows.Service.Sessions
                 return;
             }
 
-            MConnectionListener = new ResponseListener();
-            MConnectionListener.Success += (sender, o) =>
-            {
-                var finalConnectionListener = new ResponseListener();
-                finalConnectionListener.Success += (sender1, o1) =>
+
+            MConnectionListener = new ResponseListener
+            (
+                loadEventArg =>
                 {
-                    Connected = true;
+                    var finalConnectionListener = new ResponseListener
+                    (
+                        loadEventArg2 =>
+                        {
+                            Connected = true;
+
+                            if (connectionListener != null)
+                                connectionListener.OnSuccess(loadEventArg2);
+                        },
+                        serviceCommandError =>
+                        {
+                            DisconnectFromWebApp();
+
+                            if (MConnectionListener != null)
+                                MConnectionListener.OnError(serviceCommandError);
+                        }
+                    );
+
+                    Service.ConnectToWebApp(this, joinOnly, finalConnectionListener);
+                },
+                serviceCommandError =>
+                {
+                    if (Socket != null)
+                        DisconnectFromWebApp();
 
                     if (connectionListener != null)
-                        connectionListener.OnSuccess(o1);
-                };
-                finalConnectionListener.Error += (sender1, error1) =>
-                {
-                    DisconnectFromWebApp();
+                    {
+                        if (serviceCommandError == null)
+                            serviceCommandError = new ServiceCommandError(0, "Unknown error connecting to web app");
 
-                    if (MConnectionListener != null)
-                        MConnectionListener.OnError(error1);
-                };
-                Service.ConnectToWebApp(this, joinOnly, finalConnectionListener);
-            };
-            MConnectionListener.Error += (sender, error) =>
-            {
-                if (Socket != null)
-                    DisconnectFromWebApp();
-
-                if (connectionListener != null)
-                {
-                    if (error == null)
-                        error = new ServiceCommandError(0, "Unknown error connecting to web app");
-
-                    connectionListener.OnError(error);
+                        connectionListener.OnError(serviceCommandError);
+                    }
                 }
-            };
+            );
 
 
             if (Socket != null)
@@ -295,13 +301,15 @@ namespace ConnectSdk.Windows.Service.Sessions
             }
             else
             {
-                var connectListener = new ResponseListener();
-                connectListener.Error += (sender, error) =>
+                var connectListener = new ResponseListener
+                (
+                loadEventArg => SendP2PMessage(message, listener),
+                serviceCommandError =>
                 {
                     if (listener != null)
-                        listener.OnError(error);
-                };
-                connectListener.Success += (sender, o) => SendP2PMessage(message, listener);
+                        listener.OnError(serviceCommandError);
+                }
+                );
 
                 Connect(connectListener);
             }
@@ -346,7 +354,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                 var mediaCommandObject = new JsonObject
                 {
                     {"type", JsonValue.CreateStringValue("seek")},
-                    {"position", JsonValue.CreateNumberValue(position/1000)},
+                    {"position", JsonValue.CreateNumberValue((int)(position/1000))},
                     {"requestId", JsonValue.CreateStringValue(requestId)}
                 };
                 message.Add("mediaCommand", mediaCommandObject);
@@ -386,36 +394,47 @@ namespace ConnectSdk.Windows.Service.Sessions
                     listener.OnError(new ServiceCommandError(0, null));
             }
 
-            var commandResponseListener = new ResponseListener();
-            commandResponseListener.Success += (sender, o) =>
-            {
-                try
-                {
-                    var position = ((JsonObject) o).GetNamedNumber("position");
 
-                    if (listener != null)
-                        listener.OnSuccess(position*1000);
-                }
-                catch (Exception)
+            var commandResponseListener = new ResponseListener
+            (
+                loadEventArg =>
                 {
-                    commandResponseListener.OnError(new ServiceCommandError(0, null));
+                    try
+                    {
+                        var position = ((JsonObject)loadEventArg).GetNamedNumber("position");
+
+                        if (listener != null)
+                            listener.OnSuccess(position * 1000);
+                    }
+                    catch (Exception)
+                    {
+                        if (listener != null) listener.OnError(new ServiceCommandError(0, null));
+                    }
+                },
+                serviceCommandError =>
+                {
+                    if (listener != null)
+                        listener.OnError(serviceCommandError);
                 }
-            };
-            commandResponseListener.Error += (sender, error) =>
-            {
-                if (listener != null)
-                    listener.OnError(error);
-            };
+            );
 
             var command = new ServiceCommand(null, null, null, commandResponseListener);
             mActiveCommands.Add(requestId, command);
-            var messageResponseListener = new ResponseListener();
-            messageResponseListener.Error += (sender, error) =>
-            {
-                if (listener != null)
-                    listener.OnError(error);
-            };
-            messageResponseListener.Success += (sender, o) => { };
+
+
+            var messageResponseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+
+                },
+                serviceCommandError =>
+                {
+                    if (listener != null)
+                        listener.OnError(serviceCommandError);
+                }
+            );
+
             SendMessage(message, messageResponseListener);
         }
 
@@ -441,39 +460,51 @@ namespace ConnectSdk.Windows.Service.Sessions
                     listener.OnError(new ServiceCommandError(0, null));
             }
 
-            var commandResponseListener = new ResponseListener();
-            commandResponseListener.Success += (sender, o) =>
-            {
-                try
-                {
-                    var position = ((JsonObject) o).GetNamedNumber("duration");
 
-                    if (listener != null)
-                        listener.OnSuccess(position*1000);
-                }
-                catch (Exception)
+            var commandResponseListener = new ResponseListener
+            (
+                loadEventArg =>
                 {
-                    commandResponseListener.OnError(new ServiceCommandError(0, null));
+                    try
+                    {
+                        var position = ((JsonObject)loadEventArg).GetNamedNumber("duration");
+
+                        if (listener != null)
+                            listener.OnSuccess(position * 1000);
+                    }
+                    catch (Exception)
+                    {
+                        if (listener != null) listener.OnError(new ServiceCommandError(0, null));
+                    }
+                },
+                serviceCommandError =>
+                {
+                    if (listener != null)
+                        listener.OnError(serviceCommandError);
                 }
-            };
-            commandResponseListener.Error += (sender, error) =>
-            {
-                if (listener != null)
-                    listener.OnError(error);
-            };
+            );
+
 
 
             var command = new ServiceCommand(null, null, null, commandResponseListener);
 
             mActiveCommands.Add(requestId, command);
-            var messageResponseListener = new ResponseListener();
-            messageResponseListener.Error += (sender, error) =>
-            {
-                if (listener != null)
-                    listener.OnError(error);
-            };
-            messageResponseListener.Success += (sender, o) => { };
-            SendMessage(message, messageResponseListener);
+
+
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+
+                },
+                serviceCommandError =>
+                {
+                    if (listener != null)
+                        listener.OnError(serviceCommandError);
+                }
+            );
+
+            SendMessage(message, responseListener);
         }
 
         public new void GetPlayState(ResponseListener listener)
@@ -499,39 +530,47 @@ namespace ConnectSdk.Windows.Service.Sessions
                     listener.OnError(new ServiceCommandError(0, null));
             }
 
-            var commandResponseListener = new ResponseListener();
-            commandResponseListener.Success += (sender, o) =>
-            {
-                try
+            var commandResponseListener = new ResponseListener
+            (
+                loadEventArg =>
                 {
-                    var position = ((JsonObject) o).GetNamedNumber("duration");
+                    try
+                    {
+                        var position = ((JsonObject)loadEventArg).GetNamedNumber("duration");
 
+                        if (listener != null)
+                            listener.OnSuccess(position * 1000);
+                    }
+                    catch (Exception)
+                    {
+                        if (listener != null) listener.OnError(new ServiceCommandError(0, null));
+                    }
+                },
+                serviceCommandError =>
+                {
                     if (listener != null)
-                        listener.OnSuccess(position*1000);
+                        listener.OnError(serviceCommandError);
                 }
-                catch (Exception)
-                {
-                    commandResponseListener.OnError(new ServiceCommandError(0, null));
-                }
-            };
-            commandResponseListener.Error += (sender, error) =>
-            {
-                if (listener != null)
-                    listener.OnError(error);
-            };
-
+            );
 
             var command = new ServiceCommand(null, null, null, commandResponseListener);
 
             mActiveCommands.Add(requestId, command);
-            var messageResponseListener = new ResponseListener();
-            messageResponseListener.Error += (sender, error) =>
-            {
-                if (listener != null)
-                    listener.OnError(error);
-            };
-            messageResponseListener.Success += (sender, o) => { };
-            SendMessage(message, messageResponseListener);
+
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+
+                },
+                serviceCommandError =>
+                {
+                    if (listener != null)
+                        listener.OnError(serviceCommandError);
+                }
+            );
+
+            SendMessage(message, responseListener);
         }
 
         public new IServiceSubscription SubscribePlayState(ResponseListener listener)
@@ -541,9 +580,13 @@ namespace ConnectSdk.Windows.Service.Sessions
 
             if (!Connected)
             {
-                var connectResponseListener = new ResponseListener();
-                connectResponseListener.Error += (sender, error) => Util.PostError(listener, error);
-                connectResponseListener.Success += (sender, o) => { };
+
+                var connectResponseListener = new ResponseListener
+                (
+                loadEventArg => { },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+                );
+
                 Connect(connectResponseListener);
             }
 
@@ -607,19 +650,22 @@ namespace ConnectSdk.Windows.Service.Sessions
                 if (listener != null)
                     listener.OnError(new ServiceCommandError(0, null));
             }
-            var responseListener = new ResponseListener();
-            responseListener.Error += (sender, error) => Util.PostError(listener, error);
-            responseListener.Success +=
-                (sender, o) => Util.PostSuccess(listener, new MediaLaunchObject(LaunchSession, GetMediaControl()));
 
+            var responseListener = new ResponseListener
+            (
+                loadEventArg => Util.PostSuccess(listener, new MediaLaunchObject(LaunchSession, GetMediaControl())),
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
 
             var command = new ServiceCommand(Socket, null, null, responseListener);
 
             mActiveCommands.Add(requestId, command);
 
-            var messageResponseListener = new ResponseListener();
-            messageResponseListener.Error += (sender, error) => Util.PostError(listener, error);
-            messageResponseListener.Success += (sender, o) => { };
+            var messageResponseListener = new ResponseListener
+            (
+                loadEventArg => { },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
 
             SendP2PMessage(message, messageResponseListener);
         }
@@ -653,19 +699,22 @@ namespace ConnectSdk.Windows.Service.Sessions
                 if (listener != null)
                     listener.OnError(new ServiceCommandError(0, null));
             }
-            var responseListener = new ResponseListener();
-            responseListener.Error += (sender, error) => Util.PostError(listener, error);
-            responseListener.Success +=
-                (sender, o) => Util.PostSuccess(listener, new MediaLaunchObject(LaunchSession, GetMediaControl()));
 
+            var responseListener = new ResponseListener
+            (
+                loadEventArg => Util.PostSuccess(listener, new MediaLaunchObject(LaunchSession, GetMediaControl())),
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
 
             var command = new ServiceCommand(Socket, null, null, responseListener);
 
             mActiveCommands.Add(requestId, command);
 
-            var messageResponseListener = new ResponseListener();
-            messageResponseListener.Error += (sender, error) => Util.PostError(listener, error);
-            messageResponseListener.Success += (sender, o) => { };
+            var messageResponseListener = new ResponseListener
+            (
+                loadEventArg => { },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
 
             SendP2PMessage(message, messageResponseListener);
         }

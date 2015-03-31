@@ -161,17 +161,6 @@ namespace ConnectSdk.Windows.Service
 
             httpClient = new HttpClient();
             inputPickerSession = null;
-
-            var mTextChangedListener = new ResponseListener();
-
-            mTextChangedListener.Success += (sender, o) =>
-            {
-                keyboardstring = new StringBuilder((string)o);
-            };
-
-            mTextChangedListener.Error += (sender, o) =>
-            {
-            };
         }
 
         public static JsonObject DiscoveryParameters()
@@ -273,19 +262,21 @@ namespace ConnectSdk.Windows.Service
         {
             ServiceConnectionState = ConnectionState.Connecting;
 
-            var responseListener = new ResponseListener();
-            responseListener.Success += (sender, args) =>
-            {
-                if (Listener != null)
-                    Listener.OnPairingRequired(this, PairingType.PIN_CODE, null);
-            };
-            responseListener.Error += (sender, error) =>
-            {
-                ServiceConnectionState = ConnectionState.Initial;
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+                    if (Listener != null)
+                        Listener.OnPairingRequired(this, PairingType.PIN_CODE, null);
+                },
+                serviceCommandError =>
+                {
+                    ServiceConnectionState = ConnectionState.Initial;
 
-                if (Listener != null)
-                    Listener.OnConnectionFailure(this, new Exception(error.ToString()));
-            };
+                    if (Listener != null)
+                        Listener.OnConnectionFailure(this, new Exception(serviceCommandError.ToString()));
+                }
+            );
 
             var requestUrl = GetUdapRequestUrl(UdapPathPairing);
 
@@ -301,9 +292,11 @@ namespace ConnectSdk.Windows.Service
         // TODO add this when user cancel pairing
         public void RemovePairingKeyOnTv()
         {
-            var responseListener = new ResponseListener();
-            responseListener.Success += (sender, args) => { };
-            responseListener.Error += (sender, args) => { };
+            var responseListener = new ResponseListener
+            (
+                loadEventArg => { },
+                serviceCommandError => { }
+            );
 
             var requestUrl = GetUdapRequestUrl(UdapPathPairing);
 
@@ -324,21 +317,23 @@ namespace ConnectSdk.Windows.Service
                 ServiceConfig = new NetcastTvServiceConfig(ServiceConfig.ServiceUuid);
             }
 
-            var responseListener = new ResponseListener();
 
-            responseListener.Success += (sender, args) =>
-            {
-                ServiceConnectionState = ConnectionState.Paired;
-                ((NetcastTvServiceConfig)ServiceConfig).PairingKey = pairingKey;
-                ConnectSuccess();
-            };
-            responseListener.Error += (sender, args) =>
-            {
-                ServiceConnectionState = ConnectionState.Initial;
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+                    ServiceConnectionState = ConnectionState.Paired;
+                    ((NetcastTvServiceConfig)ServiceConfig).PairingKey = pairingKey;
+                    ConnectSuccess();
+                },
+                serviceCommandError =>
+                {
+                    ServiceConnectionState = ConnectionState.Initial;
 
-                if (Listener != null)
-                    Listener.OnConnectionFailure(this, new Exception(args.ToString()));
-            };
+                    if (Listener != null)
+                        Listener.OnConnectionFailure(this, new Exception(serviceCommandError.ToString()));
+                }
+            );
 
             var requestUrl = GetUdapRequestUrl(UdapPathPairing);
 
@@ -389,24 +384,26 @@ namespace ConnectSdk.Windows.Service
 
         public void GetApplication(string appName, ResponseListener listener)
         {
-            var responseListener = new ResponseListener();
-            responseListener.Success += (sender, args) =>
-            {
-                var strObj = ((string)args);
 
-                var appId = new AppInfo(Util.DecToHex(strObj));
-
-                if (!string.IsNullOrEmpty(strObj))
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
                 {
-                    Util.PostSuccess(listener, appId);
-                }
+                    var strObj = ((string)loadEventArg);
 
-            };
-            responseListener.Error += (sender, args) =>
-            {
-                if (listener != null)
-                    Util.PostError(listener, args);
-            };
+                    var appId = new AppInfo(Util.DecToHex(strObj));
+
+                    if (!string.IsNullOrEmpty(strObj))
+                    {
+                        Util.PostSuccess(listener, appId);
+                    }
+                },
+                serviceCommandError =>
+                {
+                    if (listener != null)
+                        Util.PostError(listener, serviceCommandError);
+                }
+            );
 
             var uri = UdapPathApptoappData + appName;
             var requestUrl = GetUdapRequestUrl(uri);
@@ -417,54 +414,58 @@ namespace ConnectSdk.Windows.Service
 
         public void LaunchApp(string appId, ResponseListener listener)
         {
-            var appInfoListener = new ResponseListener();
 
-            appInfoListener.Success += (sender, args) => LaunchAppWithInfo((AppInfo)args, listener);
-            appInfoListener.Error += (sender, args) => Util.PostError(listener, args);
+            var responseListener = new ResponseListener
+            (
+                loadEventArg => LaunchAppWithInfo((AppInfo)loadEventArg, listener),
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
 
-            GetAppInfoForId(appId, appInfoListener);
+            GetAppInfoForId(appId, responseListener);
         }
 
         private void GetAppInfoForId(string appId, ResponseListener listener)
         {
-            var appListListener = new ResponseListener();
-            appListListener.Success += (sender, args) =>
-            {
-                var appInfos = args as List<AppInfo>;
-                if (appInfos != null)
-                    foreach (var info in appInfos)
-                    {
-                        if (info.Name.Equals(appId))
+
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+                    var appInfos = loadEventArg as List<AppInfo>;
+                    if (appInfos != null)
+                        foreach (var info in appInfos)
                         {
-                            Util.PostSuccess(listener, info);
+                            if (info.Name.Equals(appId))
+                            {
+                                Util.PostSuccess(listener, info);
+                            }
+                            return;
                         }
-                        return;
-                    }
 
-                Util.PostError(listener, new ServiceCommandError(0, null));
-            };
+                    Util.PostError(listener, new ServiceCommandError(0, null));
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
 
-            appListListener.Error += (sender, args) => Util.PostError(listener, args);
-
-            GetAppList(appListListener);
+            GetAppList(responseListener);
         }
 
         private void LaunchApplication(string appName, string auid, string contentId, ResponseListener listener)
         {
-            var responseListener = new ResponseListener();
 
-            responseListener.Success += (sender, args) =>
-            {
-                var launchSession = LaunchSession.LaunchSessionForAppId(auid);
-                launchSession.AppName = appName;
-                launchSession.Service = this;
-                launchSession.SessionType = LaunchSessionType.App;
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+                    var launchSession = LaunchSession.LaunchSessionForAppId(auid);
+                    launchSession.AppName = appName;
+                    launchSession.Service = this;
+                    launchSession.SessionType = LaunchSessionType.App;
 
-                Util.PostSuccess(listener, launchSession);
-            };
-
-            responseListener.Error += (sender, args) => Util.PostError(listener, args);
-
+                    Util.PostSuccess(listener, launchSession);
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
 
             var requestUrl = GetUdapRequestUrl(UdapPathApptoappCommand);
 
@@ -510,15 +511,18 @@ namespace ConnectSdk.Windows.Service
 
         private void LaunchNamedApplication(string appName, ResponseListener listener)
         {
-            var appInfoListener = new ResponseListener();
-            appInfoListener.Success += (sender, o) =>
-            {
-                var ai = o as AppInfo;
-                if (ai != null) LaunchApplication(appName, ai.Id, null, listener);
-            };
 
-            appInfoListener.Error += (sender, o) => Util.PostError(listener, o);
-            GetApplication(appName, appInfoListener);
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+                    var ai = loadEventArg as AppInfo;
+                    if (ai != null) LaunchApplication(appName, ai.Id, null, listener);
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
+
+            GetApplication(appName, responseListener);
         }
 
         public void LaunchBrowser(string url, ResponseListener listener)
@@ -660,26 +664,29 @@ namespace ConnectSdk.Windows.Service
 
         private void GetTotalNumberOfApplications(int type, ResponseListener listener)
         {
-            var responseListener = new ResponseListener();
-            responseListener.Success += (sender, o) =>
-            {
-                var lea = o as LoadEventArgs;
-                if (lea == null) return;
-                var load = lea.Load.GetPayload() as HttpResponseMessage;
 
-                if (load == null) return;
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+                    var lea = loadEventArg as LoadEventArgs;
+                    if (lea == null) return;
+                    var load = lea.Load.GetPayload() as HttpResponseMessage;
 
-                var strObj = load.Content.ReadAsStringAsync().Result;
+                    if (load == null) return;
 
-                JsonObject jsonObject;
-                JsonObject.TryParse(strObj, out jsonObject);
+                    var strObj = load.Content.ReadAsStringAsync().Result;
 
-                //var tarray = jsonObject.GetNamedArray("Channel List", new JsonArray());
-                var applicationNumber = ParseAppNumberXmlToJson(strObj);
+                    JsonObject jsonObject;
+                    JsonObject.TryParse(strObj, out jsonObject);
 
-                Util.PostSuccess(listener, applicationNumber);
-            };
-            responseListener.Error += (sender, o) => Util.PostError(listener, o);
+                    //var tarray = jsonObject.GetNamedArray("Channel List", new JsonArray());
+                    var applicationNumber = ParseAppNumberXmlToJson(strObj);
+
+                    Util.PostSuccess(listener, applicationNumber);
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
 
             var requestUrl = GetUdapRequestUrl(UdapPathData, TargetAppnumGet, type.ToString());
 
@@ -690,40 +697,42 @@ namespace ConnectSdk.Windows.Service
 
         private void GetApplications(int type, int number, ResponseListener listener)
         {
-            var responseListener = new ResponseListener();
-            responseListener.Success += (sender, o) =>
-            {
-                var lea = o as LoadEventArgs;
-                if (lea == null) return;
-                var load = lea.Load.GetPayload() as HttpResponseMessage;
-
-                if (load == null) return;
-                var strObj = load.Content.ReadAsStringAsync().Result;
-
-                var appList = new List<AppInfo>();
-
-                var reader = Util.GenerateStreamFromstring(strObj);
-                var xmlReader = XmlReader.Create(reader);
-
-                while (xmlReader.Read())
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
                 {
-                    if (xmlReader.Name.Equals("data", StringComparison.OrdinalIgnoreCase))
-                        appList.Add(new AppInfo(""));
-                    if (xmlReader.Name.Equals("auid", StringComparison.OrdinalIgnoreCase))
-                        appList[appList.Count - 1].Id = xmlReader.ReadElementContentAsString();
-                    if (xmlReader.Name.Equals("name", StringComparison.OrdinalIgnoreCase))
-                        appList[appList.Count - 1].Name = xmlReader.ReadElementContentAsString();
-                }
-                appList = (from a in appList where !string.IsNullOrEmpty(a.Name) select a).ToList();
-                if (listener != null)
-                {
-                    Util.PostSuccess(listener, appList);
-                }
-            };
-            responseListener.Error += (sender, o) =>
-            {
+                    var lea = loadEventArg as LoadEventArgs;
+                    if (lea == null) return;
+                    var load = lea.Load.GetPayload() as HttpResponseMessage;
 
-            };
+                    if (load == null) return;
+                    var strObj = load.Content.ReadAsStringAsync().Result;
+
+                    var appList = new List<AppInfo>();
+
+                    var reader = Util.GenerateStreamFromstring(strObj);
+                    var xmlReader = XmlReader.Create(reader);
+
+                    while (xmlReader.Read())
+                    {
+                        if (xmlReader.Name.Equals("data", StringComparison.OrdinalIgnoreCase))
+                            appList.Add(new AppInfo(""));
+                        if (xmlReader.Name.Equals("auid", StringComparison.OrdinalIgnoreCase))
+                            appList[appList.Count - 1].Id = xmlReader.ReadElementContentAsString();
+                        if (xmlReader.Name.Equals("name", StringComparison.OrdinalIgnoreCase))
+                            appList[appList.Count - 1].Name = xmlReader.ReadElementContentAsString();
+                    }
+                    appList = (from a in appList where !string.IsNullOrEmpty(a.Name) select a).ToList();
+                    if (listener != null)
+                    {
+                        Util.PostSuccess(listener, appList);
+                    }
+                },
+                serviceCommandError =>
+                {
+
+                }
+            );
 
             var requestUrl = GetUdapRequestUrl(UdapPathData, TargetApplistGet, type.ToString(), "0",
                 number.ToString());
@@ -736,46 +745,60 @@ namespace ConnectSdk.Windows.Service
         {
             applications.Clear();
 
-            var responseListener = new ResponseListener();
-            responseListener.Success += (sender, o) =>
-            {
-                var responseListener2 = new ResponseListener();
-                responseListener2.Success += (sender2, o2) =>
+
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
                 {
-                    var loadEventArgs = o2 as LoadEventArgs;
-                    if (loadEventArgs != null)
-                        applications.AddRange((List<AppInfo>)(loadEventArgs.Load.GetPayload()));
-                    var responseListener3 = new ResponseListener();
-                    responseListener3.Success += (sender3, o3) =>
-                    {
-                        var responseListener4 = new ResponseListener();
-                        responseListener4.Success += (sender4, o4) =>
+
+                    var responseListener2 = new ResponseListener
+                    (
+                        loadEventArg2 =>
                         {
-                            var eventArgs = o4 as LoadEventArgs;
-                            if (eventArgs != null)
-                            {
-                                var apps = (List<AppInfo>)(eventArgs.Load.GetPayload());
-                                applications.AddRange(apps);
-                            }
-                            Util.PostSuccess(listener, applications);
-                        };
+                            var loadEventArgs = loadEventArg2 as LoadEventArgs;
+                            if (loadEventArgs != null)
+                                applications.AddRange((List<AppInfo>)(loadEventArgs.Load.GetPayload()));
 
-                        responseListener4.Error += (sender4, o4) => Util.PostError(listener, o4);
-                        var args = o3 as LoadEventArgs;
-                        if (args != null)
-                            GetApplications(3, (int)args.Load.GetPayload(), responseListener4);
-                    };
 
-                    responseListener3.Error += (sender3, o3) => Util.PostError(listener, o3);
-                    GetTotalNumberOfApplications(3, responseListener3);
-                };
-                responseListener2.Error += (sender2, o2) => Util.PostError(listener, o2);
-                var loadEventArgs1 = o as LoadEventArgs;
-                if (loadEventArgs1 != null)
-                    GetApplications(2, (int)loadEventArgs1.Load.GetPayload(), responseListener2);
-            };
+                            var responseListener3 = new ResponseListener
+                            (
+                                loadEventArg3 =>
+                                {
 
-            responseListener.Error += (sender, o) => Util.PostError(listener, o);
+                                    var responseListener4 = new ResponseListener
+                                    (
+                                        loadEventArg4 =>
+                                        {
+                                            var eventArgs = loadEventArg4 as LoadEventArgs;
+                                            if (eventArgs != null)
+                                            {
+                                                var apps = (List<AppInfo>)(eventArgs.Load.GetPayload());
+                                                applications.AddRange(apps);
+                                            }
+                                            Util.PostSuccess(listener, applications);
+                                        },
+                                        serviceCommandError => Util.PostError(listener, serviceCommandError)
+                                    );
+
+                                    var args = loadEventArg3 as LoadEventArgs;
+                                    if (args != null)
+                                        GetApplications(3, (int)args.Load.GetPayload(), responseListener4);
+                                },
+                                serviceCommandError => Util.PostError(listener, serviceCommandError)
+                            );
+
+                            GetTotalNumberOfApplications(3, responseListener3);
+                        },
+                        serviceCommandError => Util.PostError(listener, serviceCommandError)
+                    );
+
+                    var loadEventArgs1 = loadEventArg as LoadEventArgs;
+                    if (loadEventArgs1 != null)
+                        GetApplications(2, (int)loadEventArgs1.Load.GetPayload(), responseListener2);
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
+
             GetTotalNumberOfApplications(2, responseListener);
         }
 
@@ -798,26 +821,29 @@ namespace ConnectSdk.Windows.Service
             var requestUrl = string.Format("{0}{1}", GetUdapRequestUrl(UdapPathApptoappData),
                 string.Format("/{0}/status", launchSession.AppId));
 
-            var responseListener = new ResponseListener();
-            responseListener.Success += (sender, o) =>
-            {
-                var response = (string)o;
-                AppState appState;
-                if (response.Equals("NONE"))
-                    appState = new AppState(false, false);
-                else if (response.Equals("LOAD"))
-                    appState = new AppState(false, true);
-                else if (response.Equals("RUN_NF"))
-                    appState = new AppState(true, false);
-                else if (response.Equals("TERM"))
-                    appState = new AppState(false, true);
-                else
-                    appState = new AppState(false, false);
 
-                Util.PostSuccess(listener, appState);
-            };
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+                    var response = (string)loadEventArg;
+                    AppState appState;
+                    if (response.Equals("NONE"))
+                        appState = new AppState(false, false);
+                    else if (response.Equals("LOAD"))
+                        appState = new AppState(false, true);
+                    else if (response.Equals("RUN_NF"))
+                        appState = new AppState(true, false);
+                    else if (response.Equals("TERM"))
+                        appState = new AppState(false, true);
+                    else
+                        appState = new AppState(false, false);
 
-            responseListener.Error += (sender, o) => Util.PostError(listener, o);
+                    Util.PostSuccess(listener, appState);
+
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
 
             var command = new ServiceCommand(this, requestUrl, null, responseListener) { HttpMethod = ServiceCommand.TypeGet };
             command.Send();
@@ -845,45 +871,47 @@ namespace ConnectSdk.Windows.Service
         {
             var requestUrl = GetUdapRequestUrl(UdapPathData, TargetChannelList);
 
-            var responseListener = new ResponseListener();
-            responseListener.Success += (sender, o) =>
-            {
-                var lea = o as LoadEventArgs;
-                if (lea == null) return;
-                var load = lea.Load.GetPayload() as HttpResponseMessage;
 
-                if (load == null) return;
-                var strObj = load.Content.ReadAsStringAsync().Result;
-
-                var ser = new XmlSerializer(typeof(envelope));
-                var obj = ser.Deserialize(new StringReader(strObj)) as envelope;
-
-                if (obj != null)
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
                 {
-                    var channels = new List<ChannelInfo>();
-                    for (var i = 0; i < obj.dataList.data.Count(); i++)
+                    var lea = loadEventArg as LoadEventArgs;
+                    if (lea == null) return;
+                    var load = lea.Load.GetPayload() as HttpResponseMessage;
+
+                    if (load == null) return;
+                    var strObj = load.Content.ReadAsStringAsync().Result;
+
+                    var ser = new XmlSerializer(typeof(envelope));
+                    var obj = ser.Deserialize(new StringReader(strObj)) as envelope;
+
+                    if (obj != null)
                     {
-                        channels.Add(new ChannelInfo
+                        var channels = new List<ChannelInfo>();
+                        for (var i = 0; i < obj.dataList.data.Count(); i++)
                         {
-                            ChannelId = obj.dataList.data[i].displayMajor.ToString(),
-                            ChannelNumber = obj.dataList.data[i].displayMajor.ToString(),
-                            ChannelName = obj.dataList.data[i].chname.ToString(),
-                            MajorNumber = obj.dataList.data[i].displayMajor,
-                            MinorNumber = obj.dataList.data[i].displayMinor,
-                            SourceIndex = obj.dataList.data[i].sourceIndex,
-                            PhysicalNumber = obj.dataList.data[i].physicalNum
-                            
-                        });
-                    }
-                    Util.PostSuccess(listener, channels);
-                }
-                else
-                {
-                    Util.PostError(responseListener, new ServiceCommandError(0,null));
-                }
-            };
+                            channels.Add(new ChannelInfo
+                            {
+                                ChannelId = obj.dataList.data[i].displayMajor.ToString(),
+                                ChannelNumber = obj.dataList.data[i].displayMajor.ToString(),
+                                ChannelName = obj.dataList.data[i].chname.ToString(),
+                                MajorNumber = obj.dataList.data[i].displayMajor,
+                                MinorNumber = obj.dataList.data[i].displayMinor,
+                                SourceIndex = obj.dataList.data[i].sourceIndex,
+                                PhysicalNumber = obj.dataList.data[i].physicalNum
 
-            responseListener.Error += (sender, o) => Util.PostError(responseListener, o);
+                            });
+                        }
+                        Util.PostSuccess(listener, channels);
+                    }
+                    else
+                    {
+                        Util.PostError(listener, new ServiceCommandError(0, null));
+                    }
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
 
             var command = new ServiceCommand(this, requestUrl, null, responseListener) { HttpMethod = ServiceCommand.TypeGet };
             command.Send();
@@ -901,25 +929,26 @@ namespace ConnectSdk.Windows.Service
 
         public void SetChannel(ChannelInfo channelInfo, ResponseListener listener)
         {
-            var responseListener = new ResponseListener();
-            responseListener.Success += (sender, o) =>
-            {
-                //((ConnectSdk.Windows.Service.Capability.Listeners.LoadEventArgs)(o)).Load.payload
-
-                var loa = o as LoadEventArgs;
-                if (loa != null)
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
                 {
-                    var channelList = loa.Load.GetPayload() as List<ChannelInfo>;
-                    if (channelList != null)
-                    {
-                        var requestUrl = GetUdapRequestUrl(UdapPathCommand);
+                    //((ConnectSdk.Windows.Service.Capability.Listeners.LoadEventArgs)(o)).Load.payload
 
-                        var ps = new Dictionary<string, string>();
+                    var loa = loadEventArg as LoadEventArgs;
+                    if (loa != null)
+                    {
+                        var channelList = loa.Load.GetPayload() as List<ChannelInfo>;
+                        if (channelList != null)
+                        {
+                            var requestUrl = GetUdapRequestUrl(UdapPathCommand);
+
+                            var ps = new Dictionary<string, string>();
 
                             foreach (var ch in channelList)
                             {
                                 //var rawData = ch.RawData;
-                                 
+
                                 var major = channelInfo.MajorNumber;
                                 var minor = channelInfo.MinorNumber;
 
@@ -943,21 +972,19 @@ namespace ConnectSdk.Windows.Service
 
                             var request = new ServiceCommand(this, requestUrl, httpMessage, listener);
                             request.Send();
+                        }
+                        else
+                        {
+                            Util.PostError(listener, new ServiceCommandError(500, "Could not retrieve channel list"));
+                        }
                     }
                     else
                     {
                         Util.PostError(listener, new ServiceCommandError(500, "Could not retrieve channel list"));
                     }
-                }
-                else
-                {
-                    Util.PostError(listener, new ServiceCommandError(500, "Could not retrieve channel list"));
-                }
-                
-            };
-
-            responseListener.Error += (sender, o) => Util.PostError(listener, o);
-
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
 
             GetChannelList(responseListener);
         }
@@ -965,30 +992,33 @@ namespace ConnectSdk.Windows.Service
         public void GetCurrentChannel(ResponseListener listener)
         {
             var requestUrl = GetUdapRequestUrl(UdapPathData, TargetCurrentChannel);
-            var responseListener = new ResponseListener();
-            responseListener.Success += (sender, o) =>
-            {
-                //TODO: fix this
-                //var strObj = (string)o;
-                //SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-                //InputStream stream = new ByteArrayInputStream(strObj.getBytes("UTF-8"));
-                //SAXParser saxParser = saxParserFactory.newSAXParser();
 
-                //NetcastChannelParser parser = new NetcastChannelParser();
-                //saxParser.parse(stream, parser);
 
-                //JSONArray channelArray = parser.getJSONChannelArray();
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+                    //TODO: fix this
+                    //var strObj = (string)o;
+                    //SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+                    //InputStream stream = new ByteArrayInputStream(strObj.getBytes("UTF-8"));
+                    //SAXParser saxParser = saxParserFactory.newSAXParser();
 
-                //if ( channelArrayLength > 0 ) {
-                //    JsonObject rawData = (JsonObject) channelArray.get(0);
+                    //NetcastChannelParser parser = new NetcastChannelParser();
+                    //saxParser.parse(stream, parser);
 
-                //    ChannelInfo channel = NetcastChannelParser.parseRawChannelData(rawData);
+                    //JSONArray channelArray = parser.getJSONChannelArray();
 
-                //    Util.PostSuccess(listener, channel);
-                //}
-            };
+                    //if ( channelArrayLength > 0 ) {
+                    //    JsonObject rawData = (JsonObject) channelArray.get(0);
 
-            responseListener.Error += (sender, o) => Util.PostError(listener, o);
+                    //    ChannelInfo channel = NetcastChannelParser.parseRawChannelData(rawData);
+
+                    //    Util.PostSuccess(listener, channel);
+                    //}
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
 
             var request = new ServiceCommand(this, requestUrl, null, responseListener);
             request.Send();
@@ -1038,35 +1068,38 @@ namespace ConnectSdk.Windows.Service
 
         public void Set3DEnabled(bool enabled, ResponseListener listener)
         {
-            var responseListener = new ResponseListener();
-            responseListener.Success += (sender, o) =>
-            {
-                if (enabled != (bool)o)
-                {
-                    SendKeyCode((int)VirtualKeycodes.Video3D, listener);
-                }
-            };
 
-            responseListener.Error += (sender, o) => Util.PostError(listener, o);
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+                    if (enabled != (bool)loadEventArg)
+                    {
+                        SendKeyCode((int)VirtualKeycodes.Video3D, listener);
+                    }
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
 
             Get3DEnabled(responseListener);
         }
 
         public void Get3DEnabled(ResponseListener listener)
         {
-            var responseListener = new ResponseListener();
-            responseListener.Success += (sender, o) =>
-            {
-                var strObj = (string)o;
-                var upperStr = strObj.ToUpper();
 
-                Util.PostSuccess(listener, upperStr.Contains("TRUE"));
-            };
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+                    var strObj = (string)loadEventArg;
+                    var upperStr = strObj.ToUpper();
 
-            responseListener.Error += (sender, o) => Util.PostError(listener, o);
+                    Util.PostSuccess(listener, upperStr.Contains("TRUE"));
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
 
             var requestUrl = GetUdapRequestUrl(UdapPathData, TargetIs_3D);
-
             var request = new ServiceCommand(this, requestUrl, null, responseListener)
             {
                 HttpMethod = ServiceCommand.TypeGet
@@ -1118,26 +1151,32 @@ namespace ConnectSdk.Windows.Service
 
         public void GetVolume(ResponseListener listener)
         {
-            var responseListener = new ResponseListener();
-            responseListener.Success += (sender, o) => Util.PostSuccess(listener, ((VolumeStatus)o).Volume);
+            var responseListener = new ResponseListener
+            (
+                loadEventArg => Util.PostSuccess(listener, ((VolumeStatus)loadEventArg).Volume),
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
 
-            responseListener.Error += (sender, o) => Util.PostError(listener, o);
             GetVolumeStatus(responseListener);
         }
 
         public void SetMute(bool isMute, ResponseListener listener)
         {
-            var responseListener = new ResponseListener();
-            responseListener.Success += (sender, o) => SendKeyCode((int)VirtualKeycodes.Mute, listener);
-            responseListener.Error += (sender, o) => Util.PostError(listener, o);
+            var responseListener = new ResponseListener
+            (
+                loadEventArg => SendKeyCode((int)VirtualKeycodes.Mute, listener),
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
             GetVolumeStatus(responseListener);
         }
 
         public void GetMute(ResponseListener listener)
         {
-            var responseListener = new ResponseListener();
-            responseListener.Success += (sender, o) => Util.PostSuccess(listener, ((VolumeStatus)o).IsMute);
-            responseListener.Error += (sender, o) => Util.PostError(listener, o);
+            var responseListener = new ResponseListener
+            (
+                loadEventArg => Util.PostSuccess(listener, ((VolumeStatus)loadEventArg).IsMute),
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
             GetVolumeStatus(responseListener);
         }
 
@@ -1159,31 +1198,32 @@ namespace ConnectSdk.Windows.Service
 
         private void GetVolumeStatus(ResponseListener listener)
         {
-            var responseListener = new ResponseListener();
-            responseListener.Success += (sender, o) =>
-            {
-                var strObj =
-                    (new StreamReader(
-                        (((HttpResponseMessage)((LoadEventArgs)o).Load.GetPayload()).Content.ReadAsStreamAsync()
-                            .Result)))
-                        .ReadToEnd();
-
-                var reader = Util.GenerateStreamFromstring(strObj);
-                var xmlReader = XmlReader.Create(reader);
-                var isMute = false;
-                var volume = 0;
-                while (xmlReader.Read())
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
                 {
-                    if (xmlReader.Name == "mute")
-                        isMute = bool.Parse(xmlReader.ReadElementContentAsString());
-                    if (xmlReader.Name == "level")
-                        volume = int.Parse(xmlReader.ReadElementContentAsString());
-                }
+                    var strObj =
+                        (new StreamReader(
+                            (((HttpResponseMessage)((LoadEventArgs)loadEventArg).Load.GetPayload()).Content.ReadAsStreamAsync()
+                                .Result)))
+                            .ReadToEnd();
 
-                Util.PostSuccess(listener, new VolumeStatus(isMute, volume));
-            };
+                    var reader = Util.GenerateStreamFromstring(strObj);
+                    var xmlReader = XmlReader.Create(reader);
+                    var isMute = false;
+                    var volume = 0;
+                    while (xmlReader.Read())
+                    {
+                        if (xmlReader.Name == "mute")
+                            isMute = bool.Parse(xmlReader.ReadElementContentAsString());
+                        if (xmlReader.Name == "level")
+                            volume = int.Parse(xmlReader.ReadElementContentAsString());
+                    }
 
-            responseListener.Error += (sender, o) => Util.PostError(listener, o);
+                    Util.PostSuccess(listener, new VolumeStatus(isMute, volume));
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
 
             var requestUrl = GetUdapRequestUrl(UdapPathData, TargetVolumeInfo);
 
@@ -1211,25 +1251,29 @@ namespace ConnectSdk.Windows.Service
             const string appName = "Input List";
             var encodedStr = HttpMessage.Encode(appName);
 
-            var responseListener = new ResponseListener();
-            responseListener.Success += (sender, o) =>
-            {
-                var responseLaunchListener = new ResponseListener();
-                responseListener.Success += (sender2, o2) =>
+
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
                 {
-                    if (inputPickerSession == null)
-                    {
-                        inputPickerSession = (LaunchSession)o2;
-                    }
 
-                    Util.PostSuccess(pListener, o2);
-                };
+                    var responseLaunchListener = new ResponseListener
+                    (
+                        loadEventArg2 =>
+                        {
+                            if (inputPickerSession == null)
+                            {
+                                inputPickerSession = (LaunchSession)loadEventArg2;
+                            }
 
-                responseListener.Error += (sender2, o2) => Util.PostError(pListener, o2);
-                LaunchApplication(appName, ((AppInfo)o).Id, null, responseLaunchListener);
-            };
-
-            responseListener.Error += (sender, o) => Util.PostError(pListener, o);
+                            Util.PostSuccess(pListener, loadEventArg2);
+                        },
+                        serviceCommandError => Util.PostError(pListener, serviceCommandError)
+                    );
+                    LaunchApplication(appName, ((AppInfo)loadEventArg).Id, null, responseLaunchListener);
+                },
+                serviceCommandError => Util.PostError(pListener, serviceCommandError)
+            );
 
             GetApplication(encodedStr, responseListener);
         }
@@ -1387,19 +1431,21 @@ namespace ConnectSdk.Windows.Service
 
         public void ConnectMouse()
         {
-            var responseListener = new ResponseListener();
-            responseListener.Success += (sender, o) =>
-            {
-                mMouseDistance = new Point(0, 0);
-                mMouseIsMoving = false;
-                isMouseConnected = true;
-            };
 
-            responseListener.Error += (sender, o) =>
-            {
-                isMouseConnected = false;
-            };
-
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+                    mMouseDistance = new Point(0, 0);
+                    mMouseIsMoving = false;
+                    isMouseConnected = true;
+                },
+                serviceCommandError =>
+                {
+                    isMouseConnected = false;
+                }
+            );
+          
             SetMouseCursorVisible(true, responseListener);
         }
 
@@ -1458,19 +1504,21 @@ namespace ConnectSdk.Windows.Service
 
             var mouseService = this;
 
-            var responseListener = new ResponseListener();
-            responseListener.Success += (sender, o) =>
-            {
-                if (mMouseDistance.X > 0 || mMouseDistance.Y > 0)
-                    mouseService.MoveMouse();
-                else
-                    mMouseIsMoving = false;
-            };
 
-            responseListener.Error += (sender, o) =>
-            {
-                mMouseIsMoving = false;
-            };
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+                    if (mMouseDistance.X > 0 || mMouseDistance.Y > 0)
+                        mouseService.MoveMouse();
+                    else
+                        mMouseIsMoving = false;
+                },
+                serviceCommandError =>
+                {
+                    mMouseIsMoving = false;
+                }
+            );
 
             var httpMessage = GetUdapMessageBody(UdapApiCommand, ps);
 
@@ -1674,17 +1722,19 @@ namespace ConnectSdk.Windows.Service
 
         public void SendKeyCode(int keycode, ResponseListener pListener)
         {
-            var responseListener = new ResponseListener();
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+                    var requestUrl = GetUdapRequestUrl(UdapPathCommand);
+                    var httpMessage = GetHttpMessageForHandleKeyInput(keycode);
 
-            responseListener.Success += (sender, o) =>
-            {
-                var requestUrl = GetUdapRequestUrl(UdapPathCommand);
-                var httpMessage = GetHttpMessageForHandleKeyInput(keycode);
+                    var request = new ServiceCommand(this, requestUrl, httpMessage, pListener);
+                    request.Send();
+                },
+                serviceCommandError => Util.PostError(pListener, serviceCommandError)
+            );
 
-                var request = new ServiceCommand(this, requestUrl, httpMessage, pListener);
-                request.Send();
-            };
-            responseListener.Error += (sender, o) => Util.PostError(pListener, o);
             SetMouseCursorVisible(false, responseListener);
         }
 

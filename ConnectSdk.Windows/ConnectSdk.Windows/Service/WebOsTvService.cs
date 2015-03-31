@@ -17,7 +17,7 @@ namespace ConnectSdk.Windows.Service
     public class WebOstvService : DeviceService, IVolumeControl, ILauncher, IMediaControl, IMediaPlayer, ITvControl,
         IToastControl, IExternalInputControl, IMouseControl, ITextInputControl, IPowerControl, IKeyControl, IWebAppLauncher
     {
-        public static String[] WebOstvServiceOpenPermissionList =
+        public static String[] WebOstvServiceOpenPermissionList = 
         {
             "LAUNCH",
             "LAUNCH_WEBAPP",
@@ -54,7 +54,6 @@ namespace ConnectSdk.Windows.Service
         private const string VolumeUrl = "ssap://audio/getVolume";
         private const string MuteUrl = "ssap://audio/getMute";
 
-        private PairingType pairingType;
         public Dictionary<string, string> AppToAppIdMappings { get; set; }
         public Dictionary<string, WebOsWebAppSession> WebAppSessions { get; set; }
 
@@ -66,8 +65,6 @@ namespace ConnectSdk.Windows.Service
         public WebOstvService(ServiceDescription serviceDescription, ServiceConfig serviceConfig)
             : base(serviceDescription, serviceConfig)
         {
-            pairingType = PairingType.FIRST_SCREEN;
-
             AppToAppIdMappings = new Dictionary<String, String>();
             WebAppSessions = new Dictionary<String, WebOsWebAppSession>();
         }
@@ -208,6 +205,7 @@ namespace ConnectSdk.Windows.Service
             {
                 payload.Add("volume", JsonValue.CreateNumberValue(intVolume));
             }
+            // ReSharper disable once EmptyGeneralCatchClause
             catch (Exception)
             {
                 //e.printStackTrace();
@@ -225,23 +223,25 @@ namespace ConnectSdk.Windows.Service
 
         public void GetVolume(bool isSubscription, ResponseListener listener)
         {
-            var getVolumeResponseListener = new ResponseListener();
-            getVolumeResponseListener.Success += (sender, o) =>
-            {
-                try
+            var getVolumeResponseListener = new ResponseListener
+            (
+                loadEventArg =>
                 {
-                    var jsonObj = (JsonObject)o;
-                    var iVolume = (int)jsonObj.GetNamedNumber("volume");
-                    var fVolume = (float)(iVolume / 100.0);
+                    try
+                    {
+                        var jsonObj = (JsonObject)loadEventArg;
+                        var iVolume = (int)jsonObj.GetNamedNumber("volume");
+                        var fVolume = (float)(iVolume / 100.0);
 
-                    Util.PostSuccess(listener, fVolume);
-                }
-                catch (Exception)
-                {
+                        Util.PostSuccess(listener, fVolume);
+                    }
+                    // ReSharper disable once EmptyGeneralCatchClause
+                    catch (Exception)
+                    {
 
-                }
-            };
-            getVolumeResponseListener.Error += (sender, error) => Util.PostError(listener, error);
+                    }
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError));
 
             var request = isSubscription
                 ? new UrlServiceSubscription(this, VolumeUrl, null, true, getVolumeResponseListener)
@@ -258,6 +258,7 @@ namespace ConnectSdk.Windows.Service
             {
                 payload.Add("mute", JsonValue.CreateBooleanValue(isMute));
             }
+            // ReSharper disable once EmptyGeneralCatchClause
             catch (Exception)
             {
                 //e.printStackTrace();
@@ -274,21 +275,26 @@ namespace ConnectSdk.Windows.Service
 
         private void GetMuteStatus(bool isSubscription, ResponseListener listener)
         {
-            var getMuteResponseListener = new ResponseListener();
-            getMuteResponseListener.Success += (sender, o) =>
-            {
-                try
-                {
-                    var jsonObj = (JsonObject)o;
-                    var isMute = jsonObj.GetNamedBoolean("mute");
-                    Util.PostSuccess(listener, isMute);
-                }
-                catch (Exception)
-                {
 
-                }
-            };
-            getMuteResponseListener.Error += (sender, error) => Util.PostError(listener, error);
+            var getMuteResponseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+                    try
+                    {
+                        var jsonObj = (JsonObject)loadEventArg;
+                        var isMute = jsonObj.GetNamedBoolean("mute");
+                        Util.PostSuccess(listener, isMute);
+                    }
+                    // ReSharper disable once EmptyGeneralCatchClause
+                    catch (Exception)
+                    {
+
+                    }
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
+        
 
             var request = isSubscription
                 ? new UrlServiceSubscription(this, MuteUrl, null, true, getMuteResponseListener)
@@ -673,7 +679,7 @@ namespace ConnectSdk.Windows.Service
 
             var listener = new ResponseListener
                 (
-                (loadEventArg) =>
+                loadEventArg =>
                 {
                     JsonObject obj;
                     if (loadEventArg is LoadEventArgs)
@@ -686,7 +692,7 @@ namespace ConnectSdk.Windows.Service
                         mouseSocket = new WebOstvMouseSocketConnection(socketPath);
                     }
                 },
-                (serviceCommandError) =>
+                serviceCommandError =>
                 {
 
                 }
@@ -782,15 +788,19 @@ namespace ConnectSdk.Windows.Service
 
         public void PowerOff(ResponseListener listener)
         {
-            var responseListener = new ResponseListener();
-            responseListener.Success += (sender, o) =>
-            {
 
-            };
-            responseListener.Error += (sender, error) =>
-            {
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
 
-            };
+                },
+                serviceCommandError =>
+                {
+
+                }
+            );
+
             const string uri = "ssap://system/turnOff";
             var request = new ServiceCommand(this, uri, null, responseListener);
 
@@ -824,28 +834,31 @@ namespace ConnectSdk.Windows.Service
             }
             else
             {
-                var listener = new ResponseListener();
-                listener.Success += (sender, o) =>
-                {
-                    JsonObject obj;
-                    if (o is LoadEventArgs)
-                        obj = (o as LoadEventArgs).Load.GetPayload() as JsonObject;
-                    else obj = (JsonObject)o;
 
-                    if (obj != null)
+                var responseListener = new ResponseListener
+                (
+                    loadEventArg =>
                     {
-                        var socketPath = obj.GetNamedString("socketPath");
-                        mouseSocket = new WebOstvMouseSocketConnection(socketPath);
+                        JsonObject obj;
+                        if (loadEventArg is LoadEventArgs)
+                            obj = (loadEventArg as LoadEventArgs).Load.GetPayload() as JsonObject;
+                        else obj = (JsonObject)loadEventArg;
+
+                        if (obj != null)
+                        {
+                            var socketPath = obj.GetNamedString("socketPath");
+                            mouseSocket = new WebOstvMouseSocketConnection(socketPath);
+                        }
+
+                        mouseSocket.Button(key);
+                    },
+                    serviceCommandError =>
+                    {
+
                     }
+                );
 
-                    mouseSocket.Button(key);
-                };
-                listener.Error += (sender, error) =>
-                {
-
-                };
-
-                ConnectMouse();
+                ConnectMouse(responseListener);
             }
         }
 
@@ -877,28 +890,31 @@ namespace ConnectSdk.Windows.Service
             }
             else
             {
-                var listener2 = new ResponseListener();
-                listener2.Success += (sender, o) =>
-                {
-                    JsonObject obj;
-                    if (o is LoadEventArgs)
-                        obj = (o as LoadEventArgs).Load.GetPayload() as JsonObject;
-                    else obj = (JsonObject)o;
 
-                    if (obj != null)
+                var responseListener = new ResponseListener
+                (
+                    loadEventArg =>
                     {
-                        var socketPath = obj.GetNamedString("socketPath");
-                        mouseSocket = new WebOstvMouseSocketConnection(socketPath);
+                        JsonObject obj;
+                        if (loadEventArg is LoadEventArgs)
+                            obj = (loadEventArg as LoadEventArgs).Load.GetPayload() as JsonObject;
+                        else obj = (JsonObject)loadEventArg;
+
+                        if (obj != null)
+                        {
+                            var socketPath = obj.GetNamedString("socketPath");
+                            mouseSocket = new WebOstvMouseSocketConnection(socketPath);
+                        }
+
+                        mouseSocket.Click();
+                    },
+                    serviceCommandError =>
+                    {
+
                     }
+                );
 
-                    mouseSocket.Click();
-                };
-                listener2.Error += (sender, error) =>
-                {
-
-                };
-
-                ConnectMouse();
+                ConnectMouse(responseListener);
             }
         }
 
@@ -967,38 +983,41 @@ namespace ConnectSdk.Windows.Service
                 throw e;
             }
 
-            var responseListener = new ResponseListener();
-            responseListener.Success += (sender, o) =>
-            {
-                JsonObject obj;
-                if (o is LoadEventArgs)
-                    obj = (o as LoadEventArgs).Load.GetPayload() as JsonObject;
-                else obj = (JsonObject)o;
 
-                LaunchSession launchSession;
-
-                if (webAppSession != null)
-                    launchSession = webAppSession.LaunchSession;
-                else
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
                 {
-                    launchSession = LaunchSession.LaunchSessionForAppId(webAppId);
-                    webAppSession = new WebOsWebAppSession(launchSession, this);
-                    WebAppSessions.Add(webAppId,
-                        webAppSession);
-                }
+                    JsonObject obj;
+                    if (loadEventArg is LoadEventArgs)
+                        obj = (loadEventArg as LoadEventArgs).Load.GetPayload() as JsonObject;
+                    else obj = (JsonObject)loadEventArg;
 
-                launchSession.Service = this;
-                if (obj != null)
-                {
-                    launchSession.SessionId = obj.GetNamedString("sessionId");
-                    launchSession.SessionType = LaunchSessionType.WebApp;
-                    launchSession.RawData = obj;
-                }
+                    LaunchSession launchSession;
 
-                Util.PostSuccess(listener, webAppSession);
-            };
-            responseListener.Error += (sender, error) => Util.PostError(listener, error);
+                    if (webAppSession != null)
+                        launchSession = webAppSession.LaunchSession;
+                    else
+                    {
+                        launchSession = LaunchSession.LaunchSessionForAppId(webAppId);
+                        webAppSession = new WebOsWebAppSession(launchSession, this);
+                        WebAppSessions.Add(webAppId,
+                            webAppSession);
+                    }
 
+                    launchSession.Service = this;
+                    if (obj != null)
+                    {
+                        launchSession.SessionId = obj.GetNamedString("sessionId");
+                        launchSession.SessionType = LaunchSessionType.WebApp;
+                        launchSession.RawData = obj;
+                    }
+
+                    Util.PostSuccess(listener, webAppSession);
+
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
 
             var request = new ServiceCommand(this, uri, payload, responseListener);
             request.Send();
@@ -1018,28 +1037,33 @@ namespace ConnectSdk.Windows.Service
             }
             else
             {
-                var responseListener = new ResponseListener();
 
-                listener.Success += (sender, o) =>
-                {
-                    var appInfo = o as AppInfo;
-                    if (appInfo != null && appInfo.Id.IndexOf(webAppId, StringComparison.Ordinal) != -1)
+                var responseListener = new ResponseListener
+                (
+                    loadEventArg =>
                     {
-                        LaunchSession launchSession = LaunchSession.LaunchSessionForAppId(webAppId);
-                        launchSession.SessionType = LaunchSessionType.WebApp;
-                        launchSession.Service = this;
-                        launchSession.RawData = appInfo.RawData;
+                        var appInfo = loadEventArg as AppInfo;
+                        if (appInfo != null && appInfo.Id.IndexOf(webAppId, StringComparison.Ordinal) != -1)
+                        {
+                            LaunchSession launchSession = LaunchSession.LaunchSessionForAppId(webAppId);
+                            launchSession.SessionType = LaunchSessionType.WebApp;
+                            launchSession.Service = this;
+                            launchSession.RawData = appInfo.RawData;
 
-                        var webAppSession = WebAppSessionForLaunchSession(launchSession);
+                            var webAppSession = WebAppSessionForLaunchSession(launchSession);
 
-                        Util.PostSuccess(listener, webAppSession);
-                    }
-                    else
+                            Util.PostSuccess(listener, webAppSession);
+                        }
+                        else
+                        {
+                            LaunchWebApp(webAppId, ps, listener);
+                        }
+                    },
+                    serviceCommandError =>
                     {
-                        LaunchWebApp(webAppId, ps, listener);
+
                     }
-                };
-                listener.Error += (sender, error) => { };
+                );
 
                 GetLauncher().GetRunningApp(responseListener);
             }
@@ -1088,25 +1112,26 @@ namespace ConnectSdk.Windows.Service
                     throw ex;
                 }
 
-                var responseListener = new ResponseListener();
 
-                responseListener.Success += (sender, o) =>
-                {
-                    webAppSession.DisconnectFromWebApp();
+                var responseListener = new ResponseListener
+                (
+                    loadEventArg =>
+                    {
+                        webAppSession.DisconnectFromWebApp();
 
-                    if (Listener != null)
-                        listener.OnSuccess(o);
-                };
-                responseListener.Error += (sender, error) =>
-                {
-                    webAppSession.DisconnectFromWebApp();
+                        if (Listener != null)
+                            listener.OnSuccess(loadEventArg);
+                    },
+                    serviceCommandError =>
+                    {
+                        webAppSession.DisconnectFromWebApp();
 
-                    if (Listener != null)
-                        listener.OnError(error);
-                };
+                        if (Listener != null)
+                            listener.OnError(serviceCommandError);
+                    }
+                );
 
-
-                webAppSession.SendMessage(closeCommand, new ResponseListener());
+                webAppSession.SendMessage(closeCommand, responseListener);
             }
             else
             {
@@ -1177,58 +1202,58 @@ namespace ConnectSdk.Windows.Service
             }
 
 
-            var listener = new ResponseListener();
-
-            listener.Success += (sender, o) =>
-            {
-                var loadEventArgs = o as LoadEventArgs;
-                if (loadEventArgs != null)
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
                 {
-                    var jsonObj = (JsonObject)(loadEventArgs.Load.GetPayload());
-                    var state = jsonObj.GetNamedString("state");
-                    if (!state.Equals("Connected", StringComparison.OrdinalIgnoreCase))
+                    var loadEventArgs = loadEventArg as LoadEventArgs;
+                    if (loadEventArgs != null)
                     {
-                        if (joinOnly && state.Equals("WAITING_FOR_APP", StringComparison.OrdinalIgnoreCase))
+                        var jsonObj = (JsonObject)(loadEventArgs.Load.GetPayload());
+                        var state = jsonObj.GetNamedString("state");
+                        if (!state.Equals("Connected", StringComparison.OrdinalIgnoreCase))
                         {
-                            Util.PostError(connectionListener,
-                                new ServiceCommandError(0, "Web app is not currently running"));
+                            if (joinOnly && state.Equals("WAITING_FOR_APP", StringComparison.OrdinalIgnoreCase))
+                            {
+                                Util.PostError(connectionListener,
+                                    new ServiceCommandError(0, "Web app is not currently running"));
+                            }
+                            return;
                         }
-                        return;
+                        var fullAppId = jsonObj.GetNamedString("appId");
+                        if (!string.IsNullOrEmpty(fullAppId))
+                        {
+                            if (webAppSession.LaunchSession.SessionType == LaunchSessionType.WebApp)
+                                AppToAppIdMappings.Add(fullAppId, appId);
+                            webAppSession.SetFullAppId(fullAppId);
+                        }
                     }
-                    var fullAppId = jsonObj.GetNamedString("appId");
-                    if (!string.IsNullOrEmpty(fullAppId))
-                    {
-                        if (webAppSession.LaunchSession.SessionType == LaunchSessionType.WebApp)
-                            AppToAppIdMappings.Add(fullAppId, appId);
-                        webAppSession.SetFullAppId(fullAppId);
-                    }
-                }
-                if (connectionListener != null)
-                    connectionListener.OnSuccess(o);
-            };
-            listener.Error += (sender, error) =>
-            {
-                webAppSession.DisconnectFromWebApp();
-                var appChannelDidClose = false;
-                if (error != null && error.GetPayload() != null)
-                    appChannelDidClose = error.GetPayload().ToString().Contains("app channel closed");
-
-                if (appChannelDidClose)
+                    if (connectionListener != null)
+                        connectionListener.OnSuccess(loadEventArg);
+                },
+                serviceCommandError =>
                 {
-                    if (webAppSession.WebAppSessionListener != null)
+                    webAppSession.DisconnectFromWebApp();
+                    var appChannelDidClose = false;
+                    if (serviceCommandError != null && serviceCommandError.GetPayload() != null)
+                        appChannelDidClose = serviceCommandError.GetPayload().ToString().Contains("app channel closed");
+
+                    if (appChannelDidClose)
                     {
-                        webAppSession.WebAppSessionListener.OnWebAppSessionDisconnect(webAppSession);
+                        if (webAppSession.WebAppSessionListener != null)
+                        {
+                            webAppSession.WebAppSessionListener.OnWebAppSessionDisconnect(webAppSession);
+                        }
+                    }
+                    else
+                    {
+                        Util.PostError(connectionListener, serviceCommandError);
+
                     }
                 }
-                else
-                {
-                    Util.PostError(connectionListener, error);
+            );
 
-                }
-            };
-
-
-            webAppSession.AppToAppSubscription = new UrlServiceSubscription(this, uri, payload, true, listener);
+            webAppSession.AppToAppSubscription = new UrlServiceSubscription(this, uri, payload, true, responseListener);
             webAppSession.AppToAppSubscription.Subscribe();
         }
 
@@ -1264,28 +1289,28 @@ namespace ConnectSdk.Windows.Service
 
             }
 
-            var responseListener = new ResponseListener();
 
-            responseListener.Success += (sender, o) =>
-            {
-                var loadEventArgs = o as LoadEventArgs;
-                if (loadEventArgs == null) return;
-                var jsonObj = (JsonObject)(loadEventArgs.Load.GetPayload());
-                if (jsonObj.ContainsKey("pairingType"))
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
                 {
-                    NotifyPairingRequired();
-                }
-                else
-                {
-                    listener.OnSuccess(o);
-                }
-            };
-
-            responseListener.Error += (sender, error) => Util.PostError(listener, error);
+                    var loadEventArgs = loadEventArg as LoadEventArgs;
+                    if (loadEventArgs == null) return;
+                    var jsonObj = (JsonObject)(loadEventArgs.Load.GetPayload());
+                    if (jsonObj.ContainsKey("pairingType"))
+                    {
+                        NotifyPairingRequired();
+                    }
+                    else
+                    {
+                        listener.OnSuccess(loadEventArg);
+                    }
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
 
             ServiceCommand request = new UrlServiceSubscription(this, uri, payload, true, responseListener);
             request.Send();
-
         }
 
         public void UnPinWebApp(string webAppId, ResponseListener listener)
@@ -1312,24 +1337,25 @@ namespace ConnectSdk.Windows.Service
 
             }
 
-            var responseListener = new ResponseListener();
 
-            responseListener.Success += (sender, o) =>
-            {
-                var loadEventArgs = o as LoadEventArgs;
-                if (loadEventArgs == null) return;
-                var jsonObj = (JsonObject)(loadEventArgs.Load.GetPayload());
-                if (jsonObj.ContainsKey("pairingType"))
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
                 {
-                    NotifyPairingRequired();
-                }
-                else
-                {
-                    listener.OnSuccess(o);
-                }
-            };
-
-            responseListener.Error += (sender, error) => Util.PostError(listener, error);
+                    var loadEventArgs = loadEventArg as LoadEventArgs;
+                    if (loadEventArgs == null) return;
+                    var jsonObj = (JsonObject)(loadEventArgs.Load.GetPayload());
+                    if (jsonObj.ContainsKey("pairingType"))
+                    {
+                        NotifyPairingRequired();
+                    }
+                    else
+                    {
+                        listener.OnSuccess(loadEventArg);
+                    }
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
 
             ServiceCommand request = new UrlServiceSubscription(this, uri, payload, true, responseListener);
             request.Send();
@@ -1359,21 +1385,21 @@ namespace ConnectSdk.Windows.Service
 
             }
 
-            var responseListener = new ResponseListener();
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+                    var loadEventArgs = loadEventArg as LoadEventArgs;
+                    if (loadEventArgs == null) return;
+                    var jsonObj = (JsonObject)(loadEventArgs.Load.GetPayload());
 
-            responseListener.Success += (sender, o) =>
-            {
-                var loadEventArgs = o as LoadEventArgs;
-                if (loadEventArgs == null) return;
-                var jsonObj = (JsonObject)(loadEventArgs.Load.GetPayload());
+                    var status = jsonObj.GetNamedBoolean("pinned");
 
-                var status = jsonObj.GetNamedBoolean("pinned");
-
-                if (listener != null)
-                    listener.OnSuccess(status);
-            };
-
-            responseListener.Error += (sender, error) => Util.PostError(listener, error);
+                    if (listener != null)
+                        listener.OnSuccess(status);
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
 
             var request = isSubscription ? new UrlServiceSubscription(this, uri, payload, true, responseListener) : new ServiceCommand(this, uri, payload, responseListener);
 

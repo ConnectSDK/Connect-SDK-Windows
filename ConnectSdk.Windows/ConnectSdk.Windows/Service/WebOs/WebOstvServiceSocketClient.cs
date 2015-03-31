@@ -7,7 +7,6 @@ using Windows.Data.Json;
 using Windows.Networking.Sockets;
 using Windows.Security.ExchangeActiveSyncProvisioning;
 using Windows.Storage.Streams;
-using Windows.UI.Xaml;
 using ConnectSdk.Windows.Core;
 using ConnectSdk.Windows.Discovery;
 using ConnectSdk.Windows.Service.Capability.Listeners;
@@ -19,7 +18,7 @@ namespace ConnectSdk.Windows.Service.WebOs
 {
     public class WebOstvServiceSocketClient : IServiceCommandProcessor
     {
-        private StringBuilder log = new StringBuilder();
+        private readonly StringBuilder log = new StringBuilder();
         readonly WebOstvService service;
 
         private static MessageWebSocket messageWebSocket;
@@ -198,6 +197,7 @@ namespace ConnectSdk.Windows.Service.WebOs
             {
                 payload = message.GetNamedObject("payload");
             }
+            // ReSharper disable once EmptyGeneralCatchClause
             catch
             {
                 // we will fail when the type is error because payload is not retrievable
@@ -382,7 +382,7 @@ namespace ConnectSdk.Windows.Service.WebOs
             //@SuppressWarnings("deprecation")
             //int height = display.getHeight(); // deprecated, but still needed for supporting API levels 10-12
 
-            var screenResolution = String.Format("%{0}x%{1}", 1680, 1050); 
+            //var screenResolution = String.Format("%{0}x%{1}", 1680, 1050); 
 
             //// app Name
             //ApplicationInfo applicationInfo;
@@ -413,7 +413,7 @@ namespace ConnectSdk.Windows.Service.WebOs
                 throw e;
             }
 
-            var dataId = this.nextRequestId++;
+            var dataId = nextRequestId++;
 
             var sendData = new JsonObject();
             try
@@ -433,18 +433,20 @@ namespace ConnectSdk.Windows.Service.WebOs
 
         protected void SendRegister()
         {
-            var requestListener = new ResponseListener();
-            requestListener.Success += (sender, o) =>
-            {
+            var requestListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
 
-            };
-            requestListener.Error += (sender, o) =>
-            {
-                if (Listener != null)
-                    Listener.OnRegistrationFailed(o);
-            };
+                },
+                serviceCommandError =>
+                {
+                    if (Listener != null)
+                        Listener.OnRegistrationFailed(serviceCommandError);
+                }
+            );
 
-            int dataId = nextRequestId++;
+            var dataId = nextRequestId++;
 
             var command = new ServiceCommand(this, null, null, requestListener) {RequestId = dataId};
 
@@ -567,7 +569,8 @@ namespace ConnectSdk.Windows.Service.WebOs
             {
                 payloadType = payload.GetNamedString("type");
             }
-            catch (Exception ex)
+            // ReSharper disable once EmptyGeneralCatchClause
+            catch (Exception)
             {
                 // ignore
             }
@@ -616,6 +619,7 @@ namespace ConnectSdk.Windows.Service.WebOs
                     headers.Add("uri", JsonValue.CreateStringValue(command.Target));
 
                 }
+                // ReSharper disable once EmptyGeneralCatchClause
                 catch (Exception)
                 {
                     // TODO: handle this

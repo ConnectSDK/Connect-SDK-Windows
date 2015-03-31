@@ -156,39 +156,52 @@ namespace ConnectSdk.Demo
             var netCastService = (NetcastTvService)model.SelectedDevice.GetServiceByName(NetcastTvService.Id);
             if (netCastService != null)
             {
-                var appListResponseListener = new ResponseListener();
-
                 model.IpAddress = netCastService.ServiceDescription.IpAddress;
                 model.Port = netCastService.ServiceDescription.Port.ToString();
 
-                appListResponseListener.Success += (sender, o) =>
-                {
-                    var apps = ((o as LoadEventArgs).Load as ServiceCommandError).GetPayload() as List<AppInfo>;
-                    for (int i = 0; i < apps.Count; i++)
-                    {
-                        apps[i].SetUrl(model.IpAddress, model.Port);
-                    }
-                    model.Apps = new IndependentList<AppInfo>(apps);
-                };
-                appListResponseListener.Error += (sender, o) =>
-                {
 
-                };
+                var appListResponseListener = new ResponseListener
+                (
+                    loadEventArg =>
+                    {
+                        var loadEventArgs = loadEventArg as LoadEventArgs;
+                        if (loadEventArgs != null)
+                        {
+                            var apps = (loadEventArgs.Load as ServiceCommandError).GetPayload() as List<AppInfo>;
+                            for (int i = 0; i < apps.Count; i++)
+                            {
+                                apps[i].SetUrl(model.IpAddress, model.Port);
+                            }
+                            model.Apps = new IndependentList<AppInfo>(apps);
+                        }
+                    },
+                    serviceCommandError =>
+                    {
+
+                    }
+                );
 
                 //netCastService.getChannelList(responseListener);
                 netCastService.GetAppList(appListResponseListener);
 
 
-                var channelListResponseListener = new ResponseListener();
-                channelListResponseListener.Success += (sender, o) =>
-                {
-                    var channels = ((o as LoadEventArgs).Load as ServiceCommandError).GetPayload() as List<ChannelInfo>;
-                    model.Channels = new IndependentList<ChannelInfo>(channels);
-                };
-                channelListResponseListener.Error += (sender, o) =>
-                {
+                var channelListResponseListener = new ResponseListener
+                (
+                    loadEventArg =>
+                    {
+                        var loadEventArgs = loadEventArg as LoadEventArgs;
+                        if (loadEventArgs != null)
+                        {
+                            var channels = (loadEventArgs.Load as ServiceCommandError).GetPayload() as List<ChannelInfo>;
+                            model.Channels = new IndependentList<ChannelInfo>(channels);
+                        }
+                    },
+                    serviceCommandError =>
+                    {
 
-                };
+                    }
+                );
+
                 netCastService.GetChannelList(channelListResponseListener);
             }
         }
@@ -251,15 +264,22 @@ namespace ConnectSdk.Demo
                 var netCastService = (NetcastTvService)model.SelectedDevice.GetServiceByName(NetcastTvService.Id);
                 if (netCastService != null)
                 {
-                    ResponseListener listener = new ResponseListener();
-                    listener.Error += (o, error) =>
-                    {
-                        var msg =
-                            new MessageDialog(
-                                "Something went wrong; The application could not be started. Press 'Close' to continue");
-                        msg.ShowAsync();
-                    };
-                    netCastService.LaunchAppWithInfo(appinfo, listener);
+                    var responseListener = new ResponseListener
+                    (
+                        loadEventArg =>
+                        {
+
+                        },
+                        serviceCommandError =>
+                        {
+                            var msg =
+                                new MessageDialog(
+                                    "Something went wrong; The application could not be started. Press 'Close' to continue");
+                            msg.ShowAsync();
+                        }
+                    );
+
+                    netCastService.LaunchAppWithInfo(appinfo, responseListener);
                 }
             }
         }
@@ -272,15 +292,23 @@ namespace ConnectSdk.Demo
                 var netCastService = (NetcastTvService)model.SelectedDevice.GetServiceByName(NetcastTvService.Id);
                 if (netCastService != null)
                 {
-                    ResponseListener listener = new ResponseListener();
-                    listener.Error += (o, error) =>
-                    {
-                        var msg =
-                            new MessageDialog(
-                                "Something went wrong; The application could not be started. Press 'Close' to continue");
-                        msg.ShowAsync();
-                    };
-                    netCastService.SetChannel(channelInfo, listener);
+
+                    var responseListener = new ResponseListener
+                    (
+                        loadEventArg =>
+                        {
+
+                        },
+                        serviceCommandError =>
+                        {
+                            var msg =
+                                new MessageDialog(
+                                    "Something went wrong; The application could not be started. Press 'Close' to continue");
+                            msg.ShowAsync();
+                        }
+                    );
+
+                    netCastService.SetChannel(channelInfo, responseListener);
                 }
             }
         }
@@ -352,28 +380,26 @@ namespace ConnectSdk.Demo
 
         private void CloserWebApp_Click(object sender, RoutedEventArgs e)
         {
-
-
-
-
             var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
-            ResponseListener listener = new ResponseListener();
-            listener.Error += (o, error) =>
-            {
-                var msg =
-                    new MessageDialog(
-                        "Something went wrong; The application could not be stopped. Press 'Close' to continue");
-                msg.ShowAsync();
-            };
 
-            listener.Success += (o, param) =>
-            {
-                //var v = param as LoadEventArgs;
-                //if (v != null)
-                //    launchSession = v.Load.GetPayload() as LaunchSession;
-            };
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+                    //var v = param as LoadEventArgs;
+                    //if (v != null)
+                    //    launchSession = v.Load.GetPayload() as LaunchSession;
+                },
+                serviceCommandError =>
+                {
+                    var msg =
+                        new MessageDialog(
+                            "Something went wrong; The application could not be stopped. Press 'Close' to continue");
+                    msg.ShowAsync();
+                }
+            );
 
-            webostvService.CloseWebApp(launchSession.LaunchSession, listener);
+            webostvService.CloseWebApp(launchSession.LaunchSession, responseListener);
         }
 
         private void SendMessage_Click(object sender, RoutedEventArgs e)
@@ -386,19 +412,22 @@ namespace ConnectSdk.Demo
                 {
                     var webAppMessageBox = wrapPanel.Children[0] as TextBox;
 
-                    var listener = new ResponseListener();
-                    listener.Error += (o, error) =>
-                    {
-                        var msg =
-                            new MessageDialog(
-                                "Something went wrong; Could not send message. Press 'Close' to continue");
-                        msg.ShowAsync();
-                    };
+                    var responseListener = new ResponseListener
+                    (
+                        loadEventArg =>
+                        {
 
-                    listener.Success += (o, param) =>
-                    {
-                    };
-                    if (webAppMessageBox != null) launchSession.SendMessage(webAppMessageBox.Text, listener);
+                        },
+                        serviceCommandError =>
+                        {
+                            var msg =
+                                new MessageDialog(
+                                    "Something went wrong; Could not send message. Press 'Close' to continue");
+                            msg.ShowAsync();
+                        }
+                    );
+
+                    if (webAppMessageBox != null) launchSession.SendMessage(webAppMessageBox.Text, responseListener);
                 }
             }
         }

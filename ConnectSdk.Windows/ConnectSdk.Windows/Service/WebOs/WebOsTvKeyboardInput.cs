@@ -120,18 +120,19 @@ namespace ConnectSdk.Windows.Service.WebOs
                 }
             }
 
-            var responseListener = new ResponseListener();
-            responseListener.Success += (sender, o) =>
-            {
-                waiting = false;
-                if (toSend.Count > 0)
-                    SendData();
-            };
-
-            responseListener.Error += (sender, o) =>
-            {
-                throw new NotImplementedException();
-            };
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+                    waiting = false;
+                    if (toSend.Count > 0)
+                        SendData();
+                },
+                serviceCommandError =>
+                {
+                    throw new NotImplementedException();
+                }
+            );
 
             var request = new ServiceCommand(service, uri, payload, responseListener);
             request.Send();
@@ -139,16 +140,19 @@ namespace ConnectSdk.Windows.Service.WebOs
 
         public UrlServiceSubscription Connect(ResponseListener listener)
         {
-            var responseListener = new ResponseListener();
-            responseListener.Success += (sender, o) =>
-            {
-                var jsonObj = (JsonObject)o;
 
-                var keyboard = parseRawKeyboardData(jsonObj);
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+                    var jsonObj = (JsonObject)loadEventArg;
 
-                Util.PostSuccess(listener, keyboard);
-            };
-            responseListener.Error += (sender, o) => Util.PostError(listener, o);
+                    var keyboard = parseRawKeyboardData(jsonObj);
+
+                    Util.PostSuccess(listener, keyboard);
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
 
             var subscription = new UrlServiceSubscription(service, KeyboardInputUrl, null, true,
                 responseListener);
