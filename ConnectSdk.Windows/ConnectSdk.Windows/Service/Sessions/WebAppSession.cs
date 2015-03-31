@@ -9,7 +9,7 @@ namespace ConnectSdk.Windows.Service.Sessions
 {
    public class WebAppSession : IMediaControl, IMediaPlayer
     {
-        public WebAppSession(LaunchSession launchSession, DeviceService<object> service)
+        public WebAppSession(LaunchSession launchSession, DeviceService service)
         {
             LaunchSession = launchSession;
             Service = service;
@@ -17,7 +17,7 @@ namespace ConnectSdk.Windows.Service.Sessions
 
         public LaunchSession LaunchSession { get; set; }
 
-        public DeviceService<object> Service { get; set; }
+        public DeviceService Service { get; set; }
 
         public IWebAppSessionListener WebAppSessionListener { get; set; }
 
