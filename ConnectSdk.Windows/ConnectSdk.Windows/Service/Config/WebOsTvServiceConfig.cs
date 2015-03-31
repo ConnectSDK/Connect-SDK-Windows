@@ -1,49 +1,56 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Windows.Data.Json;
 using Windows.Security.Cryptography.Certificates;
 
 namespace ConnectSdk.Windows.Service.Config
 {
-    public class WebOstvServiceConfig : ServiceConfig
+    public class WebOSTVServiceConfig : ServiceConfig
     {
 
-        // ReSharper disable InconsistentNaming
         public static String KEY_CLIENT_KEY = "clientKey";
         public static String KEY_CERT = "serverCertificate";
-        // ReSharper restore InconsistentNaming
         private String clientKey;
         private Certificate cert;
+        private string pairingKey;
 
 
-        public string PairingKey { get; set; }
+        public string PairingKey
+        {
+            get { return pairingKey; }
+            set { pairingKey = value; }
+        }
 
-        public WebOstvServiceConfig(String serviceUuid)
-            : base(serviceUuid)
+        public WebOSTVServiceConfig(String serviceUUID)
+            : base(serviceUUID)
         {
         }
 
-        public WebOstvServiceConfig(String serviceUuid, String clientKey) :
-            base(serviceUuid)
+        public WebOSTVServiceConfig(String serviceUUID, String clientKey) :
+            base(serviceUUID)
         {
             this.clientKey = clientKey;
-            cert = null;
+            this.cert = null;
         }
 
-        public WebOstvServiceConfig(String serviceUuid, String clientKey, Certificate cert) :
-            base(serviceUuid)
+        public WebOSTVServiceConfig(String serviceUUID, String clientKey, Certificate cert) :
+            base(serviceUUID)
         {
             this.clientKey = clientKey;
             this.cert = cert;
         }
 
-        public WebOstvServiceConfig(String serviceUuid, String clientKey, String cert) :
-            base(serviceUuid)
+        public WebOSTVServiceConfig(String serviceUUID, String clientKey, String cert) :
+            base(serviceUUID)
         {
             this.clientKey = clientKey;
             this.cert = loadCertificateFromPEM(cert);
         }
 
-        public WebOstvServiceConfig(JsonObject json) :
+        public WebOSTVServiceConfig(JsonObject json) :
             base(json)
         {
 
@@ -51,38 +58,37 @@ namespace ConnectSdk.Windows.Service.Config
             cert = null; // TODO: loadCertificateFromPEM(json.optString(KEY_CERT));
         }
 
-        public String GetClientKey()
+        public String getClientKey()
         {
             return clientKey;
         }
 
-        public void SetClientKey(String pclientKey)
+        public void setClientKey(String clientKey)
         {
-            clientKey = pclientKey;
+            this.clientKey = clientKey;
         }
 
-        public Certificate GetServerCertificate()
+        public Certificate getServerCertificate()
         {
             return cert;
         }
 
-        public void SetServerCertificate(Certificate pcert)
+        public void setServerCertificate(Certificate cert)
         {
-            cert = pcert;
+            this.cert = cert;
         }
 
-        public void SetServerCertificate(String pcert)
+        public void setServerCertificate(String cert)
         {
-            cert = loadCertificateFromPEM(pcert);
+            this.cert = loadCertificateFromPEM(cert);
         }
 
-        public String GetServerCertificateInString()
+        public String getServerCertificateInString()
         {
-            return exportCertificateToPEM(cert);
+            return exportCertificateToPEM(this.cert);
         }
 
-        // ReSharper disable once UnusedParameter.Local
-        private String exportCertificateToPEM(Certificate pcert)
+        private String exportCertificateToPEM(Certificate cert)
         {
             //try {
             //    if ( cert == null ) 
@@ -95,7 +101,6 @@ namespace ConnectSdk.Windows.Service.Config
             return null;
         }
 
-        // ReSharper disable once UnusedParameter.Local
         private Certificate loadCertificateFromPEM(String pemString)
         {
             //CertificateFactory certFactory;
@@ -114,9 +119,9 @@ namespace ConnectSdk.Windows.Service.Config
             return null;
         }
 
-        public override JsonObject ToJsonObject()
+        public JsonObject toJSONObject()
         {
-            var jsonObj = base.ToJsonObject();
+            JsonObject jsonObj = base.ToJsonObject();
 
             try
             {

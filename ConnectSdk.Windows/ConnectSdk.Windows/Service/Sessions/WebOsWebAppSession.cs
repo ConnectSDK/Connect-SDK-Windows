@@ -9,30 +9,30 @@ using ConnectSdk.Windows.Service.WebOs;
 
 namespace ConnectSdk.Windows.Service.Sessions
 {
-    public class WebOsWebAppSession<T> : WebAppSession<T> where T: ResponseListener<object>
+    public class WebOsWebAppSession : WebAppSession
     {
         private const String NamespaceKey = "connectsdk.";
-        private readonly Dictionary<String, ServiceCommand<T>> mActiveCommands;
+        private readonly Dictionary<String, ServiceCommand<object>> mActiveCommands;
         private readonly WebOstvServiceSocketClientListener mSocketListener;
 
-        public UrlServiceSubscription<T>  AppToAppSubscription;
+        public UrlServiceSubscription<ResponseListener<object>>  AppToAppSubscription;
         public bool Connected;
-        public ResponseListener<ServiceCommand<T>> MConnectionListener;
+        public ResponseListener<ServiceCommand<ResponseListener<object>>> MConnectionListener;
         public WebOstvServiceSocketClient<object> Socket;
         private String mFullAppId;
         private IServiceSubscription<object> mMessageSubscription;
-        private IServiceSubscription<ResponseListener<PlayStateStatus>> mPlayStateSubscription;
+        private IServiceSubscription<PlayStateStatus> mPlayStateSubscription;
         protected new WebOstvService Service;
         private int uid;
 
-        public WebOsWebAppSession(LaunchSession<T> launchSessionObject, DeviceService<T> service) :
-            base(launchSessionObject, service)
+        public WebOsWebAppSession(LaunchSession launchSession, DeviceService service) :
+            base(launchSession, service)
         {
             uid = 0;
-            mActiveCommands = new Dictionary<string, ServiceCommand<T>>();
+            mActiveCommands = new Dictionary<string, ServiceCommand<object>>();
             Connected = false;
 
-            Service = (WebOstvService<T>)service;
+            Service = (WebOstvService) service;
             mSocketListener = new WebOstvServiceSocketClientListener(this);
         }
 
@@ -77,8 +77,8 @@ namespace ConnectSdk.Windows.Service.Sessions
         {
             if (mFullAppId == null)
             {
-                if (LaunchSessionObject.SessionType != LaunchSessionType.WebApp)
-                    mFullAppId = LaunchSessionObject.AppId;
+                if (LaunchSession.SessionType != LaunchSessionType.WebApp)
+                    mFullAppId = LaunchSession.AppId;
                 else
                 {
                     //foreach (var mapPair in service.AppToAppIdMappings)
@@ -89,7 +89,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                         //var mappedFullAppId = pair.Key;
                         var mappedAppId = pair.Value;
 
-                        if (!mappedAppId.Equals(LaunchSessionObject.AppId)) continue;
+                        if (!mappedAppId.Equals(LaunchSession.AppId)) continue;
 
                         mFullAppId = mappedAppId;
                         break;
@@ -97,7 +97,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                 }
             }
 
-            return mFullAppId ?? LaunchSessionObject.AppId;
+            return mFullAppId ?? LaunchSession.AppId;
         }
 
         public void SetFullAppId(String fullAppId)
@@ -132,8 +132,8 @@ namespace ConnectSdk.Windows.Service.Sessions
 
         public void HandleMessage(Object message)
         {
-            //if (WebAppSessionListener != null)
-            //    WebAppSessionListener.OnReceiveMessage(this, message);
+            if (WebAppSessionListener != null)
+                WebAppSessionListener.OnReceiveMessage(this, message);
         }
 
         public PlayStateStatus ParsePlayState(String playStateString)
@@ -149,17 +149,17 @@ namespace ConnectSdk.Windows.Service.Sessions
             return playStateString.Equals("finished") ? PlayStateStatus.Finished : PlayStateStatus.Unknown;
         }
 
-        public void Connect(T connectionListener)
+        public void Connect(ResponseListener<object> connectionListener)
         {
             Connect(false, connectionListener);
         }
 
-        public void Join(T connectionListener)
+        public void Join(ResponseListener<object> connectionListener)
         {
             Connect(true, connectionListener);
         }
 
-        private void Connect(bool joinOnly, T connectionListener)
+        private void Connect(bool joinOnly, ResponseListener<object> connectionListener)
         {
             if (Socket != null && Socket.State == State.Connecting)
             {
@@ -178,7 +178,7 @@ namespace ConnectSdk.Windows.Service.Sessions
 
             //MConnectionListener = new ResponseListener<ServiceCommand<ResponseListener<Object>>>();
 
-            MConnectionListener = new ResponseListener<ServiceCommand<T>>
+            MConnectionListener = new ResponseListener<ServiceCommand<ResponseListener<Object>>>
             (
                 loadEventArg =>
                 {
@@ -189,7 +189,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                             Connected = true;
 
                             if (connectionListener != null)
-                                connectionListener.OnSuccess((T)loadEventArg2);
+                                connectionListener.OnSuccess(loadEventArg2);
                         },
                         serviceCommandError =>
                         {
@@ -333,7 +333,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                 mMessageSubscription = null;
             }
 
-            Service.GetWebAppLauncher().CloseWebApp(LaunchSessionObject, listener);
+            Service.GetWebAppLauncher().CloseWebApp(LaunchSession, listener);
         }
 
         public void Seek(long position, ResponseListener<object> listener)
@@ -367,7 +367,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                     listener.OnError(new ServiceCommandError(0, null));
             }
 
-            var command = new ServiceCommand<T>(null, null, null, listener);
+            var command = new ServiceCommand<object>(null, null, null, listener);
 
             mActiveCommands.Add(requestId, command);
 
@@ -423,7 +423,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                  }
              );
 
-            var command = new ServiceCommand<T>(null, null, null, commandResponseListener);
+            var command = new ServiceCommand<object>(null, null, null, commandResponseListener);
             mActiveCommands.Add(requestId, command);
 
             var messageResponseListener = new ResponseListener<object>
@@ -489,7 +489,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                  }
              );
 
-            var command = new ServiceCommand<T>(null, null, null, commandResponseListener);
+            var command = new ServiceCommand<object>(null, null, null, commandResponseListener);
 
             mActiveCommands.Add(requestId, command);
             var messageResponseListener = new ResponseListener<object>
@@ -556,7 +556,7 @@ namespace ConnectSdk.Windows.Service.Sessions
              );
 
 
-            var command = new ServiceCommand<T>(null, null, null, commandResponseListener);
+            var command = new ServiceCommand<object>(null, null, null, commandResponseListener);
 
             mActiveCommands.Add(requestId, command);
             var messageResponseListener = new ResponseListener<object>
@@ -575,12 +575,10 @@ namespace ConnectSdk.Windows.Service.Sessions
             SendMessage(message, messageResponseListener);
         }
 
-        public class PlayStateListener : ResponseListener<PlayStateStatus> { }
-
-        public IServiceSubscription<ResponseListener<PlayStateStatus>> SubscribePlayState(ResponseListener<PlayStateStatus> listener)
+        public IServiceSubscription<PlayStateStatus> SubscribePlayState(ResponseListener<PlayStateStatus> listener)
         {
             if (mPlayStateSubscription == null)
-                mPlayStateSubscription = new UrlServiceSubscription<ResponseListener<int>>(null, null, null, null);
+                mPlayStateSubscription = new UrlServiceSubscription<PlayStateStatus>(null, null, null, null);
 
             if (!Connected)
             {
@@ -595,8 +593,8 @@ namespace ConnectSdk.Windows.Service.Sessions
                 Connect(connectResponseListener);
             }
 
-            if (!mPlayStateSubscription.GetListeners().Contains(listener as T))
-                mPlayStateSubscription.AddListener(listener as T);
+            if (!mPlayStateSubscription.GetListeners().Contains(listener))
+                mPlayStateSubscription.AddListener(listener);
 
             return mPlayStateSubscription;
         }
@@ -658,7 +656,7 @@ namespace ConnectSdk.Windows.Service.Sessions
 
             var responseListener = new ResponseListener<object>
              (
-                 loadEventArg => Util.PostSuccess(listener, LaunchSessionObject),
+                 loadEventArg => Util.PostSuccess(listener, LaunchSession),
                  serviceCommandError => Util.PostError(listener, serviceCommandError));
 
             var command = new ServiceCommand<object>(Socket, null, null, responseListener);
@@ -708,7 +706,7 @@ namespace ConnectSdk.Windows.Service.Sessions
 
             var responseListener = new ResponseListener<object>
                 (
-                loadEventArg => Util.PostSuccess(listener, LaunchSessionObject),
+                loadEventArg => Util.PostSuccess(listener, LaunchSession),
                 serviceCommandError => Util.PostError(listener, serviceCommandError)
                 );
 
@@ -757,8 +755,8 @@ namespace ConnectSdk.Windows.Service.Sessions
                         webOsWebAppSession.MConnectionListener.OnError(error);
                     else
                     {
-                        //if (webOsWebAppSession.WebAppSessionListener != null)
-                        //    webOsWebAppSession.WebAppSessionListener.OnWebAppSessionDisconnect(webOsWebAppSession);
+                        if (webOsWebAppSession.WebAppSessionListener != null)
+                            webOsWebAppSession.WebAppSessionListener.OnWebAppSessionDisconnect(webOsWebAppSession);
                     }
                 }
 

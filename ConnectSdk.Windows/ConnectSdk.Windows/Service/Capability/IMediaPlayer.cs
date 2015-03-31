@@ -14,6 +14,6 @@ namespace ConnectSdk.Windows.Service.Capability
         void PlayMedia(string url, string mimeType, string title, string description, string iconSrc, bool shouldLoop,
             ResponseListener<MediaLaunchObject> listener);
 
-        void CloseMedia<T>(LaunchSession<T> launchSession, ResponseListener<object> listener) where T: ResponseListener<object>;
+        void CloseMedia(LaunchSession launchSession, ResponseListener<object> listener);
     }
 }

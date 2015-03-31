@@ -3,9 +3,9 @@ using ConnectSdk.Windows.Service.Capability.Listeners;
 
 namespace ConnectSdk.Windows.Service.Command
 {
-    public class NotSupportedServiceSubscription<T> : IServiceSubscription<T> where T : ResponseListener<object>
+    public class NotSupportedServiceSubscription<T> : IServiceSubscription<T>
     {
-        private readonly List<T> listeners = new List<T>();
+        private readonly List<ResponseListener<T>> listeners = new List<ResponseListener<T>>();
 
 
         public void Unsubscribe()
@@ -13,19 +13,19 @@ namespace ConnectSdk.Windows.Service.Command
         }
 
 
-        public T AddListener(T listener)
+        public ResponseListener<T> AddListener(ResponseListener<T> listener)
         {
             listeners.Add(listener);
 
             return listener;
         }
 
-        public List<T> GetListeners()
+        public List<ResponseListener<T>> GetListeners()
         {
             return listeners;
         }
 
-        public void RemoveListener(T listener)
+        public void RemoveListener(ResponseListener<T> listener)
         {
             listeners.Remove(listener);
         }

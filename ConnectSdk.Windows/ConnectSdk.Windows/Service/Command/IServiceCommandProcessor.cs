@@ -1,8 +1,6 @@
-﻿using ConnectSdk.Windows.Service.Capability.Listeners;
-
-namespace ConnectSdk.Windows.Service.Command
+﻿namespace ConnectSdk.Windows.Service.Command
 {
-    public interface IServiceCommandProcessor<T> where T: ResponseListener<object>
+    public interface IServiceCommandProcessor<T>
     {
         void Unsubscribe(UrlServiceSubscription<T> subscription);
         void Unsubscribe(IServiceSubscription<T> subscription);

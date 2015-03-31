@@ -1,6 +1,6 @@
 ﻿namespace ConnectSdk.Windows.Service.Capability
 {
-    public enum PlayStateStatus
+    public enum PlayStateStatus : int
     {
         Unknown,
         Idle,

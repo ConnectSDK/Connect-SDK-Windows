@@ -41,12 +41,5 @@ namespace ConnectSdk.Windows.Service.Capability.Listeners
                 onErrorFunc(obj);
         }
 
-       
     }
-
-    //public interface IResponseListener<T>
-    //{
-    //    void OnSuccess(T loadArgument);
-    //    void OnError(ServiceCommandError serviceCommandError);
-    //}
 }
