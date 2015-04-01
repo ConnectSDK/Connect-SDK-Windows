@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -8,6 +9,7 @@ using ConnectSdk.Demo.Demo;
 using ConnectSdk.Windows.Device;
 using ConnectSdk.Windows.Discovery;
 using ConnectSdk.Windows.Service;
+using ConnectSdk.Windows.Service.Capability.Listeners;
 using ConnectSdk.Windows.Service.Config;
 using UpdateControls.XAML;
 
@@ -18,7 +20,9 @@ namespace ConnectSdk.Demo
     /// </summary>
     public sealed partial class Search : Page
     {
-        private readonly Model model; 
+        private readonly Model model;
+        private WebOstvService webOstvService;
+        private DiscoveryManagerListener listener;
 
         public Search()
         {
@@ -31,18 +35,23 @@ namespace ConnectSdk.Demo
 
         private void SearchTvs()
         {
-            var a = new Task(() =>
-            {
-                var listener = new DiscoveryManagerListener();
+            //var a = new Task(() =>
+            //{
+                listener = new DiscoveryManagerListener();
 
+                listener.Paired += (sender, o) =>
+                {
+                    model.SelectedDevice = o as ConnectableDevice;
+                    Frame.Navigate(typeof (Main));
+                };
                 DiscoveryManager.Init();
                 var discoveryManager = DiscoveryManager.GetInstance();
                 discoveryManager.AddListener(listener);
                 discoveryManager.PairingLevel = DiscoveryManager.PairingLevelEnum.On;
                 discoveryManager.Start();
-            });
+            //});
 
-            a.Start();
+            //a.Start();
         }
 
         private void TvListBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -85,7 +94,7 @@ namespace ConnectSdk.Demo
             }
             else
             {
-                var webOstvService = (WebOstvService)tvdef.GetServiceByName(WebOstvService.Id);
+                webOstvService = (WebOstvService)tvdef.GetServiceByName(WebOstvService.Id);
                 if (webOstvService != null)
                 {
                     if (!(webOstvService.ServiceConfig is WebOSTVServiceConfig))
@@ -93,10 +102,10 @@ namespace ConnectSdk.Demo
                         webOstvService.ServiceConfig = new WebOSTVServiceConfig(webOstvService.ServiceConfig.ServiceUuid);
                     }
                     var webOsServiceConfig = (WebOSTVServiceConfig)webOstvService.ServiceConfig;
+                    tvdef.AddListener(listener);
                     tvdef.Connect();
-                    tvdef.OnConnectionSuccess(webOstvService);
-                    model.SelectedDevice = tvdef;
-                    Frame.Navigate(typeof(Main));
+                    model.SelectedDevice.OnConnectionSuccess(webOstvService);
+
                 }
             }
         }

@@ -12,6 +12,7 @@ namespace ConnectSdk.Windows.Core
 	    private string name;
         private string ip;
         private string port;
+        private string url;
 
         public AppInfo(string id)
         {
@@ -43,7 +44,14 @@ namespace ConnectSdk.Windows.Core
 
         public string Url
         {
-            get { return string.Format("http://{0}:{1}/udap/api/data?target=appicon_get&auid={2}&appname={3}", ip, port, id, name); }
+            get
+            {
+                if (string.IsNullOrEmpty(url))
+                    return string.Format("http://{0}:{1}/udap/api/data?target=appicon_get&auid={2}&appname={3}", ip,
+                        port, id, name);
+                return url;
+            }
+            set { url = value; }
         }
 
         public void SetUrl(string ipParam, string portParam)

@@ -153,56 +153,64 @@ namespace ConnectSdk.Demo
         {
             navigationHelper.OnNavigatedTo(e);
 
+            var channelListResponseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+                    var loadEventArgs = loadEventArg as LoadEventArgs;
+                    if (loadEventArgs != null)
+                    {
+                        var channels = (loadEventArgs.Load as ServiceCommandError).GetPayload() as List<ChannelInfo>;
+                        model.Channels = new IndependentList<ChannelInfo>(channels);
+                    }
+                },
+                serviceCommandError =>
+                {
+
+                }
+            );
+
+            var appListResponseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+                    var loadEventArgs = loadEventArg as LoadEventArgs;
+                    if (loadEventArgs != null)
+                    {
+                        var apps = (loadEventArgs.Load as ServiceCommandError).GetPayload() as List<AppInfo>;
+                        for (int i = 0; i < apps.Count; i++)
+                        {
+                            apps[i].SetUrl(model.IpAddress, model.Port);
+                        }
+                        model.Apps = new IndependentList<AppInfo>(apps);
+                    }
+                },
+                serviceCommandError =>
+                {
+
+                }
+            );
+
             var netCastService = (NetcastTvService)model.SelectedDevice.GetServiceByName(NetcastTvService.Id);
             if (netCastService != null)
             {
                 model.IpAddress = netCastService.ServiceDescription.IpAddress;
                 model.Port = netCastService.ServiceDescription.Port.ToString();
-
-
-                var appListResponseListener = new ResponseListener
-                (
-                    loadEventArg =>
-                    {
-                        var loadEventArgs = loadEventArg as LoadEventArgs;
-                        if (loadEventArgs != null)
-                        {
-                            var apps = (loadEventArgs.Load as ServiceCommandError).GetPayload() as List<AppInfo>;
-                            for (int i = 0; i < apps.Count; i++)
-                            {
-                                apps[i].SetUrl(model.IpAddress, model.Port);
-                            }
-                            model.Apps = new IndependentList<AppInfo>(apps);
-                        }
-                    },
-                    serviceCommandError =>
-                    {
-
-                    }
-                );
-
                 //netCastService.getChannelList(responseListener);
                 netCastService.GetAppList(appListResponseListener);
-
-
-                var channelListResponseListener = new ResponseListener
-                (
-                    loadEventArg =>
-                    {
-                        var loadEventArgs = loadEventArg as LoadEventArgs;
-                        if (loadEventArgs != null)
-                        {
-                            var channels = (loadEventArgs.Load as ServiceCommandError).GetPayload() as List<ChannelInfo>;
-                            model.Channels = new IndependentList<ChannelInfo>(channels);
-                        }
-                    },
-                    serviceCommandError =>
-                    {
-
-                    }
-                );
-
                 netCastService.GetChannelList(channelListResponseListener);
+            }
+            else
+            {
+                var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
+                if (webostvService != null)
+                {
+                    model.IpAddress = webostvService.ServiceDescription.IpAddress;
+                    model.Port = webostvService.ServiceDescription.Port.ToString();
+
+                    webostvService.GetAppList(appListResponseListener);
+                    //webostvService.GetChannelList(channelListResponseListener);
+                }
             }
         }
 
@@ -314,6 +322,8 @@ namespace ConnectSdk.Demo
         }
 
         WebOsWebAppSession launchSession = null;
+        private LaunchSession applaunchSession;
+
         private void OpenWebApp_Click(object sender, RoutedEventArgs e)
         {
             //var webappname = "BareMoon 2";
@@ -346,34 +356,6 @@ namespace ConnectSdk.Demo
                 }
                 );
 
-
-/*            ResponseListener listener = new ResponseListener();
-            listener.Error += (o, error) =>
-            {
-                var msg =
-                    new MessageDialog(
-                        "Something went wrong; The application could not be started. Press 'Close' to continue");
-                msg.ShowAsync();
-            };
-
-            listener.Success += (o, param) =>
-            {
-                var v = param as LoadEventArgs;
-                if (v != null)
-                    try
-                    {
-                        launchSession = v.Load.GetPayload() as WebOsWebAppSession;
-
-
-                    }
-                    catch (Exception)
-                    {
-
-                        throw;
-                    }
-
-            };
-*/
             webostvService.LaunchWebApp(webappname, listener);
 
         }
@@ -432,22 +414,132 @@ namespace ConnectSdk.Demo
             }
         }
 
-        private void Test(object sender, RoutedEvent e)
+        private void LaunchStore_Click(object sender, RoutedEventArgs e)
         {
+            var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
 
-            var listener = new ResponseListener
+            var responseListener = new ResponseListener
             (
-                (loadEventArg) =>
-                {
+            loadEventArg =>
+            {
 
+                var responseListener2 = new ResponseListener
+                (
+                    loadEventArg2 =>
+                    {
+
+                    },
+                    serviceCommandError =>
+                    {
+
+                    }
+                );
+                webostvService.GetRunningApp(responseListener2);
+            },
+            serviceCommandError =>
+            {
+
+            }
+            );
+            webostvService.LaunchAppStore("", responseListener);
+
+
+
+        }
+
+        private void GetAppList_Click(object sender, RoutedEventArgs e)
+        {
+            var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
+
+            var appListResponseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+                    var loadEventArgs = loadEventArg as LoadEventArgs;
+                    if (loadEventArgs != null)
+                    {
+                        var apps = (loadEventArgs.Load as ServiceCommandError).GetPayload() as List<AppInfo>;
+                        for (int i = 0; i < apps.Count; i++)
+                        {
+                            apps[i].SetUrl(model.IpAddress, model.Port);
+                        }
+                        model.Apps = new IndependentList<AppInfo>(apps);
+                    }
                 },
-                (serviceCommandError) =>
+                serviceCommandError =>
                 {
 
                 }
             );
 
+            webostvService.GetAppList(appListResponseListener);
+        }
 
+        private void LauncApp_Click(object sender, RoutedEventArgs e)
+        {
+            var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
+
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+                    var v = loadEventArg as LoadEventArgs;
+                    if (v != null)
+                        try
+                        {
+                            applaunchSession = v.Load.GetPayload() as LaunchSession;
+                        }
+                        catch (Exception)
+                        {
+
+                            throw;
+                        }
+                },
+                serviceCommandError =>
+                {
+
+                }
+            );
+
+            webostvService.LaunchApp(model.Apps[1].Id,responseListener);
+        }
+
+        private void CloseApp_Click(object sender, RoutedEventArgs e)
+        {
+            var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
+
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+
+                },
+                serviceCommandError =>
+                {
+
+                }
+            );
+
+            webostvService.CloseApp(applaunchSession, responseListener);
+        }
+
+        private void GetRunningApp_Click(object sender, RoutedEventArgs e)
+        {
+            var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
+
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+
+                },
+                serviceCommandError =>
+                {
+
+                }
+            );
+
+            webostvService.GetRunningApp(responseListener);
         }
     }
 }

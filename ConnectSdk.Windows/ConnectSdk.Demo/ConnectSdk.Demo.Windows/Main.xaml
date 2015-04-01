@@ -84,6 +84,16 @@
                             </controls:WrapPanel>
                         </StackPanel>
                         <StackPanel Margin="5">
+                            <TextBlock Text="IAppLauncher" FontSize="20" VerticalAlignment="Center" Margin="5"></TextBlock>
+                            <controls:WrapPanel Orientation="Horizontal" Width="400">
+                                <Button Content="Store" Click="LaunchStore_Click"></Button>
+                                <Button Content="Get AppList" Click="GetAppList_Click"></Button>
+                                <Button Content="LaunchApp" Click="LauncApp_Click"></Button>
+                                <Button Content="CloseApp" Click="CloseApp_Click"></Button>
+                                <Button Content="GetRunningApp" Click="GetRunningApp_Click"></Button>
+                            </controls:WrapPanel>
+                        </StackPanel>
+                        <StackPanel Margin="5">
                             <TextBlock Text="IWebAppLauncher" FontSize="20" VerticalAlignment="Center" Margin="5"></TextBlock>
                             <controls:WrapPanel Orientation="Horizontal" Width="400">
                                 <TextBox Margin="5" x:Name="WebAppMessageBox"></TextBox>

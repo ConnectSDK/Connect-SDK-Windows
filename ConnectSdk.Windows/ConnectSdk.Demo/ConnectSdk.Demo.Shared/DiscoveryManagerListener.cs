@@ -13,6 +13,8 @@ namespace ConnectSdk.Demo.Demo
     {
         private Dictionary<string, string> keys = null;
 
+        public EventHandler<object> Paired;
+
         public void OnDeviceAdded(DiscoveryManager manager, ConnectableDevice device)
         {
             App.ApplicationModel.DiscoverredTvList.Add(device);
@@ -35,7 +37,8 @@ namespace ConnectSdk.Demo.Demo
 
         public void OnDeviceReady(ConnectableDevice device)
         {
-            throw new NotImplementedException();
+            if (Paired != null)
+                Paired(this, device);
         }
 
         public void OnDeviceDisconnected(ConnectableDevice device)

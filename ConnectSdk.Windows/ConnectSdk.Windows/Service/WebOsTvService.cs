@@ -15,9 +15,10 @@ using ConnectSdk.Windows.Service.WebOs;
 namespace ConnectSdk.Windows.Service
 {
     public class WebOstvService : DeviceService, IVolumeControl, ILauncher, IMediaControl, IMediaPlayer, ITvControl,
-        IToastControl, IExternalInputControl, IMouseControl, ITextInputControl, IPowerControl, IKeyControl, IWebAppLauncher
+        IToastControl, IExternalInputControl, IMouseControl, ITextInputControl, IPowerControl, IKeyControl,
+        IWebAppLauncher
     {
-        public static String[] WebOstvServiceOpenPermissionList = 
+        public static String[] WebOstvServiceOpenPermissionList =
         {
             "LAUNCH",
             "LAUNCH_WEBAPP",
@@ -51,14 +52,27 @@ namespace ConnectSdk.Windows.Service
 
         public static String Id = "webOS TV";
 
+        private const string ForegroundApp = "ssap://com.webos.applicationManager/getForegroundAppInfo";
+        private const string AppStatus = "ssap://com.webos.service.appstatus/getAppStatus";
         private const string VolumeUrl = "ssap://audio/getVolume";
         private const string MuteUrl = "ssap://audio/getMute";
+
+
+        //static String FOREGROUND_APP = "ssap://com.webos.applicationManager/getForegroundAppInfo";
+        //static String APP_STATUS = "ssap://com.webos.service.appstatus/getAppStatus";
+        //static String APP_STATE = "ssap://system.launcher/getAppState";
+        //static String VOLUME = "ssap://audio/getVolume";
+        //static String MUTE = "ssap://audio/getMute";
+        //static String VOLUME_STATUS = "ssap://audio/getStatus";
+        //static String CHANNEL_LIST = "ssap://tv/getChannelList";
+        //static String CHANNEL = "ssap://tv/getCurrentChannel";
+        //static String PROGRAM = "ssap://tv/getChannelProgramInfo";
 
         public Dictionary<string, string> AppToAppIdMappings { get; set; }
         public Dictionary<string, WebOsWebAppSession> WebAppSessions { get; set; }
 
         private WebOstvServiceSocketClient socket;
-        WebOstvMouseSocketConnection mouseSocket;
+        private WebOstvMouseSocketConnection mouseSocket;
 
         private List<String> permissions;
 
@@ -106,7 +120,7 @@ namespace ConnectSdk.Windows.Service
             if (DiscoveryManager.GetInstance().PairingLevel == DiscoveryManager.PairingLevelEnum.On)
             {
                 return socket != null && socket.IsConnected() &&
-                       (((WebOSTVServiceConfig)serviceConfig).getClientKey() != null);
+                       (((WebOSTVServiceConfig) serviceConfig).getClientKey() != null);
             }
             return socket != null && socket.IsConnected();
         }
@@ -199,13 +213,13 @@ namespace ConnectSdk.Windows.Service
         {
             const string uri = "ssap://audio/setVolume";
             var payload = new JsonObject();
-            var intVolume = (int)Math.Round(volume * 100.0f);
+            var intVolume = (int) Math.Round(volume*100.0f);
 
             try
             {
                 payload.Add("volume", JsonValue.CreateNumberValue(intVolume));
             }
-            // ReSharper disable once EmptyGeneralCatchClause
+                // ReSharper disable once EmptyGeneralCatchClause
             catch (Exception)
             {
                 //e.printStackTrace();
@@ -224,18 +238,18 @@ namespace ConnectSdk.Windows.Service
         public void GetVolume(bool isSubscription, ResponseListener listener)
         {
             var getVolumeResponseListener = new ResponseListener
-            (
+                (
                 loadEventArg =>
                 {
                     try
                     {
-                        var jsonObj = (JsonObject)loadEventArg;
-                        var iVolume = (int)jsonObj.GetNamedNumber("volume");
-                        var fVolume = (float)(iVolume / 100.0);
+                        var jsonObj = (JsonObject) loadEventArg;
+                        var iVolume = (int) jsonObj.GetNamedNumber("volume");
+                        var fVolume = (float) (iVolume/100.0);
 
                         Util.PostSuccess(listener, fVolume);
                     }
-                    // ReSharper disable once EmptyGeneralCatchClause
+                        // ReSharper disable once EmptyGeneralCatchClause
                     catch (Exception)
                     {
 
@@ -258,7 +272,7 @@ namespace ConnectSdk.Windows.Service
             {
                 payload.Add("mute", JsonValue.CreateBooleanValue(isMute));
             }
-            // ReSharper disable once EmptyGeneralCatchClause
+                // ReSharper disable once EmptyGeneralCatchClause
             catch (Exception)
             {
                 //e.printStackTrace();
@@ -277,24 +291,24 @@ namespace ConnectSdk.Windows.Service
         {
 
             var getMuteResponseListener = new ResponseListener
-            (
+                (
                 loadEventArg =>
                 {
                     try
                     {
-                        var jsonObj = (JsonObject)loadEventArg;
+                        var jsonObj = (JsonObject) loadEventArg;
                         var isMute = jsonObj.GetNamedBoolean("mute");
                         Util.PostSuccess(listener, isMute);
                     }
-                    // ReSharper disable once EmptyGeneralCatchClause
+                        // ReSharper disable once EmptyGeneralCatchClause
                     catch (Exception)
                     {
 
                     }
                 },
                 serviceCommandError => Util.PostError(listener, serviceCommandError)
-            );
-        
+                );
+
 
             var request = isSubscription
                 ? new UrlServiceSubscription(this, MuteUrl, null, true, getMuteResponseListener)
@@ -321,82 +335,376 @@ namespace ConnectSdk.Windows.Service
 
         public ILauncher GetLauncher()
         {
-            throw new NotImplementedException();
+            return this;
         }
 
         public CapabilityPriorityLevel GetLauncherCapabilityLevel()
         {
-            throw new NotImplementedException();
+            return CapabilityPriorityLevel.High;
         }
 
         public void LaunchAppWithInfo(AppInfo appInfo, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            LaunchAppWithInfo(appInfo, null, listener);
         }
 
         public void LaunchAppWithInfo(AppInfo appInfo, object ps, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            const string uri = "ssap://system.launcher/launch";
+            var payload = new JsonObject();
+
+            var appId = appInfo.Id;
+            string contentId = null;
+
+            if (ps != null)
+            {
+                try
+                {
+                    contentId = ((JsonObject) ps).GetNamedString("contentId");
+                }
+                    // ReSharper disable once EmptyGeneralCatchClause
+                catch
+                {
+
+                }
+            }
+
+            try
+            {
+                payload.Add("id", JsonValue.CreateStringValue(appId));
+
+                if (contentId != null)
+                    payload.Add("contentId", JsonValue.CreateStringValue(contentId));
+
+                if (ps != null)
+                    payload.Add("params", (JsonObject) ps);
+            }
+                // ReSharper disable once EmptyGeneralCatchClause
+            catch
+            {
+
+            }
+
+            var responseListener = new ResponseListener
+                (
+                loadEventArg =>
+                {
+                    var obj = (JsonObject)(((LoadEventArgs)loadEventArg).Load.GetPayload());
+                    var launchSession = new LaunchSession
+                    {
+                        Service = this,
+                        AppId = appId,
+                        SessionId = obj.GetNamedString("sessionId"),
+                        SessionType = LaunchSessionType.App
+                    };
+
+                    Util.PostSuccess(listener, launchSession);
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+                );
+            var request = new ServiceCommand(this, uri, payload, responseListener);
+            request.Send();
         }
 
         public void LaunchApp(string appId, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            var appInfo = new AppInfo(appId) {Id = appId};
+
+            LaunchAppWithInfo(appInfo, listener);
         }
 
         public void CloseApp(LaunchSession launchSession, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            const string uri = "ssap://system.launcher/close";
+            var appId = launchSession.AppId;
+            var sessionId = launchSession.SessionId;
+            var payload = new JsonObject();
+
+            try
+            {
+                payload.Add("id", JsonValue.CreateStringValue(appId));
+                payload.Add("sessionId", JsonValue.CreateStringValue(sessionId));
+            }
+            catch
+            {
+            }
+
+            var request = new ServiceCommand(this, uri, payload, listener);
+            request.Send();
         }
 
         public void GetAppList(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            const string uri = "ssap://com.webos.applicationManager/listApps";
+
+            var responseListener = new ResponseListener
+                (
+                loadEventArg =>
+                {
+                    try
+                    {
+                        var jsonObj = (JsonObject)(((LoadEventArgs)loadEventArg).Load.GetPayload());
+
+                        var apps = jsonObj.GetNamedArray("apps");
+                        var appList = new List<AppInfo>();
+
+                        for (var i = 0; i < apps.Count; i++)
+                        {
+                            var appObj = apps[i].GetObject();
+
+                            if (appObj == null) continue;
+                            var appInfo = new AppInfo(appObj.GetNamedString("id"))
+                            {
+
+                                Name = appObj.GetNamedString("title"),
+                                Url = appObj.GetNamedString("icon"),
+                                RawData = appObj
+                            };
+
+                            appList.Add(appInfo);
+                        }
+                        Util.PostSuccess(listener, appList);
+                    }
+                    catch
+                    {
+                    }
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+                );
+            var request = new ServiceCommand(this, uri, null, responseListener);
+            request.Send();
         }
 
         public void GetRunningApp(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            GetRunningApp(false, listener);
+        }
+
+        public ServiceCommand GetRunningApp(bool isSubscription, ResponseListener listener)
+        {
+            ServiceCommand request;
+
+            var responseListener = new ResponseListener
+                (
+                loadEventArg =>
+                {
+                    var jsonObj = (JsonObject)(((LoadEventArgs)loadEventArg).Load.GetPayload());
+                    var appInfo = new AppInfo(jsonObj.GetNamedString("appId"))
+                    {
+                        Name = jsonObj.GetNamedString("title",""),
+                        RawData = jsonObj
+                    };
+                    Util.PostSuccess(listener, appInfo);
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+                );
+
+            if (isSubscription)
+                request = new UrlServiceSubscription(this, ForegroundApp, null, true, responseListener);
+            else
+                request = new ServiceCommand(this, ForegroundApp, null, responseListener);
+
+            request.Send();
+
+            return request;
         }
 
         public IServiceSubscription SubscribeRunningApp(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            return (UrlServiceSubscription) GetRunningApp(true, listener);
         }
 
         public void GetAppState(LaunchSession launchSession, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            GetAppState(false, launchSession, listener);
+        }
+
+        public ServiceCommand GetAppState(bool subscription, LaunchSession launchSession, ResponseListener listener)
+        {
+            ServiceCommand request;
+
+            var payload = new JsonObject();
+
+            try
+            {
+                payload.Add("id", JsonValue.CreateStringValue(launchSession.AppId));
+                payload.Add("sessionId", JsonValue.CreateStringValue(launchSession.SessionId));
+            }
+            catch
+            {
+            }
+
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+                    var jsonObj = (JsonObject)(((LoadEventArgs)loadEventArg).Load.GetPayload());
+
+                    try
+                    {
+                        Util.PostSuccess(listener,
+                            new AppState(jsonObj.GetNamedBoolean("running"), jsonObj.GetNamedBoolean("visible")));
+                    }
+                    catch
+                    {
+                        Util.PostError(listener, new ServiceCommandError(0, "Malformed JSONObject"));
+                    }
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
+
+            if (subscription)
+                request = new UrlServiceSubscription(this, AppStatus, payload, true, responseListener);
+            else
+                request = new ServiceCommand(this, AppStatus, payload, responseListener);
+
+            request.Send();
+
+            return request;
         }
 
         public IServiceSubscription SubscribeAppState(LaunchSession launchSession, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            return (UrlServiceSubscription) GetAppState(true, launchSession, listener);
         }
 
         public void LaunchBrowser(string url, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            const string uri = "ssap://system.launcher/launch";
+            var payload = new JsonObject();
+
+            var responseListener = new ResponseListener
+                (
+                loadEventArg =>
+                {
+                    var obj = (JsonObject)loadEventArg;
+                    var launchSession = new LaunchSession
+                    {
+                        Service = this,
+                        AppId = obj.GetNamedString("id"),
+                        SessionId = obj.GetNamedString("sessionId"),
+                        SessionType = LaunchSessionType.App,
+                        RawData = obj
+                    };
+
+                    Util.PostSuccess(listener, launchSession);
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+                );
+
+            try
+            {
+                payload.Add("target", JsonValue.CreateStringValue(url));
+            }
+            // ReSharper disable once EmptyGeneralCatchClause
+            catch
+            {
+            }
+
+            var request = new ServiceCommand(this, uri, payload, responseListener);
+            request.Send();
         }
 
         public void LaunchYouTube(string contentId, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            LaunchYouTube(contentId, (float)0.0, listener);
+        }
+
+        public void LaunchYouTube(string contentId, float startTime, ResponseListener listener)
+        {
+            var ps = new JsonObject();
+            if (!string.IsNullOrEmpty(contentId))
+            {
+                if (startTime < 0.0)
+                {
+                    Util.PostError(listener, new ServiceCommandError(0, "Start time may not be negative"));
+                    return;
+                }
+
+                try
+                {
+                    ps.Add("contentId",
+                        JsonValue.CreateStringValue(String.Format("{0}&pairingCode={1}&t={2}", contentId,
+                            Guid.NewGuid(), startTime)));
+                }
+                catch
+                {
+                }
+            }
+
+            var appInfo = new AppInfo("youtube.leanback.v4")
+            {
+                Name = "YouTube"
+            };
+
+            LaunchAppWithInfo(appInfo, ps, listener);
         }
 
         public void LaunchNetflix(string contentId, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            var ps = new JsonObject();
+            var netflixContentId = "m=http%3A%2F%2Fapi.netflix.com%2Fcatalog%2Ftitles%2Fmovies%2F" + contentId + "&source_type=4";
+            if (!string.IsNullOrEmpty(contentId))
+            {
+                try
+                {
+                    ps.Add("contentId", JsonValue.CreateStringValue(netflixContentId));
+                }
+                catch
+                {
+                }
+            }
+
+            var appInfo = new AppInfo("netflix")
+            {
+                Name = "Netflix"
+            };
+
+            LaunchAppWithInfo(appInfo, ps, listener);
         }
 
         public void LaunchHulu(string contentId, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            var ps = new JsonObject();
+            if (!string.IsNullOrEmpty(contentId))
+            {
+                try
+                {
+                    ps.Add("contentId", JsonValue.CreateStringValue(contentId));
+                }
+                catch
+                {
+                }
+            }
+
+            var appInfo = new AppInfo("hulu")
+            {
+                Name = "Hulu"
+            };
+
+            LaunchAppWithInfo(appInfo, ps, listener);
         }
 
         public void LaunchAppStore(string appId, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            var appInfo = new AppInfo("com.webos.app.discovery") { Name = "LG Store" };
+
+            var ps = new JsonObject();
+
+            if (!string.IsNullOrEmpty(appId))
+            {
+                var query = string.Format("category/GAME_APPS/{0}", appId);
+                try
+                {
+                    ps.Add("query", JsonValue.CreateStringValue(query));
+                }
+                catch
+                {
+
+                }
+            }
+
+            LaunchAppWithInfo(appInfo, ps, listener);
         }
 
         #endregion
