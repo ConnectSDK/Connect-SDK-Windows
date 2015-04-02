@@ -149,7 +149,7 @@ namespace ConnectSdk.Windows.Service
             return Activator.CreateInstance(clazz, new object[] { serviceDescription, serviceConfig }) as DeviceService;
         }
 
-        public T GetApi<T>(T clazz) where T : CapabilityMethods
+        public T GetApi<T>() where T: class
         {
             // if this class is of the type given return it, otherwise null
             // ReSharper disable once SuspiciousTypeConversion.Global

@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Windows.Data.Json;
 using Windows.Foundation;
 using ConnectSdk.Windows.Core;
+using ConnectSdk.Windows.Device;
 using ConnectSdk.Windows.Discovery;
 using ConnectSdk.Windows.Service.Capability;
 using ConnectSdk.Windows.Service.Capability.Listeners;
@@ -56,7 +58,7 @@ namespace ConnectSdk.Windows.Service
         private const string AppStatus = "ssap://com.webos.service.appstatus/getAppStatus";
         private const string VolumeUrl = "ssap://audio/getVolume";
         private const string MuteUrl = "ssap://audio/getMute";
-
+        private const string CloseMediaUri = "ssap://media.viewer/close";
 
         //static String FOREGROUND_APP = "ssap://com.webos.applicationManager/getForegroundAppInfo";
         //static String APP_STATUS = "ssap://com.webos.service.appstatus/getAppStatus";
@@ -713,104 +715,305 @@ namespace ConnectSdk.Windows.Service
 
         public IMediaControl GetMediaControl()
         {
-            throw new NotImplementedException();
+            return this;
         }
 
         public CapabilityPriorityLevel GetMediaControlCapabilityLevel()
         {
-            throw new NotImplementedException();
+            return CapabilityPriorityLevel.High;
         }
 
         public void Play(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            const string uri = "ssap://media.controls/play";
+            var request = new ServiceCommand(this, uri, null, listener);
+
+            request.Send();
         }
 
         public void Pause(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            const string uri = "ssap://media.controls/pause";
+            var request = new ServiceCommand(this, uri, null, listener);
+
+            request.Send();
         }
 
         public void Stop(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            const string uri = "ssap://media.controls/stop";
+            var request = new ServiceCommand(this, uri, null, listener);
+
+            request.Send();
         }
 
         public void Rewind(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            const string uri = "ssap://media.controls/rewind";
+            var request = new ServiceCommand(this, uri, null, listener);
+
+            request.Send();
         }
 
         public void FastForward(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            const string uri = "ssap://media.controls/fastForward";
+            var request = new ServiceCommand(this, uri, null, listener);
+
+            request.Send();
         }
 
         public void Seek(long position, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            Util.PostError(listener, ServiceCommandError.NotSupported());
         }
 
         public void GetDuration(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            Util.PostError(listener, ServiceCommandError.NotSupported());
         }
 
         public void GetPosition(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            Util.PostError(listener, ServiceCommandError.NotSupported());
         }
 
         public void GetPlayState(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            Util.PostError(listener, ServiceCommandError.NotSupported());
         }
 
         public IServiceSubscription SubscribePlayState(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            Util.PostError(listener, ServiceCommandError.NotSupported());
+            return null;
         }
 
         public void Next(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            Util.PostError(listener, ServiceCommandError.NotSupported());
         }
 
         public void Previous(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            Util.PostError(listener, ServiceCommandError.NotSupported());
         }
 
         #endregion
 
         #region Media Player
 
+        private DeviceService GetDlnaService()
+        {
+            ConcurrentDictionary<string, ConnectableDevice> allDevices = DiscoveryManager.GetInstance().GetAllDevices();
+            ConnectableDevice device = null;
+            DeviceService service = null;
+
+            if (allDevices != null && allDevices.Count > 0)
+                device = allDevices[ServiceDescription.IpAddress];
+
+            if (device != null)
+                service = device.GetServiceByName("DLNA");
+
+            return service;
+        }
+
+
         public IMediaPlayer GetMediaPlayer()
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public CapabilityPriorityLevel GetMediaPlayerCapabilityLevel()
         {
-            throw new NotImplementedException();
+            return CapabilityPriorityLevel.High;
         }
 
         public void DisplayImage(string url, string mimeType, string title, string description, string iconSrc,
             ResponseListener listener)
         {
-            throw new NotImplementedException();
+            if (ServiceDescription.Version != null && ServiceDescription.Version.Equals("4.0.0"))
+            {
+                var dlnaService = GetDlnaService();
+
+                if (dlnaService != null)
+                {
+                    var mediaPlayer = dlnaService.GetApi<IMediaPlayer>();
+
+                    if (mediaPlayer != null)
+                    {
+                        mediaPlayer.DisplayImage(url, mimeType, title, description, iconSrc, listener);
+                        return;
+                    }
+                }
+
+                JsonObject ps = null;
+                try
+                {
+
+                    ps = new JsonObject
+                    {
+                        {"target", JsonValue.CreateStringValue(url)},
+                        {"title", JsonValue.CreateStringValue(title ?? string.Empty)},
+                        {"description", JsonValue.CreateStringValue(description ?? string.Empty)},
+                        {"mimeType", JsonValue.CreateStringValue(mimeType ?? string.Empty)},
+                        {"iconSrc", JsonValue.CreateStringValue(iconSrc ?? string.Empty)},
+                    };
+                }
+                catch (Exception ex)
+                {
+                    Util.PostError(listener, new ServiceCommandError(-1, ex.Message));
+                }
+
+                if (ps != null)
+                    DisplayMedia(ps, listener);
+            }
+            else
+            {
+                const string webAppId = "MediaPlayer";
+                var webAppLaunchListener = new ResponseListener
+                    (
+                        loadEventArg =>
+                        {
+                            var webAppSession = loadEventArg as WebAppSession;
+                            if (webAppSession != null)
+                                webAppSession.DisplayImage(url, mimeType, title, description, iconSrc, listener);
+                        },
+                        serviceCommandError =>
+                        {
+                            listener.OnError(serviceCommandError);
+                        }
+                    );
+
+                var webappResponseListener = new ResponseListener
+                    (
+                        loadEventArg =>
+                        {
+                            var webAppSession = loadEventArg as WebAppSession;
+                            if (webAppSession != null)
+                                webAppSession.DisplayImage(url, mimeType, title, description, iconSrc, listener);
+                        },
+                        serviceCommandError => GetWebAppLauncher().LaunchWebApp(webAppId, webAppLaunchListener)
+                    );
+
+                GetWebAppLauncher().JoinWebApp(webAppId, webappResponseListener);
+            }
+        }
+
+        private void DisplayMedia(JsonObject ps, ResponseListener listener)
+        {
+            const string uri = "ssap://media.viewer/open";
+
+            var responseListener = new ResponseListener
+                (
+                loadEventArg =>
+                {
+                    var obj = (JsonObject)(((LoadEventArgs)loadEventArg).Load.GetPayload());
+
+                    LaunchSession launchSession = LaunchSession.LaunchSessionForAppId(obj.GetNamedString("id"));
+                    launchSession.Service = this;
+                    launchSession.SessionId = obj.GetNamedString("sessionId");
+                    launchSession.SessionType = LaunchSessionType.Media;
+
+                    Util.PostSuccess(listener, new MediaLaunchObject(launchSession, this));
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
+
+            var request = new ServiceCommand(this, uri, ps, responseListener);
+            request.Send();
         }
 
         public void PlayMedia(string url, string mimeType, string title, string description, string iconSrc,
-            bool shouldLoop,
-            ResponseListener listener)
+            bool shouldLoop,ResponseListener listener)
         {
-            throw new NotImplementedException();
+            if (ServiceDescription.Version != null && ServiceDescription.Version.Equals("4.0.0"))
+            {
+                var dlnaService = GetDlnaService();
+
+                if (dlnaService != null)
+                {
+                    var mediaPlayer = dlnaService.GetApi<IMediaPlayer>();
+
+                    if (mediaPlayer != null)
+                    {
+                        mediaPlayer.PlayMedia(url, mimeType, title, description, iconSrc, shouldLoop, listener);
+                        return;
+                    }
+                }
+
+                JsonObject ps = null;
+                try
+                {
+                    ps = new JsonObject
+                    {
+                        {"target", JsonValue.CreateStringValue(url)},
+                        {"title", JsonValue.CreateStringValue(title ?? string.Empty)},
+                        {"description", JsonValue.CreateStringValue(description ?? string.Empty)},
+                        {"mimeType", JsonValue.CreateStringValue(mimeType ?? string.Empty)},
+                        {"iconSrc", JsonValue.CreateStringValue(iconSrc ?? string.Empty)},
+                        {"loop", JsonValue.CreateBooleanValue(shouldLoop)}
+                    };
+                }
+                catch (Exception ex)
+                {
+                    Util.PostError(listener, new ServiceCommandError(-1, ex.Message));
+                }
+
+                if (ps != null)
+                    DisplayMedia(ps, listener);
+            }
+            else
+            {
+                const string webAppId = "MediaPlayer";
+                var webAppLaunchListener = new ResponseListener
+                    (
+                        loadEventArg =>
+                        {
+                            var webAppSession = loadEventArg as WebAppSession;
+                            if (webAppSession != null)
+                                webAppSession.PlayMedia(url, mimeType, title, description, iconSrc, shouldLoop, listener);
+                        },
+                        serviceCommandError =>
+                        {
+                            listener.OnError(serviceCommandError);
+                        }
+                    );
+
+                var webappResponseListener = new ResponseListener
+                    (
+                        loadEventArg =>
+                        {
+                            var webAppSession = loadEventArg as WebAppSession;
+                            if (webAppSession != null)
+                                webAppSession.PlayMedia(url, mimeType, title, description, iconSrc, shouldLoop, listener);
+                        },
+                        serviceCommandError => GetWebAppLauncher().LaunchWebApp(webAppId, webAppLaunchListener)
+                    );
+
+                GetWebAppLauncher().JoinWebApp(webAppId, webappResponseListener);
+            }
         }
 
         public void CloseMedia(LaunchSession launchSession, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            var payload = new JsonObject();
+
+            try
+            {
+                if (!string.IsNullOrEmpty(launchSession.AppId))
+                    payload.Add("id", JsonValue.CreateStringValue(launchSession.AppId));
+
+                if (!string.IsNullOrEmpty(launchSession.SessionId))
+                    payload.Add("sessionId", JsonValue.CreateStringValue(launchSession.SessionId));
+            }
+            catch
+            {
+                
+            }
+
+            var request = new ServiceCommand(launchSession.Service, CloseMediaUri, payload, listener);
+            request.Send();
         }
 
         #endregion
@@ -1381,7 +1584,18 @@ namespace ConnectSdk.Windows.Service
         {
             var webAppSession = WebAppSessionForLaunchSession(webAppLaunchSession);
 
-            webAppSession.Join(new ResponseListener());
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+                    Util.PostSuccess(listener, webAppSession);
+                },
+                serviceCommandError =>
+                {
+                    Util.PostError(listener, serviceCommandError);
+                }
+            );
+            webAppSession.Join(responseListener);
         }
 
         public void JoinWebApp(string webAppId, ResponseListener listener)
@@ -1733,7 +1947,7 @@ namespace ConnectSdk.Windows.Service
             if (launchSession.Service == null)
                 launchSession.Service = this;
 
-            WebOsWebAppSession webAppSession = WebAppSessions[launchSession.AppId];
+            WebOsWebAppSession webAppSession = WebAppSessions.ContainsKey(launchSession.AppId) ? WebAppSessions[launchSession.AppId] : null;
 
             if (webAppSession == null)
             {

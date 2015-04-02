@@ -94,6 +94,23 @@
                             </controls:WrapPanel>
                         </StackPanel>
                         <StackPanel Margin="5">
+                            <TextBlock Text="IMediaControl" FontSize="20" VerticalAlignment="Center" Margin="5"></TextBlock>
+                            <controls:WrapPanel Orientation="Horizontal" Width="400">
+                                <Button Content="Play" Click="MediaPlay_Click"></Button>
+                                <Button Content="Pause" Click="MediaPause_Click"></Button>
+                                <Button Content="Stop" Click="MediaStop_Click"></Button>
+                                <Button Content="Rew" Click="MediaRewind_Click"></Button>
+                                <Button Content="FF" Click="MediaFastForward_Click"></Button>
+                            </controls:WrapPanel>
+                        </StackPanel>
+                        <StackPanel Margin="5">
+                            <TextBlock Text="IMediaPlayer" FontSize="20" VerticalAlignment="Center" Margin="5"></TextBlock>
+                            <controls:WrapPanel Orientation="Horizontal" Width="400">
+                                <Button Content="Play media" Click="MediaPlayerMedia_Click"></Button>
+                                <Button Content="Display image" Click="MediaPlayerImage_Click"></Button>
+                            </controls:WrapPanel>
+                        </StackPanel>
+                        <StackPanel Margin="5">
                             <TextBlock Text="IWebAppLauncher" FontSize="20" VerticalAlignment="Center" Margin="5"></TextBlock>
                             <controls:WrapPanel Orientation="Horizontal" Width="400">
                                 <TextBox Margin="5" x:Name="WebAppMessageBox"></TextBox>
@@ -177,3 +194,5 @@
         </Hub>
     </Grid>
 </Page>
+
+    

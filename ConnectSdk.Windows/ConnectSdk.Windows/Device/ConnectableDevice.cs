@@ -393,10 +393,10 @@ namespace ConnectSdk.Windows.Device
             T foundController = null;
             foreach (var service in services.Values)
             {
-                if (service.GetApi(controllerClass) == null)
+                if (service.GetApi<T>() == null)
                     continue;
 
-                var controller = service.GetApi(controllerClass);
+                var controller = service.GetApi<T>();
 
                 if (foundController == null)
                 {

@@ -541,5 +541,47 @@ namespace ConnectSdk.Demo
 
             webostvService.GetRunningApp(responseListener);
         }
+
+        private void MediaPlay_Click(object sender, RoutedEventArgs e)
+        {
+            var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
+            webostvService.Play(null);
+        }
+
+        private void MediaPause_Click(object sender, RoutedEventArgs e)
+        {
+            var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
+            webostvService.Pause(null);
+        }
+
+        private void MediaStop_Click(object sender, RoutedEventArgs e)
+        {
+            var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
+            webostvService.Stop(null);
+        }
+
+        private void MediaRewind_Click(object sender, RoutedEventArgs e)
+        {
+            var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
+            webostvService.Rewind(null);
+        }
+
+        private void MediaFastForward_Click(object sender, RoutedEventArgs e)
+        {
+            var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
+            webostvService.FastForward(null);
+        }
+
+        private void MediaPlayerMedia_Click(object sender, RoutedEventArgs e)
+        {
+            var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
+            webostvService.PlayMedia("http://www.connectsdk.com/files/8913/9657/0225/test_video.mp4", "video/mp4", "Sintel Trailer", "Blender Open Movie Project", "http://www.connectsdk.com/files/7313/9657/0225/test_video_icon.jpg", false, null);
+        }
+
+        private void MediaPlayerImage_Click(object sender, RoutedEventArgs e)
+        {
+            var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
+            webostvService.DisplayImage("http://www.connectsdk.com/files/9613/9656/8539/test_image.jpg", "image/jpeg", "Sintel Character Design", "Blender Open Movie Project", "http://www.connectsdk.com/files/2013/9656/8845/test_image_icon.jpg", null);
+        }
     }
 }
