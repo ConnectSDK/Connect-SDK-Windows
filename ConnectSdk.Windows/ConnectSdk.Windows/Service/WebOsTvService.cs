@@ -59,16 +59,9 @@ namespace ConnectSdk.Windows.Service
         private const string VolumeUrl = "ssap://audio/getVolume";
         private const string MuteUrl = "ssap://audio/getMute";
         private const string CloseMediaUri = "ssap://media.viewer/close";
-
-        //static String FOREGROUND_APP = "ssap://com.webos.applicationManager/getForegroundAppInfo";
-        //static String APP_STATUS = "ssap://com.webos.service.appstatus/getAppStatus";
-        //static String APP_STATE = "ssap://system.launcher/getAppState";
-        //static String VOLUME = "ssap://audio/getVolume";
-        //static String MUTE = "ssap://audio/getMute";
-        //static String VOLUME_STATUS = "ssap://audio/getStatus";
-        //static String CHANNEL_LIST = "ssap://tv/getChannelList";
-        //static String CHANNEL = "ssap://tv/getCurrentChannel";
-        //static String PROGRAM = "ssap://tv/getChannelProgramInfo";
+        private const string Channel = "ssap://tv/getCurrentChannel";
+        private const string ChannelList = "ssap://tv/getChannelList";
+        private const string Program = "ssap://tv/getChannelProgramInfo";
 
         public Dictionary<string, string> AppToAppIdMappings { get; set; }
         public Dictionary<string, WebOsWebAppSession> WebAppSessions { get; set; }
@@ -122,7 +115,7 @@ namespace ConnectSdk.Windows.Service
             if (DiscoveryManager.GetInstance().PairingLevel == DiscoveryManager.PairingLevelEnum.On)
             {
                 return socket != null && socket.IsConnected() &&
-                       (((WebOSTVServiceConfig) serviceConfig).getClientKey() != null);
+                       (((WebOSTVServiceConfig)serviceConfig).getClientKey() != null);
             }
             return socket != null && socket.IsConnected();
         }
@@ -215,13 +208,13 @@ namespace ConnectSdk.Windows.Service
         {
             const string uri = "ssap://audio/setVolume";
             var payload = new JsonObject();
-            var intVolume = (int) Math.Round(volume*100.0f);
+            var intVolume = (int)Math.Round(volume * 100.0f);
 
             try
             {
                 payload.Add("volume", JsonValue.CreateNumberValue(intVolume));
             }
-                // ReSharper disable once EmptyGeneralCatchClause
+            // ReSharper disable once EmptyGeneralCatchClause
             catch (Exception)
             {
                 //e.printStackTrace();
@@ -237,7 +230,7 @@ namespace ConnectSdk.Windows.Service
         }
 
 
-        public void GetVolume(bool isSubscription, ResponseListener listener)
+        private ServiceCommand GetVolume(bool isSubscription, ResponseListener listener)
         {
             var getVolumeResponseListener = new ResponseListener
                 (
@@ -245,13 +238,13 @@ namespace ConnectSdk.Windows.Service
                 {
                     try
                     {
-                        var jsonObj = (JsonObject) loadEventArg;
-                        var iVolume = (int) jsonObj.GetNamedNumber("volume");
-                        var fVolume = (float) (iVolume/100.0);
+                        var jsonObj = (JsonObject)loadEventArg;
+                        var iVolume = (int)jsonObj.GetNamedNumber("volume");
+                        var fVolume = (float)(iVolume / 100.0);
 
                         Util.PostSuccess(listener, fVolume);
                     }
-                        // ReSharper disable once EmptyGeneralCatchClause
+                    // ReSharper disable once EmptyGeneralCatchClause
                     catch (Exception)
                     {
 
@@ -264,6 +257,7 @@ namespace ConnectSdk.Windows.Service
                 : new ServiceCommand(this, VolumeUrl, null, getVolumeResponseListener);
 
             request.Send();
+            return request;
         }
 
         public void SetMute(bool isMute, ResponseListener listener)
@@ -274,10 +268,9 @@ namespace ConnectSdk.Windows.Service
             {
                 payload.Add("mute", JsonValue.CreateBooleanValue(isMute));
             }
-                // ReSharper disable once EmptyGeneralCatchClause
+            // ReSharper disable once EmptyGeneralCatchClause
             catch (Exception)
             {
-                //e.printStackTrace();
             }
 
             var request = new ServiceCommand(this, uri, payload, listener);
@@ -289,7 +282,7 @@ namespace ConnectSdk.Windows.Service
             GetMuteStatus(false, listener);
         }
 
-        private void GetMuteStatus(bool isSubscription, ResponseListener listener)
+        private ServiceCommand GetMuteStatus(bool isSubscription, ResponseListener listener)
         {
 
             var getMuteResponseListener = new ResponseListener
@@ -298,11 +291,11 @@ namespace ConnectSdk.Windows.Service
                 {
                     try
                     {
-                        var jsonObj = (JsonObject) loadEventArg;
+                        var jsonObj = (JsonObject)loadEventArg;
                         var isMute = jsonObj.GetNamedBoolean("mute");
                         Util.PostSuccess(listener, isMute);
                     }
-                        // ReSharper disable once EmptyGeneralCatchClause
+                    // ReSharper disable once EmptyGeneralCatchClause
                     catch (Exception)
                     {
 
@@ -317,18 +310,17 @@ namespace ConnectSdk.Windows.Service
                 : new ServiceCommand(this, MuteUrl, null, getMuteResponseListener);
 
             request.Send();
+            return request;
         }
 
         public IServiceSubscription SubscribeVolume(ResponseListener listener)
         {
-            throw new NotImplementedException();
-            //return (ServiceSubscription<VolumeListener>)getVolume(true, listener);
+            return (IServiceSubscription)GetVolume(true, listener);
         }
 
         public IServiceSubscription SubscribeMute(ResponseListener listener)
         {
-            throw new NotImplementedException();
-            //return (ServiceSubscription<MuteListener>) getMuteStatus(true, listener);
+            return (IServiceSubscription) GetMuteStatus(true, listener);
         }
 
         #endregion
@@ -362,9 +354,9 @@ namespace ConnectSdk.Windows.Service
             {
                 try
                 {
-                    contentId = ((JsonObject) ps).GetNamedString("contentId");
+                    contentId = ((JsonObject)ps).GetNamedString("contentId");
                 }
-                    // ReSharper disable once EmptyGeneralCatchClause
+                // ReSharper disable once EmptyGeneralCatchClause
                 catch
                 {
 
@@ -379,9 +371,9 @@ namespace ConnectSdk.Windows.Service
                     payload.Add("contentId", JsonValue.CreateStringValue(contentId));
 
                 if (ps != null)
-                    payload.Add("params", (JsonObject) ps);
+                    payload.Add("params", (JsonObject)ps);
             }
-                // ReSharper disable once EmptyGeneralCatchClause
+            // ReSharper disable once EmptyGeneralCatchClause
             catch
             {
 
@@ -410,7 +402,7 @@ namespace ConnectSdk.Windows.Service
 
         public void LaunchApp(string appId, ResponseListener listener)
         {
-            var appInfo = new AppInfo(appId) {Id = appId};
+            var appInfo = new AppInfo(appId) { Id = appId };
 
             LaunchAppWithInfo(appInfo, listener);
         }
@@ -493,7 +485,7 @@ namespace ConnectSdk.Windows.Service
                     var jsonObj = (JsonObject)(((LoadEventArgs)loadEventArg).Load.GetPayload());
                     var appInfo = new AppInfo(jsonObj.GetNamedString("appId"))
                     {
-                        Name = jsonObj.GetNamedString("title",""),
+                        Name = jsonObj.GetNamedString("title", ""),
                         RawData = jsonObj
                     };
                     Util.PostSuccess(listener, appInfo);
@@ -513,7 +505,7 @@ namespace ConnectSdk.Windows.Service
 
         public IServiceSubscription SubscribeRunningApp(ResponseListener listener)
         {
-            return (UrlServiceSubscription) GetRunningApp(true, listener);
+            return (UrlServiceSubscription)GetRunningApp(true, listener);
         }
 
         public void GetAppState(LaunchSession launchSession, ResponseListener listener)
@@ -567,7 +559,7 @@ namespace ConnectSdk.Windows.Service
 
         public IServiceSubscription SubscribeAppState(LaunchSession launchSession, ResponseListener listener)
         {
-            return (UrlServiceSubscription) GetAppState(true, launchSession, listener);
+            return (UrlServiceSubscription)GetAppState(true, launchSession, listener);
         }
 
         public void LaunchBrowser(string url, ResponseListener listener)
@@ -879,6 +871,7 @@ namespace ConnectSdk.Windows.Service
                             if (webAppSession != null)
                                 webAppSession.DisplayImage(url, mimeType, title, description, iconSrc, listener);
                         },
+                        // ReSharper disable once ConvertClosureToMethodGroup
                         serviceCommandError =>
                         {
                             listener.OnError(serviceCommandError);
@@ -925,7 +918,7 @@ namespace ConnectSdk.Windows.Service
         }
 
         public void PlayMedia(string url, string mimeType, string title, string description, string iconSrc,
-            bool shouldLoop,ResponseListener listener)
+            bool shouldLoop, ResponseListener listener)
         {
             if (ServiceDescription.Version != null && ServiceDescription.Version.Equals("4.0.0"))
             {
@@ -974,6 +967,7 @@ namespace ConnectSdk.Windows.Service
                             if (webAppSession != null)
                                 webAppSession.PlayMedia(url, mimeType, title, description, iconSrc, shouldLoop, listener);
                         },
+                        // ReSharper disable once ConvertClosureToMethodGroup
                         serviceCommandError =>
                         {
                             listener.OnError(serviceCommandError);
@@ -1009,7 +1003,7 @@ namespace ConnectSdk.Windows.Service
             }
             catch
             {
-                
+
             }
 
             var request = new ServiceCommand(launchSession.Service, CloseMediaUri, payload, listener);
@@ -1022,77 +1016,235 @@ namespace ConnectSdk.Windows.Service
 
         public ITvControl GetTvControl()
         {
-            throw new NotImplementedException();
+            return this;
         }
 
         public CapabilityPriorityLevel GetTvControlCapabilityLevel()
         {
-            throw new NotImplementedException();
+            return CapabilityPriorityLevel.High;
         }
 
         public void ChannelUp(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            const string uri = "ssap://tv/channelUp";
+            var request = new ServiceCommand(this, uri, null, listener);
+            request.Send();
         }
 
         public void ChannelDown(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            const string uri = "ssap://tv/channelDown";
+            var request = new ServiceCommand(this, uri, null, listener);
+            request.Send();
         }
 
-        public void SetChannel(ChannelInfo channelNumber, ResponseListener listener)
+        public void SetChannel(ChannelInfo channelInfo, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            const string uri = "ssap://tv/openChannel";
+            var payload = new JsonObject();
+
+            try
+            {
+                payload.Add("channelNumber", JsonValue.CreateStringValue(channelInfo.ChannelNumber));
+            }
+            catch (Exception)
+            {
+
+            }
+
+            var request = new ServiceCommand(this, uri, payload, listener);
+            request.Send();
         }
 
         public void GetCurrentChannel(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            GetCurrentChannel(false, listener);
+        }
+
+        public ServiceCommand GetCurrentChannel(bool isSubscription, ResponseListener listener)
+        {
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+                    var jsonObj = (JsonObject)(((LoadEventArgs)loadEventArg).Load.GetPayload());
+
+                    var channel = new ChannelInfo
+                    {
+                        ChannelId = jsonObj.GetNamedString("id", String.Empty),
+                        ChannelNumber = jsonObj.GetNamedString("number", String.Empty),
+                        MajorNumber = (int) jsonObj.GetNamedNumber("majorNumber", 0),
+                        MinorNumber = (int) jsonObj.GetNamedNumber("minorNumber", 0),
+                        RawData = jsonObj,
+                        SourceIndex = (sbyte) jsonObj.GetNamedNumber("sourceIndex", 0),
+                        PhysicalNumber = (sbyte) jsonObj.GetNamedNumber("physicalNumber", 0)
+                    };
+
+                    Util.PostSuccess(listener, channel);
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
+
+            var request = isSubscription 
+                ? new UrlServiceSubscription(this, Channel, null, responseListener) 
+                : new ServiceCommand(this, Channel, null, responseListener);
+            request.Send();
+
+            return request;
         }
 
         public IServiceSubscription SubscribeCurrentChannel(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            return (IServiceSubscription)GetCurrentChannel(true, listener);
         }
 
         public void GetChannelList(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            GetChannelList(false, listener);
+        }
+
+        private ServiceCommand GetChannelList(bool isSubscription, ResponseListener listener)
+        {
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+                    var jsonObj = (JsonObject)(((LoadEventArgs)loadEventArg).Load.GetPayload());
+
+                    var channels = jsonObj.GetNamedArray("channelList");
+                    var channelList = new List<ChannelInfo>();
+
+                    for (var i = 0; i < channels.Count; i++)
+                    {
+                        var chObj = channels[i].GetObject();
+
+                        if (chObj == null) continue;
+                        var channelInfo = new ChannelInfo
+                        {
+                            ChannelId = chObj.GetNamedString("id", String.Empty),
+                            ChannelNumber = chObj.GetNamedString("number", String.Empty),
+                            MajorNumber = (int)chObj.GetNamedNumber("majorNumber", 0),
+                            MinorNumber = (int)chObj.GetNamedNumber("minorNumber", 0),
+                            RawData = chObj,
+                            SourceIndex = (sbyte)chObj.GetNamedNumber("sourceIndex", 0),
+                            PhysicalNumber = (sbyte)chObj.GetNamedNumber("physicalNumber", 0)
+                        };
+
+                        channelList.Add(channelInfo);
+                    }
+                    Util.PostSuccess(listener, channelList);
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
+
+            var request = isSubscription 
+                ? new UrlServiceSubscription(this, ChannelList, null, responseListener) 
+                : new ServiceCommand(this, ChannelList, null, responseListener);
+            request.Send();
+
+            return request;
+
         }
 
         public void GetProgramInfo(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            Util.PostError(listener, ServiceCommandError.NotSupported());
         }
 
         public IServiceSubscription SubscribeProgramInfo(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            Util.PostError(listener, ServiceCommandError.NotSupported());
+
+            return new NotSupportedServiceSubscription();
         }
 
         public void GetProgramList(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            GetProgramList(false, listener);
+        }
+
+        private ServiceCommand GetProgramList(bool isSubscription, ResponseListener listener)
+        {
+            var responseListener = new ResponseListener
+                (
+                loadEventArg =>
+                {
+                    var jsonObj = (JsonObject) (((LoadEventArgs) loadEventArg).Load.GetPayload());
+                    var jsonChannel = jsonObj.GetNamedObject("channel");
+                    var channelInfo = new ChannelInfo
+                    {
+                        ChannelId = jsonChannel.GetNamedString("id", String.Empty),
+                        ChannelNumber = jsonChannel.GetNamedString("number", String.Empty),
+                        MajorNumber = (int) jsonChannel.GetNamedNumber("majorNumber", 0),
+                        MinorNumber = (int) jsonChannel.GetNamedNumber("minorNumber", 0),
+                        RawData = jsonChannel,
+                        SourceIndex = (sbyte) jsonChannel.GetNamedNumber("sourceIndex", 0),
+                        PhysicalNumber = (sbyte) jsonChannel.GetNamedNumber("physicalNumber", 0)
+                    };
+                    var programList = jsonObj.GetNamedArray("programList");
+                    Util.PostSuccess(listener, new ProgramList(channelInfo, programList));
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+                );
+
+
+            var request = isSubscription 
+                ? new UrlServiceSubscription(this, Program, null, true, responseListener) 
+                : new ServiceCommand(this, Program, null, responseListener);
+
+            request.Send();
+
+            return request;
         }
 
         public IServiceSubscription SubscribeProgramList(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            return (IServiceSubscription)GetProgramList(true, listener);
         }
 
         public void Get3DEnabled(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            Get3DEnabled(false, listener);
+        }
+
+        private ServiceCommand Get3DEnabled(bool isSubscription, ResponseListener listener)
+        {
+            const string uri = "ssap://com.webos.service.tv.display/get3DStatus";
+            var responseListener = new ResponseListener
+            (
+                loadEventArg =>
+                {
+                    var jsonObj = (JsonObject)(((LoadEventArgs)loadEventArg).Load.GetPayload());
+                    var statusobj = jsonObj.GetNamedObject("status3D");
+                    var status = statusobj.GetNamedBoolean("status", false);
+
+                    Util.PostSuccess(listener, status);
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
+
+
+            var request = isSubscription
+                ? new UrlServiceSubscription(this, uri, null, true, responseListener)
+                : new ServiceCommand(this, uri, null, responseListener);
+
+            request.Send();
+
+            return request;
         }
 
         public void Set3DEnabled(bool enabled, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            var uri = enabled ? "ssap://com.webos.service.tv.display/set3DOn" : "ssap://com.webos.service.tv.display/set3DOff";
+
+            var request = new ServiceCommand(this, uri, null, listener);
+
+            request.Send();
         }
 
         public IServiceSubscription Subscribe3DEnabled(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            return (IServiceSubscription)Get3DEnabled(true, listener);
         }
 
         #endregion
