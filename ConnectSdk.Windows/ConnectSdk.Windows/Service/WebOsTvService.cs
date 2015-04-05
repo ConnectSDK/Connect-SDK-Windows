@@ -70,6 +70,7 @@ namespace ConnectSdk.Windows.Service
         private WebOstvMouseSocketConnection mouseSocket;
 
         private List<String> permissions;
+        private WebOsTvKeyboardInput keyboardInput;
 
         public WebOstvService(ServiceDescription serviceDescription, ServiceConfig serviceConfig)
             : base(serviceDescription, serviceConfig)
@@ -476,8 +477,6 @@ namespace ConnectSdk.Windows.Service
 
         public ServiceCommand GetRunningApp(bool isSubscription, ResponseListener listener)
         {
-            ServiceCommand request;
-
             var responseListener = new ResponseListener
                 (
                 loadEventArg =>
@@ -493,10 +492,9 @@ namespace ConnectSdk.Windows.Service
                 serviceCommandError => Util.PostError(listener, serviceCommandError)
                 );
 
-            if (isSubscription)
-                request = new UrlServiceSubscription(this, ForegroundApp, null, true, responseListener);
-            else
-                request = new ServiceCommand(this, ForegroundApp, null, responseListener);
+            var request = isSubscription 
+                ? new UrlServiceSubscription(this, ForegroundApp, null, true, responseListener) 
+                : new ServiceCommand(this, ForegroundApp, null, responseListener);
 
             request.Send();
 
@@ -515,8 +513,6 @@ namespace ConnectSdk.Windows.Service
 
         public ServiceCommand GetAppState(bool subscription, LaunchSession launchSession, ResponseListener listener)
         {
-            ServiceCommand request;
-
             var payload = new JsonObject();
 
             try
@@ -547,10 +543,9 @@ namespace ConnectSdk.Windows.Service
                 serviceCommandError => Util.PostError(listener, serviceCommandError)
             );
 
-            if (subscription)
-                request = new UrlServiceSubscription(this, AppStatus, payload, true, responseListener);
-            else
-                request = new ServiceCommand(this, AppStatus, payload, responseListener);
+            var request = subscription 
+                ? new UrlServiceSubscription(this, AppStatus, payload, true, responseListener) 
+                : new ServiceCommand(this, AppStatus, payload, responseListener);
 
             request.Send();
 
@@ -1103,7 +1098,7 @@ namespace ConnectSdk.Windows.Service
             GetChannelList(false, listener);
         }
 
-        private ServiceCommand GetChannelList(bool isSubscription, ResponseListener listener)
+        private void GetChannelList(bool isSubscription, ResponseListener listener)
         {
             var responseListener = new ResponseListener
             (
@@ -1142,7 +1137,7 @@ namespace ConnectSdk.Windows.Service
                 : new ServiceCommand(this, ChannelList, null, responseListener);
             request.Send();
 
-            return request;
+            //return request;
 
         }
 
@@ -1253,45 +1248,151 @@ namespace ConnectSdk.Windows.Service
 
         public IToastControl GetToastControl()
         {
-            throw new NotImplementedException();
+            return this;
         }
 
         public CapabilityPriorityLevel GetToastControlCapabilityLevel()
         {
-            throw new NotImplementedException();
+            return CapabilityPriorityLevel.High;
         }
 
         public void ShowToast(string message, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            ShowToast(message, null, null, listener);
         }
 
         public void ShowToast(string message, string iconData, string iconExtension, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            var payload = new JsonObject();
+            try
+            {
+                payload.Add("message", JsonValue.CreateStringValue(message));
+
+                if (iconData != null)
+                {
+                    payload.Add("iconData", JsonValue.CreateStringValue(iconData));
+                    payload.Add("iconExtension", JsonValue.CreateStringValue(iconExtension));
+                }
+            }
+            catch 
+            {
+            }
+
+            SendToast(payload, listener);
         }
 
         public void ShowClickableToastForApp(string message, AppInfo appInfo, JsonObject ps, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            ShowClickableToastForApp(message, appInfo, ps, null, null, listener);
         }
 
-        public void ShowClickableToastForApp(string message, AppInfo appInfo, JsonObject ps, string iconData,
-            string iconExtension,
-            ResponseListener listener)
+        public void ShowClickableToastForApp(string message, AppInfo appInfo, JsonObject ps, string iconData, string iconExtension, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            var payload = new JsonObject();
+
+            try
+            {
+                payload.Add("message", JsonValue.CreateStringValue(message));
+
+                if (iconData != null)
+                {
+                    payload.Add("iconData", JsonValue.CreateStringValue(iconData));
+                    payload.Add("iconExtension", JsonValue.CreateStringValue(iconExtension));
+                }
+
+                if (appInfo != null)
+                {
+                    var onClick = new JsonObject {{"appId", JsonValue.CreateStringValue(appInfo.Id)}};
+                    if (ps != null)
+                    {
+                        onClick.Add("params", ps);
+                    }
+                    payload.Add("onClick", onClick);
+                }
+            }
+            catch
+            {
+
+            }
+
+            SendToast(payload, listener);
         }
 
         public void ShowClickableToastForUrl(string message, string url, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            ShowClickableToastForUrl(message, url, null, null, listener); 
         }
 
         public void ShowClickableToastForUrl(string message, string url, string iconData, string iconExtension,
             ResponseListener listener)
         {
-            throw new NotImplementedException();
+            var payload = new JsonObject();
+
+            try
+            {
+                payload.Add("message", JsonValue.CreateStringValue(message));
+
+                if (iconData != null)
+                {
+                    payload.Add("iconData", JsonValue.CreateStringValue(iconData));
+                    payload.Add("iconExtension", JsonValue.CreateStringValue(iconExtension));
+                }
+
+                if (url != null)
+                {
+                    var onClick = new JsonObject {{"target", JsonValue.CreateStringValue(url)}};
+                    payload.Add("onClick", onClick);
+                }
+            }
+            catch
+            {
+
+            }
+
+            SendToast(payload, listener);
+        }
+
+
+        private void SendToast(JsonObject payload, ResponseListener listener)
+        {
+            if (!payload.ContainsKey("iconData"))
+            {
+                //todo: find a way to get the icon and add it to the request
+                //Context context = DiscoveryManager.getInstance().getContext();
+
+                //try
+                //{
+                //    Drawable drawable = context.getPackageManager().getApplicationIcon(context.getPackageName());
+
+                //    if (drawable != null)
+                //    {
+                //        BitmapDrawable bitDw = ((BitmapDrawable)drawable);
+                //        Bitmap bitmap = bitDw.getBitmap();
+
+                //        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                //        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+
+                //        byte[] bitmapByte = stream.toByteArray();
+                //        bitmapByte = Base64.encode(bitmapByte, Base64.NO_WRAP);
+                //        String bitmapData = new String(bitmapByte);
+
+                //        payload.put("iconData", bitmapData);
+                //        payload.put("iconExtension", "png");
+                //    }
+                //}
+                //catch (NameNotFoundException e)
+                //{
+                //    e.printStackTrace();
+                //}
+                //catch (JSONException e)
+                //{
+                //    e.printStackTrace();
+                //}
+            }
+
+            const string uri = "palm://system.notifications/createToast";
+            var request = new ServiceCommand(this, uri, payload, listener);
+            request.Send();
         }
 
         #endregion
@@ -1300,27 +1401,48 @@ namespace ConnectSdk.Windows.Service
 
         public IExternalInputControl GetExternalInput()
         {
-            throw new NotImplementedException();
+            return this;
         }
 
         public CapabilityPriorityLevel GetExternalInputControlPriorityLevel()
         {
-            throw new NotImplementedException();
+            return CapabilityPriorityLevel.High;
         }
 
-        public void LaunchInputPicker(ResponseListener pListener)
+        public void LaunchInputPicker(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            var appInfo = new AppInfo("com.webos.app.inputpicker")
+            {
+                Name = "InputPicker"
+            };
+            LaunchAppWithInfo(appInfo, listener);
         }
 
-        public void CloseInputPicker(LaunchSession launchSessionm, ResponseListener pListener)
+        public void CloseInputPicker(LaunchSession launchSession, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            CloseApp(launchSession, listener);
         }
 
-        public void SetExternalInput(ExternalInputInfo input, ResponseListener pListener)
+        public void SetExternalInput(ExternalInputInfo input, ResponseListener listener)
         {
-            throw new NotImplementedException();
+            const string uri = "ssap://tv/switchInput";
+
+            var payload = new JsonObject();
+
+            try
+            {
+                if (input != null && input.Id != null)
+                {
+                    payload.Add("inputId", JsonValue.CreateStringValue(input.Id));
+                }
+            }
+            catch (Exception)
+            {
+                
+            }
+
+            var request = new ServiceCommand(this, uri, payload, listener);
+            request.Send();
         }
 
         #endregion
@@ -1329,12 +1451,12 @@ namespace ConnectSdk.Windows.Service
 
         public IMouseControl GetMouseControl()
         {
-            throw new NotImplementedException();
+            return this;
         }
 
         public CapabilityPriorityLevel GetMouseControlCapabilityLevel()
         {
-            throw new NotImplementedException();
+            return CapabilityPriorityLevel.High;
         }
 
         public void ConnectMouse()
@@ -1373,32 +1495,46 @@ namespace ConnectSdk.Windows.Service
 
         public void DisconnectMouse()
         {
-            throw new NotImplementedException();
+            mouseSocket.Disconnect();
+            mouseSocket = null;
         }
 
         public void Click()
         {
-            throw new NotImplementedException();
+            if (mouseSocket != null)
+            {
+                mouseSocket.Click();
+            }
+            else ConnectMouse();
         }
 
         public void Move(double dx, double dy)
         {
-            throw new NotImplementedException();
+            if (mouseSocket != null)
+            {
+                mouseSocket.Move(dx, dy);
+            }
         }
 
         public void Move(Point distance)
         {
-            throw new NotImplementedException();
+            Move(distance.X, distance.Y);
         }
 
         public void Scroll(double dx, double dy)
         {
-            throw new NotImplementedException();
+            if (mouseSocket != null)
+            {
+                mouseSocket.Scroll(dx, dy);
+            }
         }
 
         public void Scroll(Point distance)
         {
-            throw new NotImplementedException();
+            if (mouseSocket != null)
+            {
+                Scroll(distance.X, distance.Y);
+            }
         }
 
         #endregion
@@ -1407,32 +1543,42 @@ namespace ConnectSdk.Windows.Service
 
         public ITextInputControl GetTextInputControl()
         {
-            throw new NotImplementedException();
+            return this;
         }
 
         public CapabilityPriorityLevel GetTextInputControlCapabilityLevel()
         {
-            throw new NotImplementedException();
+            return CapabilityPriorityLevel.High;
         }
 
         public IServiceSubscription SubscribeTextInputStatus(ResponseListener listener)
         {
-            throw new NotImplementedException();
+            keyboardInput = new WebOsTvKeyboardInput(this, true);
+            return keyboardInput.Connect(listener);
         }
 
         public void SendText(string input)
         {
-            throw new NotImplementedException();
+            if (keyboardInput != null)
+            {
+                keyboardInput.AddToQueue(input);
+            }
         }
 
         public void SendEnter()
         {
-            throw new NotImplementedException();
+            if (keyboardInput != null)
+            {
+                keyboardInput.SendEnter();
+            }
         }
 
         public void SendDelete()
         {
-            throw new NotImplementedException();
+            if (keyboardInput != null)
+            {
+                keyboardInput.SendDel();
+            }
         }
 
         #endregion
@@ -1738,14 +1884,8 @@ namespace ConnectSdk.Windows.Service
 
             var responseListener = new ResponseListener
             (
-                loadEventArg =>
-                {
-                    Util.PostSuccess(listener, webAppSession);
-                },
-                serviceCommandError =>
-                {
-                    Util.PostError(listener, serviceCommandError);
-                }
+                loadEventArg => Util.PostSuccess(listener, webAppSession),
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
             );
             webAppSession.Join(responseListener);
         }
