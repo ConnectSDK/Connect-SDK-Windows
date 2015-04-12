@@ -1,4 +1,5 @@
-﻿using Windows.UI.Popups;
+﻿using Windows.UI.Core;
+using Windows.UI.Popups;
 using Windows.UI.Xaml.Media.Imaging;
 using ConnectSdk.Demo.Common;
 using System;
@@ -162,6 +163,7 @@ namespace ConnectSdk.Demo
                     {
                         var channels = (loadEventArgs.Load as ServiceCommandError).GetPayload() as List<ChannelInfo>;
                         model.Channels = new IndependentList<ChannelInfo>(channels);
+                        this.Dispatcher.RunAsync(CoreDispatcherPriority.High, () => { model.OnPropertyChanged("Channels"); });
                     }
                 },
                 serviceCommandError =>
@@ -178,11 +180,18 @@ namespace ConnectSdk.Demo
                     if (loadEventArgs != null)
                     {
                         var apps = (loadEventArgs.Load as ServiceCommandError).GetPayload() as List<AppInfo>;
+                        var netCastService1 = (NetcastTvService)model.SelectedDevice.GetServiceByName(NetcastTvService.Id);
+                        var webostvService1 = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
+                        var port = netCastService1 != null
+                            ? netCastService1.ServiceDescription.Port.ToString()
+                            : webostvService1.ServiceDescription.Port.ToString();
+
                         for (int i = 0; i < apps.Count; i++)
                         {
-                            apps[i].SetUrl(model.IpAddress, model.Port);
+                            apps[i].SetUrl(model.SelectedDevice.IpAddress, port);
                         }
                         model.Apps = new IndependentList<AppInfo>(apps);
+                        this.Dispatcher.RunAsync(CoreDispatcherPriority.High, () => { model.OnPropertyChanged("Apps"); });
                     }
                 },
                 serviceCommandError =>
@@ -194,9 +203,6 @@ namespace ConnectSdk.Demo
             var netCastService = (NetcastTvService)model.SelectedDevice.GetServiceByName(NetcastTvService.Id);
             if (netCastService != null)
             {
-                model.IpAddress = netCastService.ServiceDescription.IpAddress;
-                model.Port = netCastService.ServiceDescription.Port.ToString();
-                //netCastService.getChannelList(responseListener);
                 netCastService.GetAppList(appListResponseListener);
                 netCastService.GetChannelList(channelListResponseListener);
             }
@@ -205,11 +211,8 @@ namespace ConnectSdk.Demo
                 var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
                 if (webostvService != null)
                 {
-                    model.IpAddress = webostvService.ServiceDescription.IpAddress;
-                    model.Port = webostvService.ServiceDescription.Port.ToString();
-
                     webostvService.GetAppList(appListResponseListener);
-                    //webostvService.GetChannelList(channelListResponseListener);
+                    webostvService.GetChannelList(channelListResponseListener);
                 }
             }
         }
@@ -231,7 +234,7 @@ namespace ConnectSdk.Demo
 
         private void ButtonClear_OnClick(object sender, RoutedEventArgs e)
         {
-            model.TextInput = "";
+            //model.TextInput = "";
             // ugly code but since we use the control in a datatemplate we have to find it as opposed to refference it
             var textBoxToSend = ((e.OriginalSource as Button).Parent as StackPanel).Children[0] as TextBox;
             ;
@@ -458,12 +461,21 @@ namespace ConnectSdk.Demo
                     var loadEventArgs = loadEventArg as LoadEventArgs;
                     if (loadEventArgs != null)
                     {
+                        var netCastService1 = (NetcastTvService)model.SelectedDevice.GetServiceByName(NetcastTvService.Id);
+                        var webostvService1 = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
+                        var port = netCastService1 != null
+                            ? netCastService1.ServiceDescription.Port.ToString()
+                            : webostvService1.ServiceDescription.Port.ToString();
+
                         var apps = (loadEventArgs.Load as ServiceCommandError).GetPayload() as List<AppInfo>;
                         for (int i = 0; i < apps.Count; i++)
                         {
-                            apps[i].SetUrl(model.IpAddress, model.Port);
+                            apps[i].SetUrl(model.SelectedDevice.IpAddress, port);
+                            model.Apps.Add(apps[i]);
                         }
-                        model.Apps = new IndependentList<AppInfo>(apps);
+                        //model.Apps = new IndependentList<AppInfo>(apps);
+
+                        this.Dispatcher.RunAsync(CoreDispatcherPriority.High, () => { model.OnPropertyChanged("Apps"); });
                     }
                 },
                 serviceCommandError =>
@@ -542,35 +554,6 @@ namespace ConnectSdk.Demo
             webostvService.GetRunningApp(responseListener);
         }
 
-        private void MediaPlay_Click(object sender, RoutedEventArgs e)
-        {
-            var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
-            webostvService.Play(null);
-        }
-
-        private void MediaPause_Click(object sender, RoutedEventArgs e)
-        {
-            var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
-            webostvService.Pause(null);
-        }
-
-        private void MediaStop_Click(object sender, RoutedEventArgs e)
-        {
-            var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
-            webostvService.Stop(null);
-        }
-
-        private void MediaRewind_Click(object sender, RoutedEventArgs e)
-        {
-            var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
-            webostvService.Rewind(null);
-        }
-
-        private void MediaFastForward_Click(object sender, RoutedEventArgs e)
-        {
-            var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
-            webostvService.FastForward(null);
-        }
 
         private void MediaPlayerMedia_Click(object sender, RoutedEventArgs e)
         {

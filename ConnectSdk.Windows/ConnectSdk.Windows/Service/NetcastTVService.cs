@@ -1872,5 +1872,93 @@ namespace ConnectSdk.Windows.Service
         {
             throw new NotImplementedException();
         }
+
+        protected override void UpdateCapabilities()
+        {
+            var capabilities = new List<String>();
+
+            if (DiscoveryManager.GetInstance().PairingLevel == DiscoveryManager.PairingLevelEnum.On)
+            {
+                foreach (var s in TextInputControl.Capabilities)
+                {
+                    capabilities.Add(s);
+                }
+                foreach (var s in MouseControl.Capabilities)
+                {
+                    capabilities.Add(s);
+                }
+                foreach (var s in KeyControl.Capabilities)
+                {
+                    capabilities.Add(s);
+                }
+                foreach (var s in MediaPlayer.Capabilities)
+                {
+                    capabilities.Add(s);
+                }
+
+                capabilities.Add(PowerControl.Off);
+
+                capabilities.Add(MediaControl.Play);
+                capabilities.Add(MediaControl.Pause);
+                capabilities.Add(MediaControl.Stop);
+                capabilities.Add(MediaControl.Rewind);
+                capabilities.Add(MediaControl.FastForward);
+                capabilities.Add(MediaControl.Duration);
+                capabilities.Add(MediaControl.Position);
+                capabilities.Add(MediaControl.Seek);
+
+                capabilities.Add(Launcher.Application);
+                capabilities.Add(Launcher.ApplicationClose);
+                capabilities.Add(Launcher.ApplicationList);
+                capabilities.Add(Launcher.Browser);
+                capabilities.Add(Launcher.Hulu);
+                capabilities.Add(Launcher.Netflix);
+                capabilities.Add(Launcher.NetflixParams);
+                capabilities.Add(Launcher.YouTube);
+                capabilities.Add(Launcher.YouTubeParams);
+                capabilities.Add(Launcher.AppStore);
+
+                capabilities.Add(Launcher.AppStore);
+
+                capabilities.Add(TvControl.ChannelUp);
+                capabilities.Add(TvControl.ChannelDown);
+                capabilities.Add(TvControl.ChannelGet);
+                capabilities.Add(TvControl.ChannelList);
+                capabilities.Add(TvControl.ChannelSubscribe);
+                capabilities.Add(TvControl.Get_3D);
+                capabilities.Add(TvControl.Set_3D);
+                capabilities.Add(TvControl.Subscribe_3D);
+
+                capabilities.Add(ExternalInputControl.PickerLaunch);
+                capabilities.Add(ExternalInputControl.PickerClose);
+
+                capabilities.Add(VolumeControl.VolumeGet);
+                capabilities.Add(VolumeControl.VolumeUpDown);
+                capabilities.Add(VolumeControl.MuteGet);
+                capabilities.Add(VolumeControl.MuteSet);
+
+                if (ServiceDescription.ModelNumber.Equals("4.0"))
+                {
+                    capabilities.Add(Launcher.AppStoreParams);
+                }
+            }
+            else
+            {
+                foreach (var s in MediaPlayer.Capabilities)
+                {
+                    capabilities.Add(s);
+                }
+
+                capabilities.Add(MediaControl.Play);
+                capabilities.Add(MediaControl.Pause);
+                capabilities.Add(MediaControl.Stop);
+                capabilities.Add(MediaControl.Rewind);
+                capabilities.Add(MediaControl.FastForward);
+
+                capabilities.Add(Launcher.YouTube);
+                capabilities.Add(Launcher.YouTubeParams);
+            }
+            SetCapabilities(capabilities);
+        }
     }
 }

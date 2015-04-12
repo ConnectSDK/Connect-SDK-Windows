@@ -16,7 +16,7 @@
         public static string Position = "MediaControl.Position";
 
         public static string Previous = "MediaControl.Previous";
-        public static string String = "MediaControl.Next";
+        public static string Next = "MediaControl.Next";
 
         public static int PlayerStateUnknown = 0;
         public static int PlayerStateIdle = 1;

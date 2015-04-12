@@ -1117,9 +1117,10 @@ namespace ConnectSdk.Windows.Service
                         var channelInfo = new ChannelInfo
                         {
                             ChannelId = chObj.GetNamedString("id", String.Empty),
-                            ChannelNumber = chObj.GetNamedString("number", String.Empty),
+                            ChannelNumber = chObj.GetNamedString("channelNumber", String.Empty),
                             MajorNumber = (int)chObj.GetNamedNumber("majorNumber", 0),
                             MinorNumber = (int)chObj.GetNamedNumber("minorNumber", 0),
+                            ChannelName = chObj.GetNamedString("channelName", ""),
                             RawData = chObj,
                             SourceIndex = (sbyte)chObj.GetNamedNumber("sourceIndex", 0),
                             PhysicalNumber = (sbyte)chObj.GetNamedNumber("physicalNumber", 0)
@@ -2282,6 +2283,163 @@ namespace ConnectSdk.Windows.Service
                 //Log.w("Connect SDK", "Permissions changed -- you will need to re-pair to the TV.");
                 Disconnect();
             }
+        }
+
+        public void GetServiceInfo(ResponseListener listener)
+        {
+            const string uri = "ssap://api/getServiceList";
+
+            var responseListener = new ResponseListener
+                (
+                loadEventArg =>
+                {
+                    var loadEventArgs = loadEventArg as LoadEventArgs;
+                    if (loadEventArgs == null) return;
+                    var jsonObj = (JsonObject) (loadEventArgs.Load.GetPayload());
+                    if (jsonObj.ContainsKey("services"))
+                    {
+                        listener.OnSuccess(new ServiceCommandError(0, jsonObj.GetNamedArray("services")));
+                    }
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+                );
+
+            var request = new ServiceCommand(this, uri, null, responseListener);
+            request.Send();
+
+
+        }
+
+        public void GetSystemInfo(ResponseListener listener)
+        {
+            const string uri = "ssap://api/getServiceList";
+
+            var responseListener = new ResponseListener
+                (
+                loadEventArg =>
+                {
+                    var loadEventArgs = loadEventArg as LoadEventArgs;
+                    if (loadEventArgs == null) return;
+                    var jsonObj = (JsonObject) (loadEventArgs.Load.GetPayload());
+                    if (jsonObj.ContainsKey("features"))
+                    {
+                        listener.OnSuccess(new ServiceCommandError(0, jsonObj.GetNamedArray("features")));
+                    }
+                },
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+                );
+
+            var request = new ServiceCommand(this, uri, null, responseListener);
+            request.Send();
+
+        }
+
+        protected override void UpdateCapabilities()
+        {
+            var capabilities = new List<String>();
+
+            if (DiscoveryManager.GetInstance().PairingLevel == DiscoveryManager.PairingLevelEnum.On)
+            {
+                foreach (var s in TextInputControl.Capabilities)
+                {
+                    capabilities.Add(s);
+                }
+                foreach (var s in MouseControl.Capabilities)
+                {
+                    capabilities.Add(s);
+                }
+                foreach (var s in KeyControl.Capabilities)
+                {
+                    capabilities.Add(s);
+                }
+                foreach (var s in MediaPlayer.Capabilities)
+                {
+                    capabilities.Add(s);
+                }
+                foreach (var s in Launcher.Capabilities)
+                {
+                    capabilities.Add(s);
+                }
+                foreach (var s in TvControl.Capabilities)
+                {
+                    capabilities.Add(s);
+                }
+                foreach (var s in ExternalInputControl.Capabilities)
+                {
+                    capabilities.Add(s);
+                }
+                foreach (var s in VolumeControl.Capabilities)
+                {
+                    capabilities.Add(s);
+                }
+                foreach (var s in ToastControl.Capabilities)
+                {
+                    capabilities.Add(s);
+                }
+                capabilities.Add(PowerControl.Off);
+
+            }
+            else
+            {
+                foreach (var s in VolumeControl.Capabilities)
+                {
+                    capabilities.Add(s);
+                }
+                foreach (var s in MediaPlayer.Capabilities)
+                {
+                    capabilities.Add(s);
+                }
+
+                capabilities.Add(Launcher.Application);
+                capabilities.Add(Launcher.ApplicationParams);
+                capabilities.Add(Launcher.ApplicationClose);
+                capabilities.Add(Launcher.Browser);
+                capabilities.Add(Launcher.BrowserParams);
+                capabilities.Add(Launcher.Hulu);
+                capabilities.Add(Launcher.Netflix);
+                capabilities.Add(Launcher.NetflixParams);
+                capabilities.Add(Launcher.YouTube);
+                capabilities.Add(Launcher.YouTubeParams);
+                capabilities.Add(Launcher.AppStore);
+                capabilities.Add(Launcher.AppStoreParams);
+                capabilities.Add(Launcher.AppState);
+                capabilities.Add(Launcher.AppStateSubscribe);
+            }
+
+            if (ServiceDescription != null && ServiceDescription.Version != null)
+            {
+                if (ServiceDescription.Version.Contains("4.0.0") || ServiceDescription.Version.Contains("4.0.1"))
+                {
+                    capabilities.Add(WebAppLauncher.Launch);
+                    capabilities.Add(WebAppLauncher.LaunchParams);
+
+                    capabilities.Add(MediaControl.Play);
+                    capabilities.Add(MediaControl.Pause);
+                    capabilities.Add(MediaControl.Stop);
+                    capabilities.Add(MediaControl.Seek);
+                    capabilities.Add(MediaControl.Position);
+                    capabilities.Add(MediaControl.Duration);
+                    capabilities.Add(MediaControl.PlayState);
+
+                    capabilities.Add(WebAppLauncher.Close);
+                }
+                else
+                {
+                    foreach (var s in WebAppLauncher.Capabilities)
+                    {
+                        capabilities.Add(s);
+                    }
+                    foreach (var s in MediaControl.Capabilities)
+                    {
+                        if (s.Equals(MediaControl.Previous, StringComparison.OrdinalIgnoreCase) ||
+                            s.Equals(MediaControl.Next, StringComparison.OrdinalIgnoreCase))
+                            continue;
+                        capabilities.Add(s);
+                    }
+                }
+            }
+
+            SetCapabilities(capabilities);
         }
     }
 }

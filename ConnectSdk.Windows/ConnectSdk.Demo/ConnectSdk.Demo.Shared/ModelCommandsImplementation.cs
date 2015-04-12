@@ -38,6 +38,7 @@ namespace ConnectSdk.Demo.Demo
         }
         private void QMenuExecute(object obj)
         {
+            
             try
             {
                 selectedDevice.GetControl<IKeyControl>().SendKeyCode((int)VirtualKeycodes.QuickMenu, null);
@@ -176,8 +177,156 @@ namespace ConnectSdk.Demo.Demo
 
         private void SmartExecute(object obj)
         {
+            selectedDevice.GetControl<IKeyControl>().Home(null);
+        }
+
+        private void MyAppsExecute(object obj)
+        {
             var msgd = new MessageDialog("This function is not supported", "Info");
             msgd.ShowAsync();
+        }
+
+        private void UpExecute(object obj)
+        {
+            selectedDevice.GetControl<IKeyControl>().Up(null);
+        }
+
+        private void LeftExecute(object obj)
+        {
+            selectedDevice.GetControl<IKeyControl>().Left(null);
+        }
+
+        private void OkExecute(object obj)
+        {
+            selectedDevice.GetControl<IKeyControl>().Ok(null);
+        }
+
+        private void RightExecute(object obj)
+        {
+            selectedDevice.GetControl<IKeyControl>().Right(null);
+        }
+
+        private void DownExecute(object obj)
+        {
+            selectedDevice.GetControl<IKeyControl>().Down(null);
+        }
+
+        private void BackExecute(object obj)
+        {
+            selectedDevice.GetControl<IKeyControl>().Back(null);
+        }
+
+        private void LiveExecute(object obj)
+        {
+            var msgd = new MessageDialog("This function is not supported", "Info");
+            msgd.ShowAsync();
+        }
+
+        private void ExitExecute(object obj)
+        {
+            selectedDevice.GetControl<IKeyControl>().Back(null);
+        }
+
+        private void RedExecute(object obj)
+        {
+            var msgd = new MessageDialog("This function is not supported", "Info");
+            msgd.ShowAsync();
+        }
+
+        private void GreenExecute(object obj)
+        {
+            var msgd = new MessageDialog("This function is not supported", "Info");
+            msgd.ShowAsync();
+        }
+
+        private void YellowExecute(object obj)
+        {
+            var msgd = new MessageDialog("This function is not supported", "Info");
+            msgd.ShowAsync();
+        }
+
+        private void BlueExecute(object obj)
+        {
+            var msgd = new MessageDialog("This function is not supported", "Info");
+            msgd.ShowAsync();
+        }
+
+        private void TextExecute(object obj)
+        {
+            var msgd = new MessageDialog("This function is not supported", "Info");
+            msgd.ShowAsync();
+        }
+
+        private void TOptExecute(object obj)
+        {
+            var msgd = new MessageDialog("This function is not supported", "Info");
+            msgd.ShowAsync();
+        }
+
+        private void AppExecute(object obj)
+        {
+            var msgd = new MessageDialog("This function is not supported", "Info");
+            msgd.ShowAsync();
+        }
+
+        private void StopExecute(object obj)
+        {
+            selectedDevice.GetControl<IMediaControl>().Stop(null);
+        }
+
+        private void PlayExecute(object obj)
+        {
+            selectedDevice.GetControl<IMediaControl>().Play(null);
+        }
+
+        private void PauseExecute(object obj)
+        {
+            selectedDevice.GetControl<IMediaControl>().Pause(null);
+
+        }
+
+        private void RewExecute(object obj)
+        {
+            selectedDevice.GetControl<IMediaControl>().Rewind(null);
+        }
+
+        private void FfExecute(object obj)
+        {
+            selectedDevice.GetControl<IMediaControl>().FastForward(null);
+        }
+
+        private void RecExecute(object obj)
+        {
+            var msgd = new MessageDialog("This function is not supported", "Info");
+            msgd.ShowAsync();
+        }
+
+        private void SubExecute(object obj)
+        {
+            var msgd = new MessageDialog("This function is not supported", "Info");
+            msgd.ShowAsync();
+        }
+
+        private void AdExecute(object obj)
+        {
+            var msgd = new MessageDialog("This function is not supported", "Info");
+            msgd.ShowAsync();
+        }
+
+        private void TvRadExecute(object obj)
+        {
+            var msgd = new MessageDialog("This function is not supported", "Info");
+            msgd.ShowAsync();
+        }
+
+        public void Move(double d, double d1)
+        {
+            selectedDevice.GetControl<IMouseControl>().Move(d, d1);
+        }
+
+        public void Tap()
+        {
+            selectedDevice.GetControl<IMouseControl>().Click();
         }
     }
 }

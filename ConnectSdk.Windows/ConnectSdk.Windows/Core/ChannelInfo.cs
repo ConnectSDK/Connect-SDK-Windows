@@ -8,9 +8,19 @@ namespace ConnectSdk.Windows.Core
     /// </summary>
     public class ChannelInfo
     {
+        private string channelNumber;
         public string ChannelName { get; set; }
         public string ChannelId { get; set; }
-        public string ChannelNumber { get; set; }
+
+        public string ChannelNumber
+        {
+            get { return channelNumber; }
+            set
+            {
+                channelNumber = value;
+            }
+        }
+
         public int MinorNumber { get; set; }
         public int MajorNumber { get; set; }
         public JsonObject RawData { get; set; }

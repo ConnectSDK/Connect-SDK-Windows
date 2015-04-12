@@ -11,6 +11,7 @@ using ConnectSdk.Windows.Discovery;
 using ConnectSdk.Windows.Service;
 using ConnectSdk.Windows.Service.Capability.Listeners;
 using ConnectSdk.Windows.Service.Config;
+using UpdateControls.Fields;
 using UpdateControls.XAML;
 
 namespace ConnectSdk.Demo
@@ -41,7 +42,7 @@ namespace ConnectSdk.Demo
 
                 listener.Paired += (sender, o) =>
                 {
-                    model.SelectedDevice = o as ConnectableDevice;
+                    model.SelectedDevice = new Independent<ConnectableDevice>(o as ConnectableDevice);
                     Frame.Navigate(typeof (Main));
                 };
                 DiscoveryManager.Init();

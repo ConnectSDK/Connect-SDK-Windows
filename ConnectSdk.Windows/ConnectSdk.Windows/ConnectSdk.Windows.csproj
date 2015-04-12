@@ -89,6 +89,7 @@
     <Compile Include="Etc\Helper\DeviceServiceReachabilityListener.cs" />
     <Compile Include="Etc\Helper\HttpMessage.cs" />
     <Compile Include="Etc\Helper\Storage.cs" />
+    <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\Capability\AppState.cs" />
     <Compile Include="Service\Capability\CapabilityMethods.cs" />

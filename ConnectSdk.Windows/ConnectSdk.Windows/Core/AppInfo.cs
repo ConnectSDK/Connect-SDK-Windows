@@ -1,4 +1,7 @@
-﻿using Windows.Data.Json;
+﻿using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using Windows.Data.Json;
+using ConnectSdk.Windows.Annotations;
 
 namespace ConnectSdk.Windows.Core
 {
@@ -6,7 +9,7 @@ namespace ConnectSdk.Windows.Core
     /// Normalized reference object for information about a DeviceService's app. This object will, in most cases, be used to launch apps.
     /// In some cases, all that is needed to launch an app is the app id.
     /// </summary>
-    public class AppInfo : IJsonSerializable
+    public class AppInfo : IJsonSerializable, INotifyPropertyChanged
     {
         private string id;
 	    private string name;
@@ -34,7 +37,7 @@ namespace ConnectSdk.Windows.Core
         public string Name
         {
             get { return name; }
-            set { name = value.Trim(); }
+            set { name = value.Trim(); OnPropertyChanged();}
         }
 
         /// <summary>
@@ -51,7 +54,7 @@ namespace ConnectSdk.Windows.Core
                         port, id, name);
                 return url;
             }
-            set { url = value; }
+            set { url = value; OnPropertyChanged(); }
         }
 
         public void SetUrl(string ipParam, string portParam)
@@ -68,6 +71,15 @@ namespace ConnectSdk.Windows.Core
                 {"id", JsonValue.CreateStringValue(id)}
             };
             return obj;
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }
