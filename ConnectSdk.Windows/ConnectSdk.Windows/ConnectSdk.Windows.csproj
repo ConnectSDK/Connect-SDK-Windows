@@ -39,6 +39,7 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
+    <None Include="ConnectSdk.Windows.licenseheader" />
     <None Include="Migration to 1.4.x.xlsx" />
   </ItemGroup>
   <ItemGroup>

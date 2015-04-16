@@ -209,7 +209,7 @@ namespace ConnectSdk.Demo.Demo
         }
 
         public Command MuteCommand
-        {
+        { 
             get { return muteCommand ?? (muteCommand = new Command(MuteExecute) { Enabled = selectedDevice.HasCapability(VolumeControl.MuteSet) }); }
             set { muteCommand = value; }
         }
