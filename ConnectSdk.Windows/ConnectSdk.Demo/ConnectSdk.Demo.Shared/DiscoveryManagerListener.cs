@@ -48,7 +48,7 @@ namespace ConnectSdk.Demo.Demo
 
         public void OnPairingRequired(ConnectableDevice device, DeviceService service, PairingType pairingType)
         {
-            throw new NotImplementedException();
+            
         }
 
         public void OnCapabilityUpdated(ConnectableDevice device, List<string> added, List<string> removed)

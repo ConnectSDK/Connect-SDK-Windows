@@ -157,6 +157,7 @@
     <Compile Include="Service\WebOs\WebOsTvKeyboardInput.cs" />
     <Compile Include="Service\WebOs\WebOstvMouseSocketConnection.cs" />
     <Compile Include="Service\WebOs\WebOstvServiceSocketClient.cs" />
+    <Compile Include="Service\WebOs\WebOstvServiceSocketClientListener.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Service\AirPlay\" />

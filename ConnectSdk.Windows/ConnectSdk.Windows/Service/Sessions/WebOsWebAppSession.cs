@@ -771,7 +771,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                 webOsWebAppSession.MConnectionListener = null;
             }
 
-            public void OnBeforeRegister()
+            public void OnBeforeRegister(PairingType pairingType)
             {
             }
 

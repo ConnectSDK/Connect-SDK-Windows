@@ -126,6 +126,7 @@ namespace ConnectSdk.Windows.Service
             if (socket == null)
             {
                 socket = new WebOstvServiceSocketClient(this, WebOstvServiceSocketClient.GetUri(this));
+                socket.Listener = new WebOstvServiceSocketClientListener(this, Listener);
             }
 
             if (!IsConnected())

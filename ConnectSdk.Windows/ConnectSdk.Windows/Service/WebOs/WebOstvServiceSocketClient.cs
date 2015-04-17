@@ -470,7 +470,7 @@ namespace ConnectSdk.Windows.Service.WebOs
                 else
                 {
                     if (Listener != null)
-                        Listener.OnBeforeRegister();
+                        Listener.OnBeforeRegister(PairingType.NONE);
                 }
 
                 if (manifest != null)

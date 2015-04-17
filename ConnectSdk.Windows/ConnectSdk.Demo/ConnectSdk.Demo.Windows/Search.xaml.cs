@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -43,7 +44,7 @@ namespace ConnectSdk.Demo
                 listener.Paired += (sender, o) =>
                 {
                     model.SelectedDevice = new Independent<ConnectableDevice>(o as ConnectableDevice);
-                    Frame.Navigate(typeof (Main));
+                    this.Dispatcher.RunAsync(CoreDispatcherPriority.High, () => Frame.Navigate(typeof(Main)));
                 };
                 DiscoveryManager.Init();
                 var discoveryManager = DiscoveryManager.GetInstance();
