@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Windows.ApplicationModel;
@@ -69,8 +70,8 @@ namespace ConnectSdk.Windows.Service.WebOs
                 {
                     reader.UnicodeEncoding = UnicodeEncoding.Utf8;
                     read = reader.ReadString(reader.UnconsumedBufferLength);
-                    log.AppendLine(string.Format("{0} : {1} : {2}", DateTime.Now, "received", read));
-
+                    
+                    Debug.WriteLine(string.Format("{0} : {1} : {2}", DateTime.Now, "received", read));
                 }
                 OnMessage(read);
                 if (!connected)
@@ -78,7 +79,11 @@ namespace ConnectSdk.Windows.Service.WebOs
                     HandleConnected();
                 }
             };
-            messageWebSocket.Closed += (sender, args) => OnClose(0, args.ToString());
+            messageWebSocket.Closed += (sender, args) =>
+            {
+                OnClose(0, args.ToString());
+                HandleConnectionLost(false, null);
+            };
         }
 
         public static Uri GetUri(WebOstvService service)
@@ -173,6 +178,7 @@ namespace ConnectSdk.Windows.Service.WebOs
             {
                 var obj = JsonObject.Parse(data);
                 HandleMessage(obj);
+                if (!connected) connected = true;
             }
                 // ReSharper disable once EmptyGeneralCatchClause
             catch
@@ -206,16 +212,19 @@ namespace ConnectSdk.Windows.Service.WebOs
             int id = 0;
             if (message.ContainsKey("id"))
             {
-                
-                try
+                if (message.ContainsKey("id"))
                 {
-                    id = (int)message.GetNamedNumber("id");
+                    if (message.GetNamedValue("id").ValueType != JsonValueType.String)
+                    {
+                        id = (int) message.GetNamedNumber("id");
+                    }
+                    else
+                    {
+                        var intstr = message.GetNamedString("id");
+                        int.TryParse(intstr, out id);
+                    }                        
                 }
-                catch
-                {
-                    var intstr = message.GetNamedString("id");
-                    int.TryParse(intstr, out id);
-                }
+
                 try
                 {
                     request = Requests[id];
@@ -567,7 +576,8 @@ namespace ConnectSdk.Windows.Service.WebOs
 
             try
             {
-                payloadType = payload.GetNamedString("type");
+                if (payload != null && payload.ContainsKey("type"))
+                    payloadType = payload.GetNamedString("type");
             }
             // ReSharper disable once EmptyGeneralCatchClause
             catch (Exception)
@@ -602,6 +612,7 @@ namespace ConnectSdk.Windows.Service.WebOs
                         dr = new DataWriter(messageWebSocket.OutputStream);
                     dr.WriteString(message);
                     dr.StoreAsync();
+                    Debug.WriteLine(string.Format("{0} : {1} : {2}", DateTime.Now, "sent", message));
                 }
                 // ReSharper disable once EmptyGeneralCatchClause
                 catch
@@ -663,6 +674,7 @@ namespace ConnectSdk.Windows.Service.WebOs
                         dr = new DataWriter(messageWebSocket.OutputStream);
                     dr.WriteString(message);
                     dr.StoreAsync();
+                    Debug.WriteLine(string.Format("{0} : {1} : {2}", DateTime.Now, "sent", message));
                 }
                     // ReSharper disable once EmptyGeneralCatchClause
                 catch

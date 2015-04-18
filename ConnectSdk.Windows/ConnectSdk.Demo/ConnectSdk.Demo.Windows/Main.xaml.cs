@@ -4,26 +4,18 @@ using Windows.UI.Xaml.Media.Imaging;
 using ConnectSdk.Demo.Common;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
 // The Basic Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234237
 using ConnectSdk.Demo.Demo;
 using ConnectSdk.Windows.Core;
 using ConnectSdk.Windows.Service;
+using ConnectSdk.Windows.Service.Capability;
 using ConnectSdk.Windows.Service.Capability.Listeners;
 using ConnectSdk.Windows.Service.Command;
-using ConnectSdk.Windows.Service.Config;
 using ConnectSdk.Windows.Service.Sessions;
 using UpdateControls.Collections;
 using WinRTXamlToolkit.Controls;
@@ -36,10 +28,12 @@ namespace ConnectSdk.Demo
     public sealed partial class Main : Page
     {
 
-        private NavigationHelper navigationHelper;
-        private ObservableDictionary defaultViewModel = new ObservableDictionary();
+        private readonly NavigationHelper navigationHelper;
 
-        private Model model = null;
+        private readonly Model model;
+
+        WebOsWebAppSession launchSession;
+        private LaunchSession applaunchSession;
 
         /// <summary>
         /// NavigationHelper is used on each page to aid in navigation and 
@@ -47,7 +41,7 @@ namespace ConnectSdk.Demo
         /// </summary>
         public NavigationHelper NavigationHelper
         {
-            get { return this.navigationHelper; }
+            get { return navigationHelper; }
         }
 
 
@@ -55,10 +49,8 @@ namespace ConnectSdk.Demo
         {
             model = App.ApplicationModel;
 
-            this.InitializeComponent();
-            this.navigationHelper = new NavigationHelper(this);
-            this.navigationHelper.LoadState += navigationHelper_LoadState;
-            this.navigationHelper.SaveState += navigationHelper_SaveState;
+            InitializeComponent();
+            navigationHelper = new NavigationHelper(this);
 
             DataContext = model;
         }
@@ -91,69 +83,43 @@ namespace ConnectSdk.Demo
             {
                 var arg = e as TappedRoutedEventArgs;
                 // we filled the border with a textblock and we will get this first
-                var scrollPad = (arg.OriginalSource as TextBlock).Parent as Border;
-                var pos = arg.GetPosition(scrollPad);
-                if (scrollPad != null && (pos.X > 0 && pos.Y > 0 && pos.X < scrollPad.ActualWidth && pos.Y < scrollPad.ActualWidth))
+                var textBlock = arg.OriginalSource as TextBlock;
+                if (textBlock != null)
                 {
-                    model.Tap();
+                    var scrollPad = textBlock.Parent as Border;
+                    var pos = arg.GetPosition(scrollPad);
+                    if (scrollPad != null && (pos.X > 0 && pos.Y > 0 && pos.X < scrollPad.ActualWidth && pos.Y < scrollPad.ActualWidth))
+                    {
+                        model.Tap();
+                    }
                 }
             }
             else
             {
                 var arg = e as DoubleTappedRoutedEventArgs;
                 // we filled the border with a textblock and we will get this first
-                var scrollPad = (arg.OriginalSource as TextBlock).Parent as Border;
-                var pos = arg.GetPosition(scrollPad);
-                if (scrollPad != null && (pos.X > 0 && pos.Y > 0 && pos.X < scrollPad.ActualWidth && pos.Y < scrollPad.ActualWidth))
+                if (arg != null)
                 {
-                    model.Tap();
+                    var textBlock = arg.OriginalSource as TextBlock;
+                    if (textBlock != null)
+                    {
+                        var scrollPad = textBlock.Parent as Border;
+                        var pos = arg.GetPosition(scrollPad);
+                        if (scrollPad != null && (pos.X > 0 && pos.Y > 0 && pos.X < scrollPad.ActualWidth && pos.Y < scrollPad.ActualWidth))
+                        {
+                            model.Tap();
+                        }
+                    }
                 }
             }
 
         }
 
-        /// <summary>
-        /// Populates the page with content passed during navigation. Any saved state is also
-        /// provided when recreating a page from a prior session.
-        /// </summary>
-        /// <param name="sender">
-        /// The source of the event; typically <see cref="NavigationHelper"/>
-        /// </param>
-        /// <param name="e">Event data that provides both the navigation parameter passed to
-        /// <see cref="Frame.Navigate(Type, Object)"/> when this page was initially requested and
-        /// a dictionary of state preserved by this page during an earlier
-        /// session. The state will be null the first time a page is visited.</param>
-        private void navigationHelper_LoadState(object sender, LoadStateEventArgs e)
-        {
-        }
-
-        /// <summary>
-        /// Preserves state associated with this page in case the application is suspended or the
-        /// page is discarded from the navigation cache.  Values must conform to the serialization
-        /// requirements of <see cref="SuspensionManager.SessionState"/>.
-        /// </summary>
-        /// <param name="sender">The source of the event; typically <see cref="NavigationHelper"/></param>
-        /// <param name="e">Event data that provides an empty dictionary to be populated with
-        /// serializable state.</param>
-        private void navigationHelper_SaveState(object sender, SaveStateEventArgs e)
-        {
-        }
 
         #region NavigationHelper registration
 
-        /// The methods provided in this section are simply used to allow
-        /// NavigationHelper to respond to the page's navigation methods.
-        /// 
-        /// Page specific logic should be placed in event handlers for the  
-        /// <see cref="GridCS.Common.NavigationHelper.LoadState"/>
-        /// and <see cref="GridCS.Common.NavigationHelper.SaveState"/>.
-        /// The navigation parameter is available in the LoadState method 
-        /// in addition to page state preserved during an earlier session.
-
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            navigationHelper.OnNavigatedTo(e);
-
             var channelListResponseListener = new ResponseListener
             (
                 loadEventArg =>
@@ -161,9 +127,9 @@ namespace ConnectSdk.Demo
                     var loadEventArgs = loadEventArg as LoadEventArgs;
                     if (loadEventArgs != null)
                     {
-                        var channels = (loadEventArgs.Load as ServiceCommandError).GetPayload() as List<ChannelInfo>;
+                        var channels = loadEventArgs.Load.GetPayload() as List<ChannelInfo>;
                         model.Channels = new IndependentList<ChannelInfo>(channels);
-                        this.Dispatcher.RunAsync(CoreDispatcherPriority.High, () => { model.OnPropertyChanged("Channels"); });
+                        Dispatcher.RunAsync(CoreDispatcherPriority.High, () => { model.OnPropertyChanged("Channels"); });
                     }
                 },
                 serviceCommandError =>
@@ -179,7 +145,7 @@ namespace ConnectSdk.Demo
                     var loadEventArgs = loadEventArg as LoadEventArgs;
                     if (loadEventArgs != null)
                     {
-                        var apps = (loadEventArgs.Load as ServiceCommandError).GetPayload() as List<AppInfo>;
+                        var apps = loadEventArgs.Load.GetPayload() as List<AppInfo>;
                         var netCastService1 = (NetcastTvService)model.SelectedDevice.GetServiceByName(NetcastTvService.Id);
                         var webostvService1 = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
                         var port = netCastService1 != null
@@ -191,7 +157,7 @@ namespace ConnectSdk.Demo
                             apps[i].SetUrl(model.SelectedDevice.IpAddress, port);
                         }
                         model.Apps = new IndependentList<AppInfo>(apps);
-                        this.Dispatcher.RunAsync(CoreDispatcherPriority.High, () => { model.OnPropertyChanged("Apps"); });
+                        Dispatcher.RunAsync(CoreDispatcherPriority.High, () => { model.OnPropertyChanged("Apps"); });
                     }
                 },
                 serviceCommandError =>
@@ -223,134 +189,49 @@ namespace ConnectSdk.Demo
         }
 
         #endregion
-
-        private void TextBoxToSend_OnTextChanged(object sender, TextChangedEventArgs e)
-        {
-            var textBox = (TextBox)sender;
-            var binding = textBox.GetBindingExpression(TextBox.TextProperty);
-            if (binding != null) binding.UpdateSource();
-        }
-
-
-        private void ButtonClear_OnClick(object sender, RoutedEventArgs e)
-        {
-            //model.TextInput = "";
-            // ugly code but since we use the control in a datatemplate we have to find it as opposed to refference it
-            var textBoxToSend = ((e.OriginalSource as Button).Parent as StackPanel).Children[0] as TextBox;
-            ;
-            if (textBoxToSend == null) return;
-
-            var binding = textBoxToSend.GetBindingExpression(TextBox.TextProperty);
-            if (binding != null) binding.UpdateSource();
-            textBoxToSend.Text = "";
-        }
-
-        private void PrintButton_OnClick(object sender, RoutedEventArgs e)
-        {
-            CallCaptureImage(e);
-        }
-
+        
         public void CallCaptureImage(RoutedEventArgs eva)
         {
             try
             {
-                var img = ((eva.OriginalSource as Button).Parent as StackPanel).Children[1] as Image;
-                var serviceDescription = model.SelectedDevice.GetServiceByName("Netcast TV").ServiceDescription;
-                var baseurl = string.Format("http://{0}:{1}", serviceDescription.IpAddress, serviceDescription.Port);
-                var url = baseurl + "/udap/api/data?target=screen_image&s=" + DateTime.Now.Ticks;
-
-                img.Source = new BitmapImage(new Uri(url));
-            }
-            catch (Exception e)
-            {
-
-            }
-        }
-
-        private void AppImage_OnTapped(object sender, TappedRoutedEventArgs e)
-        {
-            var appinfo = (e.OriginalSource as Image).DataContext as AppInfo;
-            if (appinfo != null)
-            {
-                var netCastService = (NetcastTvService)model.SelectedDevice.GetServiceByName(NetcastTvService.Id);
-                if (netCastService != null)
+                var button = eva.OriginalSource as Button;
+                if (button != null)
                 {
-                    var responseListener = new ResponseListener
-                    (
-                        loadEventArg =>
-                        {
+                    var stackPanel = button.Parent as StackPanel;
+                    if (stackPanel != null)
+                    {
+                        var img = stackPanel.Children[1] as Image;
+                        var serviceDescription = model.SelectedDevice.GetServiceByName("Netcast TV").ServiceDescription;
+                        var baseurl = string.Format("http://{0}:{1}", serviceDescription.IpAddress, serviceDescription.Port);
+                        var url = baseurl + "/udap/api/data?target=screen_image&s=" + DateTime.Now.Ticks;
 
-                        },
-                        serviceCommandError =>
-                        {
-                            var msg =
-                                new MessageDialog(
-                                    "Something went wrong; The application could not be started. Press 'Close' to continue");
-                            msg.ShowAsync();
-                        }
-                    );
-
-                    netCastService.LaunchAppWithInfo(appinfo, responseListener);
+                        if (img != null) img.Source = new BitmapImage(new Uri(url));
+                    }
                 }
             }
-        }
-
-        private void ChannelListView_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            var channelInfo = e.AddedItems[0] as ChannelInfo;
-            if (channelInfo != null)
+            catch (Exception)
             {
-                var netCastService = (NetcastTvService)model.SelectedDevice.GetServiceByName(NetcastTvService.Id);
-                if (netCastService != null)
-                {
 
-                    var responseListener = new ResponseListener
-                    (
-                        loadEventArg =>
-                        {
-
-                        },
-                        serviceCommandError =>
-                        {
-                            var msg =
-                                new MessageDialog(
-                                    "Something went wrong; The application could not be started. Press 'Close' to continue");
-                            msg.ShowAsync();
-                        }
-                    );
-
-                    netCastService.SetChannel(channelInfo, responseListener);
-                }
             }
         }
-
-        WebOsWebAppSession launchSession = null;
-        private LaunchSession applaunchSession;
 
         private void OpenWebApp_Click(object sender, RoutedEventArgs e)
         {
-            //var webappname = "BareMoon 2";
-            var webappname = "SampleWebApp";
+            const string webappname = "SampleWebApp";
 
             var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
 
             var listener = new ResponseListener
                 (
-                (loadEventArg) =>
+                loadEventArg =>
                 {
                     var v = loadEventArg as LoadEventArgs;
                     if (v != null)
-                        try
-                        {
-                            launchSession = v.Load.GetPayload() as WebOsWebAppSession;
-                        }
-                        catch (Exception)
-                        {
-
-                            throw;
-                        }
+                    {
+                        launchSession = v.Load.GetPayload() as WebOsWebAppSession;
+                    }
                 },
-                (serviceCommandError) =>
+                serviceCommandError =>
                 {
                     var msg =
                         new MessageDialog(
@@ -445,9 +326,6 @@ namespace ConnectSdk.Demo
             }
             );
             webostvService.LaunchAppStore("", responseListener);
-
-
-
         }
 
         private void GetAppList_Click(object sender, RoutedEventArgs e)
@@ -467,15 +345,13 @@ namespace ConnectSdk.Demo
                             ? netCastService1.ServiceDescription.Port.ToString()
                             : webostvService1.ServiceDescription.Port.ToString();
 
-                        var apps = (loadEventArgs.Load as ServiceCommandError).GetPayload() as List<AppInfo>;
+                        var apps = loadEventArgs.Load.GetPayload() as List<AppInfo>;
                         for (int i = 0; i < apps.Count; i++)
                         {
                             apps[i].SetUrl(model.SelectedDevice.IpAddress, port);
                             model.Apps.Add(apps[i]);
                         }
-                        //model.Apps = new IndependentList<AppInfo>(apps);
-
-                        this.Dispatcher.RunAsync(CoreDispatcherPriority.High, () => { model.OnPropertyChanged("Apps"); });
+                        Dispatcher.RunAsync(CoreDispatcherPriority.High, () => { model.OnPropertyChanged("Apps"); });
                     }
                 },
                 serviceCommandError =>
@@ -497,15 +373,9 @@ namespace ConnectSdk.Demo
                 {
                     var v = loadEventArg as LoadEventArgs;
                     if (v != null)
-                        try
-                        {
-                            applaunchSession = v.Load.GetPayload() as LaunchSession;
-                        }
-                        catch (Exception)
-                        {
-
-                            throw;
-                        }
+                    {
+                        applaunchSession = v.Load.GetPayload() as LaunchSession;
+                    }
                 },
                 serviceCommandError =>
                 {
@@ -513,7 +383,7 @@ namespace ConnectSdk.Demo
                 }
             );
 
-            webostvService.LaunchApp(model.Apps[1].Id,responseListener);
+            webostvService.LaunchApp(model.Apps[1].Id, responseListener);
         }
 
         private void CloseApp_Click(object sender, RoutedEventArgs e)
@@ -558,13 +428,156 @@ namespace ConnectSdk.Demo
         private void MediaPlayerMedia_Click(object sender, RoutedEventArgs e)
         {
             var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
-            webostvService.PlayMedia("http://www.connectsdk.com/files/8913/9657/0225/test_video.mp4", "video/mp4", "Sintel Trailer", "Blender Open Movie Project", "http://www.connectsdk.com/files/7313/9657/0225/test_video_icon.jpg", false, null);
+
+            if (launchSession == null)
+            {
+                const string webappname = "MediaPlayer";
+
+                var listener = new ResponseListener
+                    (
+                    loadEventArg =>
+                    {
+                        var v = loadEventArg as LoadEventArgs;
+                        if (v != null)
+                        {
+                            launchSession = v.Load.GetPayload() as WebOsWebAppSession;
+
+                            var listener2 = new ResponseListener
+                                (
+                                loadEventArg2 => webostvService.PlayMedia("http://www.connectsdk.com/files/8913/9657/0225/test_video.mp4", "video/mp4", "Sintel Trailer", "Blender Open Movie Project", "http://www.connectsdk.com/files/7313/9657/0225/test_video_icon.jpg", false, null),
+                                serviceCommandError =>
+                                {
+                                });
+
+
+                            if (launchSession != null) launchSession.Connect(listener2);
+                        }
+                    },
+                    serviceCommandError =>
+                    {
+                        var msg =
+                            new MessageDialog(
+                                "Something went wrong; The application could not be started. Press 'Close' to continue");
+                        msg.ShowAsync();
+                    }
+                    );
+
+                webostvService.LaunchWebApp(webappname, listener);
+            }
+            else
+            {
+                webostvService.PlayMedia("http://www.connectsdk.com/files/8913/9657/0225/test_video.mp4", "video/mp4", "Sintel Trailer", "Blender Open Movie Project", "http://www.connectsdk.com/files/7313/9657/0225/test_video_icon.jpg", false, null);
+            }
+
+
         }
 
         private void MediaPlayerImage_Click(object sender, RoutedEventArgs e)
         {
             var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
-            webostvService.DisplayImage("http://www.connectsdk.com/files/9613/9656/8539/test_image.jpg", "image/jpeg", "Sintel Character Design", "Blender Open Movie Project", "http://www.connectsdk.com/files/2013/9656/8845/test_image_icon.jpg", null);
+
+            if (launchSession == null)
+            {
+                const string webappname = "MediaPlayer";
+                var listener = new ResponseListener
+                    (
+                    loadEventArg =>
+                    {
+                        var v = loadEventArg as LoadEventArgs;
+                        if (v != null)
+                        {
+                            launchSession = v.Load.GetPayload() as WebOsWebAppSession;
+
+                            var listener2 = new ResponseListener
+                                (
+                                loadEventArg2 => webostvService.DisplayImage(
+                                    "http://www.connectsdk.com/files/9613/9656/8539/test_image.jpg", "image/jpeg",
+                                    "Sintel Character Design", "Blender Open Movie Project",
+                                    "http://www.connectsdk.com/files/2013/9656/8845/test_image_icon.jpg", null),
+                                serviceCommandError =>
+                                {
+                                });
+
+
+                            if (launchSession != null) launchSession.Connect(listener2);
+                        }
+                    },
+                    serviceCommandError =>
+                    {
+                        var msg =
+                            new MessageDialog(
+                                "Something went wrong; The application could not be started. Press 'Close' to continue");
+                        msg.ShowAsync();
+                    }
+                    );
+
+                webostvService.LaunchWebApp(webappname, listener);
+            }
+            else
+            {
+                webostvService.DisplayImage(
+                    "http://www.connectsdk.com/files/9613/9656/8539/test_image.jpg", "image/jpeg",
+                    "Sintel Character Design", "Blender Open Movie Project",
+                    "http://www.connectsdk.com/files/2013/9656/8845/test_image_icon.jpg", null);
+            }
+
+
         }
+
+        private void AppListBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var appinfo = e.AddedItems[0] as AppInfo;
+            if (appinfo != null)
+            {
+                var dservice = model.SelectedDevice.GetServices()[0];
+
+                var responseListener = new ResponseListener
+                (
+                    loadEventArg =>
+                    {
+
+                    },
+                    serviceCommandError =>
+                    {
+                        var msg =
+                            new MessageDialog(
+                                "Something went wrong; The application could not be started. Press 'Close' to continue");
+                        msg.ShowAsync();
+                    }
+                );
+
+                if (dservice is ILauncher)
+                    (dservice as ILauncher).LaunchAppWithInfo(appinfo, responseListener);
+
+            }
+        }
+
+        private void ChannelListView_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var channelInfo = e.AddedItems[0] as ChannelInfo;
+            if (channelInfo != null)
+            {
+                var dservice = model.SelectedDevice.GetServices()[0];
+
+                var responseListener = new ResponseListener
+                (
+                    loadEventArg =>
+                    {
+
+                    },
+                    serviceCommandError =>
+                    {
+                        var msg =
+                            new MessageDialog(
+                                "Something went wrong; The application could not be started. Press 'Close' to continue");
+                        msg.ShowAsync();
+                    }
+                );
+
+                if (dservice is ITvControl)
+                    (dservice as ITvControl).SetChannel(channelInfo, responseListener);
+            }
+        }
+
     }
 }

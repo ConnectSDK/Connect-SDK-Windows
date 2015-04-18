@@ -1464,6 +1464,8 @@ namespace ConnectSdk.Windows.Service
 
         public void Click()
         {
+            if (isMouseConnected) ConnectMouse();
+
             var responseListener = new ResponseListener();
 
             var requestUrl = GetUdapRequestUrl(UdapPathCommand);
@@ -1478,6 +1480,7 @@ namespace ConnectSdk.Windows.Service
 
         public void Move(double dx, double dy)
         {
+            if (!isMouseConnected) ConnectMouse();
             mMouseDistance.X += dx;
             mMouseDistance.Y += dy;
 
@@ -1533,6 +1536,8 @@ namespace ConnectSdk.Windows.Service
 
         public void Scroll(double dx, double dy)
         {
+            if (isMouseConnected) ConnectMouse(); 
+
             var responseListener = new ResponseListener();
 
             var requestUrl = GetUdapRequestUrl(UdapPathCommand);

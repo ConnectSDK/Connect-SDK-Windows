@@ -81,12 +81,8 @@ namespace ConnectSdk.Windows.Service.Sessions
                     mFullAppId = LaunchSession.AppId;
                 else
                 {
-                    //foreach (var mapPair in service.AppToAppIdMappings)
-                    //{
-                    //}
                     foreach (var pair in Service.AppToAppIdMappings)
                     {
-                        //var mappedFullAppId = pair.Key;
                         var mappedAppId = pair.Value;
 
                         if (!mappedAppId.Equals(LaunchSession.AppId)) continue;
@@ -285,7 +281,10 @@ namespace ConnectSdk.Windows.Service.Sessions
             {
                 payload.Add("type", JsonValue.CreateStringValue("p2p"));
                 payload.Add("to", JsonValue.CreateStringValue(GetFullAppId()));
-                payload.Add("payload", JsonValue.CreateStringValue(message.ToString()));
+                if (message is JsonObject)
+                    payload.Add("payload", JsonValue.CreateStringValue((message as JsonObject).Stringify()));
+                else
+                    payload.Add("payload", JsonValue.CreateStringValue(message.ToString()));
             }
             catch (Exception ex)
             {
@@ -653,9 +652,14 @@ namespace ConnectSdk.Windows.Service.Sessions
 
             var responseListener = new ResponseListener
             (
-                loadEventArg => Util.PostSuccess(listener, new MediaLaunchObject(LaunchSession, GetMediaControl())),
-                serviceCommandError => Util.PostError(listener, serviceCommandError)
-            );
+                loadEventArg =>
+                {
+                    Util.PostSuccess(listener, new MediaLaunchObject(LaunchSession, GetMediaControl()));
+                },
+                serviceCommandError =>
+                {
+                    Util.PostError(listener, serviceCommandError);
+                });
 
             var command = new ServiceCommand(Socket, null, null, responseListener);
 
@@ -663,9 +667,14 @@ namespace ConnectSdk.Windows.Service.Sessions
 
             var messageResponseListener = new ResponseListener
             (
-                loadEventArg => { },
-                serviceCommandError => Util.PostError(listener, serviceCommandError)
-            );
+                loadEventArg =>
+                {
+                    
+                },
+                serviceCommandError =>
+                {
+                    Util.PostError(listener, serviceCommandError);
+                });
 
             SendP2PMessage(message, messageResponseListener);
         }

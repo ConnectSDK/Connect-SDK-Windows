@@ -6,6 +6,7 @@ using Windows.UI.Xaml;
 using ConnectSdk.Demo.Annotations;
 using ConnectSdk.Windows.Core;
 using ConnectSdk.Windows.Device;
+using ConnectSdk.Windows.Service.Capability;
 using UpdateControls.Collections;
 using UpdateControls.Fields;
 
@@ -14,17 +15,9 @@ namespace ConnectSdk.Demo.Demo
     public partial class Model : INotifyPropertyChanged
     {
         private IndependentList<TvDefinition> knownTvs;
-        //private Command deleteCommand;
-        //private Command executeCommand;
 
+        private string textInput;
 
-        //private string textInput;
-        //private bool touchEnabled;
-
-        //private SdkConnector sdkConnector;
-
-        //public string IpAddress;
-        //public string Port;
         private ConnectableDevice selectedDevice;
         private IndependentList<AppInfo> apps;
         private IndependentList<ChannelInfo> channels;
@@ -39,18 +32,6 @@ namespace ConnectSdk.Demo.Demo
             }
         }
 
-        //public Command DeleteCommand
-        //{
-        //    get { return deleteCommand ?? (deleteCommand = new Command(Delete)); }
-        //    set { deleteCommand = value; }
-        //}
-
-        //public Command ExecuteCommand
-        //{
-        //    get { return executeCommand ?? (executeCommand = new Command(Execute)); }
-        //    set { executeCommand = value; }
-        //}
-
         public TvDefinition SelectedTv { get; set; }
 
         public ConnectableDevice SelectedDevice
@@ -59,21 +40,16 @@ namespace ConnectSdk.Demo.Demo
             set { selectedDevice = value;}
         }
 
-        //public Visibility CanEnterKey
-        //{
-        //    get { return SelectedDevice != null ? Visibility.Visible : Visibility.Collapsed; }
-        //}
-
-        //public string TextInput
-        //{
-        //    get { return textInput; }
-        //    set
-        //    {
-        //        if (Equals(value, textInput)) return;
-        //        textInput = value;
-        //        SendText(textInput);
-        //    }
-        //}
+        public string TextInput
+        {
+            get { return textInput; }
+            set
+            {
+                if (Equals(value, textInput)) return;
+                textInput = value;
+                selectedDevice.GetControl<ITextInputControl>().SendText(textInput);
+            }
+        }
 
 
         //public bool TouchEnabled

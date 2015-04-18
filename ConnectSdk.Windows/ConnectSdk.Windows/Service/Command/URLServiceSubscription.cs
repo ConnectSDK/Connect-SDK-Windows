@@ -35,7 +35,7 @@ namespace ConnectSdk.Windows.Service.Command
             {
                 HttpMethod = "subscribe";
             }
-            //todo: check this cast
+            
             Service.SendCommand(this);
 
         }

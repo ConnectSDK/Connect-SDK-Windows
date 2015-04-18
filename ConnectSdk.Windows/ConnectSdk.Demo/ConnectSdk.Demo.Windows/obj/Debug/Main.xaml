@@ -166,27 +166,27 @@
                     <StackPanel Margin="5"  HorizontalAlignment="Center">
                         <TextBlock Text="IAppLauncher" FontSize="20" VerticalAlignment="Center" Margin="5"></TextBlock>
                         <controls:WrapPanel Orientation="Horizontal" Width="400">
-                            <Button x:ConnectionId='11' Content="Store"                          ></Button>
-                            <Button x:ConnectionId='12' Content="Get AppList"                         ></Button>
-                            <Button x:ConnectionId='13' Content="LaunchApp"                       ></Button>
-                            <Button x:ConnectionId='14' Content="CloseApp"                       ></Button>
-                            <Button x:ConnectionId='15' Content="GetRunningApp"                            ></Button>
+                            <Button x:ConnectionId='9' Content="Store"                          ></Button>
+                            <Button x:ConnectionId='10' Content="Get AppList"                         ></Button>
+                            <Button x:ConnectionId='11' Content="LaunchApp"                       ></Button>
+                            <Button x:ConnectionId='12' Content="CloseApp"                       ></Button>
+                            <Button x:ConnectionId='13' Content="GetRunningApp"                            ></Button>
                         </controls:WrapPanel>
                     </StackPanel>
                     <StackPanel Margin="5"  HorizontalAlignment="Center">
                         <TextBlock Text="IMediaPlayer" FontSize="20" VerticalAlignment="Center" Margin="5"></TextBlock>
                         <controls:WrapPanel Orientation="Horizontal" Width="400">
-                            <Button x:ConnectionId='9' Content="Play media"                               ></Button>
-                            <Button x:ConnectionId='10' Content="Display image"                               ></Button>
+                            <Button x:ConnectionId='7' Content="Play media"                               ></Button>
+                            <Button x:ConnectionId='8' Content="Display image"                               ></Button>
                         </controls:WrapPanel>
                     </StackPanel>
                     <StackPanel Margin="5" HorizontalAlignment="Center">
                         <TextBlock Text="IWebAppLauncher" FontSize="20" VerticalAlignment="Center" Margin="5"></TextBlock>
                         <controls:WrapPanel Orientation="Horizontal" Width="400">
                             <TextBox Margin="5" x:Name="WebAppMessageBox"></TextBox>
-                            <Button x:ConnectionId='6' Content="Send message"                          ></Button>
-                            <Button x:ConnectionId='7' Content="Open webapp"                         ></Button>
-                            <Button x:ConnectionId='8' Content="Close webapp"                           ></Button>
+                            <Button x:ConnectionId='4' Content="Send message"                          ></Button>
+                            <Button x:ConnectionId='5' Content="Open webapp"                         ></Button>
+                            <Button x:ConnectionId='6' Content="Close webapp"                           ></Button>
                         </controls:WrapPanel>
                     </StackPanel>
                 </StackPanel>
@@ -194,12 +194,8 @@
                     <Border x:ConnectionId='3' x:Name="ScrollPad" Margin="2" Width="200" Height="200" BorderThickness="5" BorderBrush="Green" CornerRadius="5" ManipulationMode="TranslateX, TranslateY"                                                                                                                     >
                         <TextBlock Text="Pad" FontSize="22" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></TextBlock>
                     </Border>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <TextBox x:ConnectionId='4' x:Name="TextBoxToSend" FontSize="35" Margin="2" Width="230" Text="{Binding Path=TextInput, Mode=TwoWay, UpdateSourceTrigger=Explicit}"                                          ></TextBox>
-                        <Button x:ConnectionId='5' Content="Clear" Name="ButtonClear"                            ></Button>
-                    </StackPanel>
                 </StackPanel>
-                <ListView Grid.Row="1" Grid.Column="0" x:Name="TvListBox" Width="400" ItemsSource="{Binding Path=Apps}" HorizontalContentAlignment="Stretch" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+                <ListView x:ConnectionId='1' Grid.Row="1" Grid.Column="0" x:Name="AppListBox" Width="400" ItemsSource="{Binding Path=Apps}" HorizontalContentAlignment="Stretch" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"                                                 >
                     <ListView.ItemsPanel>
                         <ItemsPanelTemplate>
                             <WrapGrid Orientation="Horizontal" />
@@ -207,22 +203,22 @@
                     </ListView.ItemsPanel>
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <Grid Width="100">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="100"></RowDefinition>
-                                    <RowDefinition></RowDefinition>
-                                </Grid.RowDefinitions>
-                                <Image x:ConnectionId='2' Grid.Row="0" Height="80" x:Name="AppImage"                           >
-                                    <Image.Source>
-                                        <BitmapImage UriSource="{Binding Path=Url}" />
-                                    </Image.Source>
-                                </Image>
-                                <TextBlock Grid.Row="1" Text="{Binding Path=Name}" TextWrapping="Wrap" HorizontalAlignment="Center" FontSize="14" Style="{StaticResource TitleTextBlockStyle}" Margin="0,-10,0,10" Foreground="White" />
-                            </Grid>
+                                <Grid Width="100" >
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="100"></RowDefinition>
+                                        <RowDefinition></RowDefinition>
+                                    </Grid.RowDefinitions>
+                                    <Image Grid.Row="0" Height="80" x:Name="AppImage" >
+                                        <Image.Source>
+                                            <BitmapImage UriSource="{Binding Path=Url}" />
+                                        </Image.Source>
+                                    </Image>
+                                    <TextBlock Grid.Row="1" Text="{Binding Path=Name}" TextWrapping="Wrap" HorizontalAlignment="Center" FontSize="14" Style="{StaticResource TitleTextBlockStyle}" Margin="0,-10,0,10" Foreground="White" />
+                                </Grid>
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
-                <ListView x:ConnectionId='1' Grid.Row="1" Grid.Column="1" Width="300" ItemsSource="{Binding Path=Channels}" HorizontalContentAlignment="Stretch" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" x:Name="ChannelListView"                                                      >
+                <ListView x:ConnectionId='2' Grid.Row="1" Grid.Column="1" Width="300" ItemsSource="{Binding Path=Channels}" HorizontalContentAlignment="Stretch" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" x:Name="ChannelListView"                                                      >
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <Grid Width="300">

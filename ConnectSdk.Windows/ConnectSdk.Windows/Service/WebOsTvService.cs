@@ -863,9 +863,17 @@ namespace ConnectSdk.Windows.Service
                     (
                         loadEventArg =>
                         {
-                            var webAppSession = loadEventArg as WebAppSession;
-                            if (webAppSession != null)
-                                webAppSession.DisplayImage(url, mimeType, title, description, iconSrc, listener);
+                            var loadEventArgs = loadEventArg as LoadEventArgs;
+                            if (loadEventArgs != null)
+                            {
+                                var webAppSession = (loadEventArgs.Load.GetPayload()) as WebOsWebAppSession;
+                                if (webAppSession != null)
+                                    webAppSession.DisplayImage(url, mimeType, title, description, iconSrc, listener);
+                            }
+
+                            //var webAppSession = loadEventArg as WebAppSession;
+                            //if (webAppSession != null)
+                            //    webAppSession.DisplayImage(url, mimeType, title, description, iconSrc, listener);
                         },
                         // ReSharper disable once ConvertClosureToMethodGroup
                         serviceCommandError =>
@@ -878,12 +886,18 @@ namespace ConnectSdk.Windows.Service
                     (
                         loadEventArg =>
                         {
-                            var webAppSession = loadEventArg as WebAppSession;
-                            if (webAppSession != null)
-                                webAppSession.DisplayImage(url, mimeType, title, description, iconSrc, listener);
+                            var loadEventArgs = loadEventArg as LoadEventArgs;
+                            if (loadEventArgs != null)
+                            {
+                                var webAppSession = (loadEventArgs.Load.GetPayload()) as WebOsWebAppSession;
+                                if (webAppSession != null)
+                                    webAppSession.DisplayImage(url, mimeType, title, description, iconSrc, listener);
+                            }
                         },
-                        serviceCommandError => GetWebAppLauncher().LaunchWebApp(webAppId, webAppLaunchListener)
-                    );
+                        serviceCommandError =>
+                        {
+                            GetWebAppLauncher().LaunchWebApp(webAppId, webAppLaunchListener);
+                        });
 
                 GetWebAppLauncher().JoinWebApp(webAppId, webappResponseListener);
             }
@@ -959,9 +973,13 @@ namespace ConnectSdk.Windows.Service
                     (
                         loadEventArg =>
                         {
-                            var webAppSession = loadEventArg as WebAppSession;
-                            if (webAppSession != null)
-                                webAppSession.PlayMedia(url, mimeType, title, description, iconSrc, shouldLoop, listener);
+                            var loadEventArgs = loadEventArg as LoadEventArgs;
+                            if (loadEventArgs != null)
+                            {
+                                var webAppSession = (loadEventArgs.Load.GetPayload()) as WebOsWebAppSession;
+                                if (webAppSession != null)
+                                    webAppSession.PlayMedia(url, mimeType, title, description, iconSrc, shouldLoop, listener);
+                            }
                         },
                         // ReSharper disable once ConvertClosureToMethodGroup
                         serviceCommandError =>
@@ -974,9 +992,13 @@ namespace ConnectSdk.Windows.Service
                     (
                         loadEventArg =>
                         {
-                            var webAppSession = loadEventArg as WebAppSession;
-                            if (webAppSession != null)
-                                webAppSession.PlayMedia(url, mimeType, title, description, iconSrc, shouldLoop, listener);
+                            var loadEventArgs = loadEventArg as LoadEventArgs;
+                            if (loadEventArgs != null)
+                            {
+                                var webAppSession = (loadEventArgs.Load.GetPayload()) as WebOsWebAppSession;
+                                if (webAppSession != null)
+                                    webAppSession.PlayMedia(url, mimeType, title, description, iconSrc, shouldLoop, listener);
+                            }
                         },
                         serviceCommandError => GetWebAppLauncher().LaunchWebApp(webAppId, webAppLaunchListener)
                     );
@@ -1516,6 +1538,34 @@ namespace ConnectSdk.Windows.Service
             {
                 mouseSocket.Move(dx, dy);
             }
+            else
+            {
+
+                var responseListener = new ResponseListener
+                (
+                    loadEventArg =>
+                    {
+                        JsonObject obj;
+                        if (loadEventArg is LoadEventArgs)
+                            obj = (loadEventArg as LoadEventArgs).Load.GetPayload() as JsonObject;
+                        else obj = (JsonObject)loadEventArg;
+
+                        if (obj != null)
+                        {
+                            var socketPath = obj.GetNamedString("socketPath");
+                            mouseSocket = new WebOstvMouseSocketConnection(socketPath);
+                        }
+
+                        mouseSocket.Move(dx, dy);
+                    },
+                    serviceCommandError =>
+                    {
+
+                    }
+                );
+
+                ConnectMouse(responseListener);
+            }
         }
 
         public void Move(Point distance)
@@ -1886,9 +1936,14 @@ namespace ConnectSdk.Windows.Service
 
             var responseListener = new ResponseListener
             (
-                loadEventArg => Util.PostSuccess(listener, webAppSession),
-                serviceCommandError => Util.PostError(listener, serviceCommandError)
-            );
+                loadEventArg =>
+                {
+                    Util.PostSuccess(listener, webAppSession);
+                },
+                serviceCommandError =>
+                {
+                    Util.PostError(listener, serviceCommandError);
+                });
             webAppSession.Join(responseListener);
         }
 

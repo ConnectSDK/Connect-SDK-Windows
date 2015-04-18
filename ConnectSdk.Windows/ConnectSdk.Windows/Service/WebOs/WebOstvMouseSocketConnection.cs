@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Text;
 using Windows.Networking.Sockets;
 using Windows.Storage.Streams;
@@ -45,7 +46,7 @@ namespace ConnectSdk.Windows.Service.WebOs
                     reader.UnicodeEncoding = global::Windows.Storage.Streams.UnicodeEncoding.Utf8;
 
                     read = reader.ReadString(reader.UnconsumedBufferLength);
-
+                    Debug.WriteLine("{0} : {1} : {2}", DateTime.Now, "received", read);
                 }
                 OnMessage(read);
             };
@@ -56,7 +57,6 @@ namespace ConnectSdk.Windows.Service.WebOs
 
         public void OnMessage(String data)
         {
-
             //this.handleMessage(data);
         }
 
@@ -71,7 +71,8 @@ namespace ConnectSdk.Windows.Service.WebOs
             {
                 // ReSharper disable once UnusedVariable
                 var status = WebSocketError.GetStatus(ex.GetBaseException().HResult);
-                throw;
+                isConnected = false;
+                
             }
         }
 
@@ -172,31 +173,23 @@ namespace ConnectSdk.Windows.Service.WebOs
 
         private void Send(string sb)
         {
-            try
+            if (isConnected)
             {
-                if (isConnected)
-                {
-                    ws.Control.MessageType = SocketMessageType.Utf8;
-                    ws.OutputStream.FlushAsync().GetResults();
-                    if (messageWriter == null)
-                        messageWriter = new DataWriter(ws.OutputStream);
-                    messageWriter.WriteString(sb);
-                    messageWriter.StoreAsync();
-                }
-                else
-                {
-                    
-                }
-            }
-            catch (Exception)
-            {
-                
-                throw;
+                ws.Control.MessageType = SocketMessageType.Utf8;
+                ws.OutputStream.FlushAsync().GetResults();
+                if (messageWriter == null)
+                    messageWriter = new DataWriter(ws.OutputStream);
+                messageWriter.WriteString(sb);
+                messageWriter.StoreAsync();
+                Debug.WriteLine("{0} : {1} : {2}", DateTime.Now, "sent", sb);
             }
         }
 
         public void Move(double dx, double dy)
         {
+            if (!IsConnected())
+                Connect();
+
             if (IsConnected())
             {
                 var sb = new StringBuilder();

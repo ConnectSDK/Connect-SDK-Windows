@@ -194,12 +194,8 @@
                     <Border x:Name="ScrollPad" Margin="2" Width="200" Height="200" BorderThickness="5" BorderBrush="Green" CornerRadius="5" ManipulationMode="TranslateX, TranslateY" Tapped="ScrollPadOnTapped" ManipulationDelta="ScrollPadOnManipulationDelta" DoubleTapped="ScrollPad_OnDoubleTapped" >
                         <TextBlock Text="Pad" FontSize="22" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></TextBlock>
                     </Border>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <TextBox x:Name="TextBoxToSend" FontSize="35" Margin="2" Width="230" Text="{Binding Path=TextInput, Mode=TwoWay, UpdateSourceTrigger=Explicit}" TextChanged="TextBoxToSend_OnTextChanged"></TextBox>
-                        <Button Content="Clear" Name="ButtonClear" Click="ButtonClear_OnClick"></Button>
-                    </StackPanel>
                 </StackPanel>
-                <ListView Grid.Row="1" Grid.Column="0" x:Name="TvListBox" Width="400" ItemsSource="{Binding Path=Apps}" HorizontalContentAlignment="Stretch" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+                <ListView Grid.Row="1" Grid.Column="0" x:Name="AppListBox" Width="400" ItemsSource="{Binding Path=Apps}" HorizontalContentAlignment="Stretch" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" SelectionChanged="AppListBox_OnSelectionChanged">
                     <ListView.ItemsPanel>
                         <ItemsPanelTemplate>
                             <WrapGrid Orientation="Horizontal" />
@@ -207,18 +203,18 @@
                     </ListView.ItemsPanel>
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <Grid Width="100">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="100"></RowDefinition>
-                                    <RowDefinition></RowDefinition>
-                                </Grid.RowDefinitions>
-                                <Image Grid.Row="0" Height="80" x:Name="AppImage" Tapped="AppImage_OnTapped">
-                                    <Image.Source>
-                                        <BitmapImage UriSource="{Binding Path=Url}" />
-                                    </Image.Source>
-                                </Image>
-                                <TextBlock Grid.Row="1" Text="{Binding Path=Name}" TextWrapping="Wrap" HorizontalAlignment="Center" FontSize="14" Style="{StaticResource TitleTextBlockStyle}" Margin="0,-10,0,10" Foreground="White" />
-                            </Grid>
+                                <Grid Width="100" >
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="100"></RowDefinition>
+                                        <RowDefinition></RowDefinition>
+                                    </Grid.RowDefinitions>
+                                    <Image Grid.Row="0" Height="80" x:Name="AppImage" >
+                                        <Image.Source>
+                                            <BitmapImage UriSource="{Binding Path=Url}" />
+                                        </Image.Source>
+                                    </Image>
+                                    <TextBlock Grid.Row="1" Text="{Binding Path=Name}" TextWrapping="Wrap" HorizontalAlignment="Center" FontSize="14" Style="{StaticResource TitleTextBlockStyle}" Margin="0,-10,0,10" Foreground="White" />
+                                </Grid>
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
