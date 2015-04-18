@@ -891,12 +891,7 @@ namespace ConnectSdk.Windows.Service
                                 if (webAppSession != null)
                                     webAppSession.DisplayImage(url, mimeType, title, description, iconSrc, listener);
                             }
-
-                            //var webAppSession = loadEventArg as WebAppSession;
-                            //if (webAppSession != null)
-                            //    webAppSession.DisplayImage(url, mimeType, title, description, iconSrc, listener);
                         },
-                        // ReSharper disable once ConvertClosureToMethodGroup
                         serviceCommandError =>
                         {
                             listener.OnError(serviceCommandError);

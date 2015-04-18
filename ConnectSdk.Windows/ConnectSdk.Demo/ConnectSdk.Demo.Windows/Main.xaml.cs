@@ -444,7 +444,7 @@ namespace ConnectSdk.Demo
 
                             var listener2 = new ResponseListener
                                 (
-                                loadEventArg2 => webostvService.PlayMedia("http://www.connectsdk.com/files/8913/9657/0225/test_video.mp4", "video/mp4", "Sintel Trailer", "Blender Open Movie Project", "http://www.connectsdk.com/files/7313/9657/0225/test_video_icon.jpg", false, null),
+                                loadEventArg2 => webostvService.PlayMedia("http://connectsdk.com/files/8913/9657/0225/test_video.mp4", "video/mp4", "Sintel Trailer", "Blender Open Movie Project", "http://www.connectsdk.com/files/7313/9657/0225/test_video_icon.jpg", false, null),
                                 serviceCommandError =>
                                 {
                                 });
@@ -491,9 +491,9 @@ namespace ConnectSdk.Demo
                             var listener2 = new ResponseListener
                                 (
                                 loadEventArg2 => webostvService.DisplayImage(
-                                    "http://www.connectsdk.com/files/9613/9656/8539/test_image.jpg", "image/jpeg",
+                                    "http://connectsdk.com/files/9613/9656/8539/test_image.jpg", "image/jpeg",
                                     "Sintel Character Design", "Blender Open Movie Project",
-                                    "http://www.connectsdk.com/files/2013/9656/8845/test_image_icon.jpg", null),
+                                    "http://connectsdk.com/files/2013/9656/8845/test_image_icon.jpg", null),
                                 serviceCommandError =>
                                 {
                                 });

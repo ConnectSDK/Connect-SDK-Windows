@@ -77,7 +77,7 @@ namespace ConnectSdk.Windows.Service.WebOs
             set { state = value; }
         }
 
-        private bool connected = false;
+        private bool connected;
 
         private void CreateSocket()
         {
@@ -92,7 +92,7 @@ namespace ConnectSdk.Windows.Service.WebOs
                     reader.UnicodeEncoding = UnicodeEncoding.Utf8;
                     read = reader.ReadString(reader.UnconsumedBufferLength);
                     
-                    Debug.WriteLine(string.Format("{0} : {1} : {2}", DateTime.Now, "received", read));
+                    Debug.WriteLine("{0} : {1} : {2}", DateTime.Now, "received", read);
                 }
                 OnMessage(read);
                 if (!connected)
@@ -612,7 +612,7 @@ namespace ConnectSdk.Windows.Service.WebOs
                 {
                     try
                     {
-                        headers.Add(key, payload.GetNamedObject(key));
+                        if (payload != null) headers.Add(key, payload.GetNamedObject(key));
                     }
                         // ReSharper disable once EmptyGeneralCatchClause
                     catch
@@ -624,23 +624,25 @@ namespace ConnectSdk.Windows.Service.WebOs
             }
             else if (payloadType == "hello")
             {
-                var message = payload.Stringify();
-                try
+                if (payload != null)
                 {
-                    messageWebSocket.Control.MessageType = SocketMessageType.Utf8;
-                    messageWebSocket.OutputStream.FlushAsync().GetResults();
-                    if (dr == null)
-                        dr = new DataWriter(messageWebSocket.OutputStream);
-                    dr.WriteString(message);
-                    dr.StoreAsync();
-                    Debug.WriteLine(string.Format("{0} : {1} : {2}", DateTime.Now, "sent", message));
-                }
-                // ReSharper disable once EmptyGeneralCatchClause
-                catch
-                {
+                    var message = payload.Stringify();
+                    try
+                    {
+                        messageWebSocket.Control.MessageType = SocketMessageType.Utf8;
+                        messageWebSocket.OutputStream.FlushAsync().GetResults();
+                        if (dr == null)
+                            dr = new DataWriter(messageWebSocket.OutputStream);
+                        dr.WriteString(message);
+                        dr.StoreAsync();
+                        Debug.WriteLine("{0} : {1} : {2}", DateTime.Now, "sent", message);
+                    }
+                        // ReSharper disable once EmptyGeneralCatchClause
+                    catch
+                    {
 
+                    }
                 }
-
             }
             else
             {
@@ -695,7 +697,7 @@ namespace ConnectSdk.Windows.Service.WebOs
                         dr = new DataWriter(messageWebSocket.OutputStream);
                     dr.WriteString(message);
                     dr.StoreAsync();
-                    Debug.WriteLine(string.Format("{0} : {1} : {2}", DateTime.Now, "sent", message));
+                    Debug.WriteLine("{0} : {1} : {2}", DateTime.Now, "sent", message);
                 }
                     // ReSharper disable once EmptyGeneralCatchClause
                 catch
