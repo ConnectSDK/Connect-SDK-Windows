@@ -1,10 +1,11 @@
-﻿#region Copyright Notice
+extensions: .cs
+#region Copyright Notice
 /*
- * ConnectSdk.Windows
- * IPowerControl.cs
+ * %Project%
+ * %FileName%
  * 
  * Copyright (c) 2015 LG Electronics.
- * Created by Sorin S. Serban on 20-2-2015,
+ * Created by Sorin S. Serban on %CreationDay%-%CreationMonth%-%CreationYear%,
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +20,6 @@
  * limitations under the License.
  */
  #endregion
-using ConnectSdk.Windows.Service.Capability.Listeners;
 
-namespace ConnectSdk.Windows.Service.Capability
-{
-    public interface IPowerControl
-    {
-        IPowerControl GetPowerControl();
-        CapabilityPriorityLevel GetPowerControlCapabilityLevel();
-
-        void PowerOff(ResponseListener listener);
-        void PowerOn(ResponseListener listener);
-    }
-}
+extensions: .aspx .ascx
+<%-- This is a sample license header. --%>
