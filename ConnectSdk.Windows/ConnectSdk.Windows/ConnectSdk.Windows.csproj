@@ -112,7 +112,6 @@
     <Compile Include="Service\Capability\IWebAppLauncher.cs" />
     <Compile Include="Service\Capability\KeyControl.cs" />
     <Compile Include="Service\Capability\Launcher.cs" />
-    <Compile Include="Service\Capability\Listeners\ErrorListener.cs" />
     <Compile Include="Service\Capability\Listeners\LoadEventArgs.cs" />
     <Compile Include="Service\Capability\Listeners\ResponseListener.cs" />
     <Compile Include="Service\Capability\MediaControl.cs" />

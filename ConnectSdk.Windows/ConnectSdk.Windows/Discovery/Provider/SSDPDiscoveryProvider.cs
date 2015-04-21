@@ -118,7 +118,7 @@ namespace ConnectSdk.Windows.Discovery.Provider
                     NotifyListenersOfLostService(service);
                 }
 
-                ServiceDescription fsrv = null;
+                ServiceDescription fsrv;
                 if (foundServices.ContainsKey(key))
                     foundServices.TryRemove(key, out fsrv);
             }
@@ -232,7 +232,7 @@ namespace ConnectSdk.Windows.Discovery.Provider
 
                 if (service != null)
                 {
-                    ServiceDescription fsrv = null;
+                    ServiceDescription fsrv;
                     foundServices.TryRemove(uuid, out fsrv);
                     NotifyListenersOfLostService(service);
                 }

@@ -169,17 +169,17 @@ namespace ConnectSdk.Windows.Device
             if (device.LastDetection > 0)
                 storedDevice.SetNamedValue(ConnectableDevice.KeyLastDetected, JsonValue.CreateNumberValue(device.LastDetection));
 
-            var services = storedDevice.GetNamedObject(ConnectableDevice.KeyServices) ?? new JsonObject();
+            var tempServices = storedDevice.GetNamedObject(ConnectableDevice.KeyServices) ?? new JsonObject();
 
             foreach (var service in device.GetServices())
             {
                 var serviceInfo = service.ToJsonObject();
 
                 if (serviceInfo != null)
-                    services.SetNamedValue(service.ServiceDescription.Uuid, serviceInfo);
+                    tempServices.SetNamedValue(service.ServiceDescription.Uuid, serviceInfo);
             }
 
-            storedDevice.SetNamedValue(ConnectableDevice.KeyServices, services);
+            storedDevice.SetNamedValue(ConnectableDevice.KeyServices, tempServices);
 
             storedDevices.SetNamedValue(device.Id, storedDevice);
             if (activeDevices.ContainsKey(device.Id))
@@ -202,16 +202,16 @@ namespace ConnectSdk.Windows.Device
             return storedDevices;
         }
 
-        public ConnectableDevice GetDevice(string uuid)
+        public ConnectableDevice GetDevice(string uuidParam)
         {
-            if (string.IsNullOrEmpty(uuid))
+            if (string.IsNullOrEmpty(uuidParam))
                 return null;
 
-            var foundDevice = GetActiveDevice(uuid);
+            var foundDevice = GetActiveDevice();
 
             if (foundDevice == null)
             {
-                var foundDeviceInfo = GetStoredDevice(uuid);
+                var foundDeviceInfo = GetStoredDevice(uuidParam);
 
                 if (foundDeviceInfo != null)
                     foundDevice = new ConnectableDevice(foundDeviceInfo);
@@ -220,40 +220,39 @@ namespace ConnectSdk.Windows.Device
             return foundDevice;
         }
 
-        private ConnectableDevice GetActiveDevice(string uuid)
+        private ConnectableDevice GetActiveDevice()
         {
             var foundDevice = activeDevices.ContainsKey(uuid) ? activeDevices[uuid] : null;
 
-            if (foundDevice == null)
-            {
-                if (activeDevices.Values.SelectMany(device => device.GetServices()).Any(service => uuid.Equals(service.ServiceDescription.Uuid)))
-                {
-                    return foundDevice;
-                }
-            }
-            return foundDevice;
-        }
-
-        private JsonObject GetStoredDevice(string uuid)
-        {
-            var foundDevice = storedDevices.GetNamedObject(uuid, null);
-
             if (foundDevice != null) return foundDevice;
-
-            return (from pair in storedDevices select storedDevices.GetNamedObject(pair.Key) into device let services = device.GetNamedObject(ConnectableDevice.KeyServices) where services != null && services.ContainsKey(uuid) select device).FirstOrDefault();
+            return activeDevices.Values.SelectMany(device => device.GetServices()).Any(service => uuid.Equals(service.ServiceDescription.Uuid)) ? foundDevice : foundDevice;
         }
 
-        public ServiceConfig GetServiceConfig(string uuid)
+        private JsonObject GetStoredDevice(string uuidParam)
         {
-            if (string.IsNullOrEmpty(uuid))
+            var foundDevice = storedDevices.GetNamedObject(uuidParam, null);
+
+            return foundDevice ??
+                   (from 
+                        pair 
+                        in storedDevices 
+                    select storedDevices.GetNamedObject(pair.Key) into device 
+                    let services = device.GetNamedObject(ConnectableDevice.KeyServices) 
+                    where services != null && services.ContainsKey(uuidParam) select device
+                    ).FirstOrDefault();
+        }
+
+        public ServiceConfig GetServiceConfig(string uuidParam)
+        {
+            if (string.IsNullOrEmpty(uuidParam))
                 return null;
 
-            var device = GetStoredDevice(uuid);
+            var device = GetStoredDevice(uuidParam);
             if (device == null) return null;
-            var services = device.GetNamedObject(ConnectableDevice.KeyServices);
+            var tempServices = device.GetNamedObject(ConnectableDevice.KeyServices);
 
-            if (services == null) return null;
-            var service = services.GetNamedObject(uuid);
+            if (tempServices == null) return null;
+            var service = tempServices.GetNamedObject(uuidParam);
 
             if (service == null) return null;
             var serviceConfigInfo = service.GetNamedObject(DeviceService.KEY_CONFIG);

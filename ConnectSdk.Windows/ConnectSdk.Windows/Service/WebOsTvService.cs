@@ -137,7 +137,7 @@ namespace ConnectSdk.Windows.Service
             if (DiscoveryManager.GetInstance().PairingLevel == DiscoveryManager.PairingLevelEnum.On)
             {
                 return socket != null && socket.IsConnected() &&
-                       (((WebOSTVServiceConfig)serviceConfig).getClientKey() != null);
+                       (((WebOsTvServiceConfig)serviceConfig).ClientKey != null);
             }
             return socket != null && socket.IsConnected();
         }
@@ -146,8 +146,10 @@ namespace ConnectSdk.Windows.Service
         {
             if (socket == null)
             {
-                socket = new WebOstvServiceSocketClient(this, WebOstvServiceSocketClient.GetUri(this));
-                socket.Listener = new WebOstvServiceSocketClientListener(this, Listener);
+                socket = new WebOstvServiceSocketClient(this, WebOstvServiceSocketClient.GetUri(this))
+                {
+                    Listener = new WebOstvServiceSocketClientListener(this, Listener)
+                };
             }
 
             if (!IsConnected())
@@ -463,23 +465,15 @@ namespace ConnectSdk.Windows.Service
                         var jsonObj = (JsonObject)(((LoadEventArgs)loadEventArg).Load.GetPayload());
 
                         var apps = jsonObj.GetNamedArray("apps");
-                        var appList = new List<AppInfo>();
-
-                        for (var i = 0; i < apps.Count; i++)
-                        {
-                            var appObj = apps[i].GetObject();
-
-                            if (appObj == null) continue;
-                            var appInfo = new AppInfo(appObj.GetNamedString("id"))
+                        var appList = (from t in apps
+                            select t.GetObject()
+                            into appObj
+                            where appObj != null
+                            select new AppInfo(appObj.GetNamedString("id"))
                             {
+                                Name = appObj.GetNamedString("title"), Url = appObj.GetNamedString("icon"), RawData = appObj
+                            }).ToList();
 
-                                Name = appObj.GetNamedString("title"),
-                                Url = appObj.GetNamedString("icon"),
-                                RawData = appObj
-                            };
-
-                            appList.Add(appInfo);
-                        }
                         Util.PostSuccess(listener, appList);
                     }
                     catch
@@ -892,10 +886,7 @@ namespace ConnectSdk.Windows.Service
                                     webAppSession.DisplayImage(url, mimeType, title, description, iconSrc, listener);
                             }
                         },
-                        serviceCommandError =>
-                        {
-                            listener.OnError(serviceCommandError);
-                        }
+                        serviceCommandError => listener.OnError(serviceCommandError)
                     );
 
                 var webappResponseListener = new ResponseListener
@@ -910,10 +901,7 @@ namespace ConnectSdk.Windows.Service
                                     webAppSession.DisplayImage(url, mimeType, title, description, iconSrc, listener);
                             }
                         },
-                        serviceCommandError =>
-                        {
-                            GetWebAppLauncher().LaunchWebApp(webAppId, webAppLaunchListener);
-                        });
+                        serviceCommandError => GetWebAppLauncher().LaunchWebApp(webAppId, webAppLaunchListener));
 
                 GetWebAppLauncher().JoinWebApp(webAppId, webappResponseListener);
             }
@@ -1952,14 +1940,9 @@ namespace ConnectSdk.Windows.Service
 
             var responseListener = new ResponseListener
             (
-                loadEventArg =>
-                {
-                    Util.PostSuccess(listener, webAppSession);
-                },
-                serviceCommandError =>
-                {
-                    Util.PostError(listener, serviceCommandError);
-                });
+                loadEventArg => Util.PostSuccess(listener, webAppSession),
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+            );
             webAppSession.Join(responseListener);
         }
 
@@ -2345,10 +2328,10 @@ namespace ConnectSdk.Windows.Service
         {
             permissions = ppermissions;
 
-            var config = (WebOSTVServiceConfig)serviceConfig;
+            var config = (WebOsTvServiceConfig)serviceConfig;
 
-            if (config.getClientKey() == null) return;
-            config.setClientKey(null);
+            if (config.ClientKey == null) return;
+            config.ClientKey = null;
 
             if (IsConnected())
             {
@@ -2412,55 +2395,22 @@ namespace ConnectSdk.Windows.Service
 
             if (DiscoveryManager.GetInstance().PairingLevel == DiscoveryManager.PairingLevelEnum.On)
             {
-                foreach (var s in TextInputControl.Capabilities)
-                {
-                    capabilities.Add(s);
-                }
-                foreach (var s in MouseControl.Capabilities)
-                {
-                    capabilities.Add(s);
-                }
-                foreach (var s in KeyControl.Capabilities)
-                {
-                    capabilities.Add(s);
-                }
-                foreach (var s in MediaPlayer.Capabilities)
-                {
-                    capabilities.Add(s);
-                }
-                foreach (var s in Launcher.Capabilities)
-                {
-                    capabilities.Add(s);
-                }
-                foreach (var s in TvControl.Capabilities)
-                {
-                    capabilities.Add(s);
-                }
-                foreach (var s in ExternalInputControl.Capabilities)
-                {
-                    capabilities.Add(s);
-                }
-                foreach (var s in VolumeControl.Capabilities)
-                {
-                    capabilities.Add(s);
-                }
-                foreach (var s in ToastControl.Capabilities)
-                {
-                    capabilities.Add(s);
-                }
+                capabilities.AddRange(TextInputControl.Capabilities);
+                capabilities.AddRange(MouseControl.Capabilities);
+                capabilities.AddRange(KeyControl.Capabilities);
+                capabilities.AddRange(MediaPlayer.Capabilities);
+                capabilities.AddRange(Launcher.Capabilities);
+                capabilities.AddRange(TvControl.Capabilities);
+                capabilities.AddRange(ExternalInputControl.Capabilities);
+                capabilities.AddRange(VolumeControl.Capabilities);
+                capabilities.AddRange(ToastControl.Capabilities);
                 capabilities.Add(PowerControl.Off);
 
             }
             else
             {
-                foreach (var s in VolumeControl.Capabilities)
-                {
-                    capabilities.Add(s);
-                }
-                foreach (var s in MediaPlayer.Capabilities)
-                {
-                    capabilities.Add(s);
-                }
+                capabilities.AddRange(VolumeControl.Capabilities);
+                capabilities.AddRange(MediaPlayer.Capabilities);
 
                 capabilities.Add(Launcher.Application);
                 capabilities.Add(Launcher.ApplicationParams);
@@ -2497,17 +2447,8 @@ namespace ConnectSdk.Windows.Service
                 }
                 else
                 {
-                    foreach (var s in WebAppLauncher.Capabilities)
-                    {
-                        capabilities.Add(s);
-                    }
-                    foreach (var s in MediaControl.Capabilities)
-                    {
-                        if (s.Equals(MediaControl.Previous, StringComparison.OrdinalIgnoreCase) ||
-                            s.Equals(MediaControl.Next, StringComparison.OrdinalIgnoreCase))
-                            continue;
-                        capabilities.Add(s);
-                    }
+                    capabilities.AddRange(WebAppLauncher.Capabilities);
+                    capabilities.AddRange(MediaControl.Capabilities.Where(s => !s.Equals(MediaControl.Previous, StringComparison.OrdinalIgnoreCase) && !s.Equals(MediaControl.Next, StringComparison.OrdinalIgnoreCase)));
                 }
             }
 

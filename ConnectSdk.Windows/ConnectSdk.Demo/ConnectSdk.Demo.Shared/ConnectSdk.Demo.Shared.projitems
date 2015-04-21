@@ -28,8 +28,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)ModelCommands.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ModelCommandsImplementation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ScrollDirection.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SdkConnector.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TvDefinition.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)ConnectSdk.Demo.Shared.licenseheader" />

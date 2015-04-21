@@ -298,15 +298,15 @@ namespace ConnectSdk.Windows.Service.WebOs
             }
             else if ("registered".Equals(type))
             {
-                if (!(service.ServiceConfig is WebOSTVServiceConfig))
+                if (!(service.ServiceConfig is WebOsTvServiceConfig))
                 {
-                    service.ServiceConfig = new WebOSTVServiceConfig(service.ServiceConfig.ServiceUuid);
+                    service.ServiceConfig = new WebOsTvServiceConfig(service.ServiceConfig.ServiceUuid);
                 }
 
                 if (payload != null)
                 {
                     var clientKey = ((JsonObject)payload).GetNamedString("client-key");
-                    ((WebOSTVServiceConfig)service.ServiceConfig).setClientKey(clientKey);
+                    ((WebOsTvServiceConfig) service.ServiceConfig).ClientKey = clientKey;
 
                     HandleRegistered();
 
@@ -355,10 +355,10 @@ namespace ConnectSdk.Windows.Service.WebOs
                 {
                     if (!service.ServiceConfig.ServiceUuid.Equals(jsonObj.GetNamedString("deviceUUID")))
                     {
-                        ((WebOSTVServiceConfig)service.ServiceConfig).setClientKey(null);
+                        ((WebOsTvServiceConfig)service.ServiceConfig).ClientKey = null;
                         String cert = null;
                         // ReSharper disable once ExpressionIsAlwaysNull
-                        ((WebOSTVServiceConfig)service.ServiceConfig).setServerCertificate(cert);
+                        ((WebOsTvServiceConfig)service.ServiceConfig).SetServerCertificate(cert);
                         service.ServiceConfig.ServiceUuid = null;
                         service.ServiceDescription.IpAddress = null;
                         service.ServiceDescription.Uuid = null;
@@ -488,14 +488,14 @@ namespace ConnectSdk.Windows.Service.WebOs
                 headers.Add("type", JsonValue.CreateStringValue("register"));
                 headers.Add("id", JsonValue.CreateNumberValue(dataId));
 
-                if (!(service.ServiceConfig is WebOSTVServiceConfig))
+                if (!(service.ServiceConfig is WebOsTvServiceConfig))
                 {
-                    service.ServiceConfig = new WebOSTVServiceConfig(service.ServiceConfig.ServiceUuid);
+                    service.ServiceConfig = new WebOsTvServiceConfig(service.ServiceConfig.ServiceUuid);
                 }
 
-                if (((WebOSTVServiceConfig)service.ServiceConfig).getClientKey() != null)
+                if (((WebOsTvServiceConfig)service.ServiceConfig).ClientKey != null)
                 {
-                    payload.Add("client-key", JsonValue.CreateStringValue(((WebOSTVServiceConfig)service.ServiceConfig).getClientKey()));
+                    payload.Add("client-key", JsonValue.CreateStringValue(((WebOsTvServiceConfig)service.ServiceConfig).ClientKey));
                 }
                 else
                 {

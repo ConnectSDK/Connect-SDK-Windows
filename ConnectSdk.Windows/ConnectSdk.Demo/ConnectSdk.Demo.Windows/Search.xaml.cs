@@ -99,11 +99,11 @@ namespace ConnectSdk.Demo
                 webOstvService = (WebOstvService)tvdef.GetServiceByName(WebOstvService.Id);
                 if (webOstvService != null)
                 {
-                    if (!(webOstvService.ServiceConfig is WebOSTVServiceConfig))
+                    if (!(webOstvService.ServiceConfig is WebOsTvServiceConfig))
                     {
-                        webOstvService.ServiceConfig = new WebOSTVServiceConfig(webOstvService.ServiceConfig.ServiceUuid);
+                        webOstvService.ServiceConfig = new WebOsTvServiceConfig(webOstvService.ServiceConfig.ServiceUuid);
                     }
-                    var webOsServiceConfig = (WebOSTVServiceConfig)webOstvService.ServiceConfig;
+                    var webOsServiceConfig = (WebOsTvServiceConfig)webOstvService.ServiceConfig;
                     tvdef.AddListener(listener);
                     tvdef.Connect();
                     model.SelectedDevice.OnConnectionSuccess(webOstvService);

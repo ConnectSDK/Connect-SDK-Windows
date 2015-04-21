@@ -1905,22 +1905,10 @@ namespace ConnectSdk.Windows.Service
 
             if (DiscoveryManager.GetInstance().PairingLevel == DiscoveryManager.PairingLevelEnum.On)
             {
-                foreach (var s in TextInputControl.Capabilities)
-                {
-                    capabilities.Add(s);
-                }
-                foreach (var s in MouseControl.Capabilities)
-                {
-                    capabilities.Add(s);
-                }
-                foreach (var s in KeyControl.Capabilities)
-                {
-                    capabilities.Add(s);
-                }
-                foreach (var s in MediaPlayer.Capabilities)
-                {
-                    capabilities.Add(s);
-                }
+                capabilities.AddRange(TextInputControl.Capabilities);
+                capabilities.AddRange(MouseControl.Capabilities);
+                capabilities.AddRange(KeyControl.Capabilities);
+                capabilities.AddRange(MediaPlayer.Capabilities);
 
                 capabilities.Add(PowerControl.Off);
 
@@ -1970,10 +1958,7 @@ namespace ConnectSdk.Windows.Service
             }
             else
             {
-                foreach (var s in MediaPlayer.Capabilities)
-                {
-                    capabilities.Add(s);
-                }
+                capabilities.AddRange(MediaPlayer.Capabilities);
 
                 capabilities.Add(MediaControl.Play);
                 capabilities.Add(MediaControl.Pause);

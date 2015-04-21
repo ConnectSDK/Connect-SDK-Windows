@@ -20,7 +20,6 @@
  */
  #endregion
 using Windows.Data.Json;
-using ConnectSdk.Windows.Service.Capability.Listeners;
 using ConnectSdk.Windows.Service.Command;
 
 namespace ConnectSdk.Windows.Service.WebOs

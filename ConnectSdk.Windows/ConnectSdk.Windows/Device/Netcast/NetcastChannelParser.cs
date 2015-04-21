@@ -19,6 +19,8 @@
  * limitations under the License.
  */
  #endregion
+
+using System;
 using Windows.Data.Json;
 using ConnectSdk.Windows.Core;
 
@@ -85,7 +87,7 @@ namespace ConnectSdk.Windows.Device.Netcast
                 if (!channelRawData.ContainsKey("minorNumber"))
                     minorNumber = (int)channelRawData.GetNamedNumber("minorNumber");
 
-                string channelNumber = !channelRawData.ContainsKey("channelNumber") 
+                var channelNumber = !channelRawData.ContainsKey("channelNumber") 
                     ? channelRawData.GetNamedString("channelNumber") 
                     : string.Format("{0}-{1}", majorNumber, minorNumber);
 
@@ -96,10 +98,10 @@ namespace ConnectSdk.Windows.Device.Netcast
                 channelInfo.MinorNumber = minorNumber;
 
             }
-            catch
+            catch (Exception e)
             {
                 //TODO: get some analysis here
-                throw;
+                throw new Exception("There was an error parsin the channel information", e);
             }
 
             return channelInfo;

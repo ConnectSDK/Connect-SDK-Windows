@@ -419,11 +419,7 @@ namespace ConnectSdk.Windows.Service
 
                     Util.PostSuccess(listener, status);
                 },
-                serviceCommandError =>
-                {
-                    Util.PostError(listener, serviceCommandError);
-                }
-            );
+                serviceCommandError => Util.PostError(listener, serviceCommandError));
             var request = new ServiceCommand(this, method, payload, responseListener);
 
             request.Send();
@@ -446,7 +442,7 @@ namespace ConnectSdk.Windows.Service
 
 
         // ReSharper disable once UnusedParameter.Local
-        private void AddSubscription(UrlServiceSubscription subscription)
+        private static void AddSubscription(UrlServiceSubscription subscription)
         {
             // no server capability in winrt yet
             throw new NotSupportedException();
@@ -474,11 +470,11 @@ namespace ConnectSdk.Windows.Service
 
         public void GetMediaInfo(ResponseListener listener)
         {
-
             var responseListener = new ResponseListener
             (
                 loadEventArg =>
                 {
+                    //todo: implement this
                     throw new NotImplementedException();
                     /*
                                     var positionInfoXml = args as string;
@@ -497,6 +493,7 @@ namespace ConnectSdk.Windows.Service
                         listener.OnError(serviceCommandError);
                 }
             );
+            GetPositionInfo(responseListener);
         }
 
         public IServiceSubscription SubscribeMediaInfo(ResponseListener listener)

@@ -189,7 +189,7 @@ namespace ConnectSdk.Windows.Device
                 return;
 
             service.Disconnect();
-            DeviceService srv = null;
+            DeviceService srv;
             services.TryRemove(serviceId, out srv);
 
             var removed = GetMismatchCapabilities(service.Capabilities, GetCapabilities());

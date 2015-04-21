@@ -35,12 +35,7 @@ namespace ConnectSdk.Windows.Service.WebOs
 
         public WebOstvMouseSocketConnection(String socketPath)
         {
-            if (socketPath.StartsWith("wss:"))
-            {
-                this.socketPath = socketPath.Replace("wss:", "ws:").Replace(":3001/", ":3000/"); // downgrade to plaintext
-            }
-            else
-                this.socketPath = socketPath;
+            this.socketPath = socketPath.StartsWith("wss:") ? socketPath.Replace("wss:", "ws:").Replace(":3001/", ":3000/") : socketPath;
 
             CreateSocket();
             //try

@@ -4,15 +4,12 @@ using ConnectSdk.Windows.Device;
 using ConnectSdk.Windows.Discovery;
 using ConnectSdk.Windows.Service;
 using ConnectSdk.Windows.Service.Command;
-using UpdateControls.Collections;
 
 namespace ConnectSdk.Demo.Demo
 {
 
     public class DiscoveryManagerListener : IDiscoveryManagerListener, IConnectableDeviceListener
     {
-        private Dictionary<string, string> keys = null;
-
         public EventHandler<object> Paired;
 
         public void OnDeviceAdded(DiscoveryManager manager, ConnectableDevice device)

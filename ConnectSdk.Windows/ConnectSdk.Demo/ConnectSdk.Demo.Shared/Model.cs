@@ -11,23 +11,8 @@ namespace ConnectSdk.Demo.Demo
 {
     public partial class Model : INotifyPropertyChanged
     {
-        private IndependentList<TvDefinition> knownTvs;
-
-        private string textInput;
-
         private ConnectableDevice selectedDevice;
-
-        public IndependentList<TvDefinition> KnownTvs
-        {
-            get { return knownTvs; }
-            set
-            {
-                if (Equals(value, knownTvs)) return;
-                knownTvs = value;
-            }
-        }
-
-        public TvDefinition SelectedTv { get; set; }
+        private string textInput;
 
         public ConnectableDevice SelectedDevice
         {
@@ -51,7 +36,6 @@ namespace ConnectSdk.Demo.Demo
             }
         }
 
-
         public IndependentList<ConnectableDevice> DiscoverredTvList { get; set; }
 
         public IndependentList<AppInfo> Apps { get; set; }
@@ -62,7 +46,9 @@ namespace ConnectSdk.Demo.Demo
         {
             get
             {
-                if (selectedDevice.DeviceType == null) return Visibility.Collapsed; return Visibility.Visible;
+                if (selectedDevice.DeviceType == null) 
+                    return Visibility.Collapsed; 
+                return Visibility.Visible;
             }
         }
 
@@ -102,7 +88,7 @@ namespace ConnectSdk.Demo.Demo
         [NotifyPropertyChangedInvocator]
         public virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            PropertyChangedEventHandler handler = PropertyChanged;
+            var handler = PropertyChanged;
             if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
         }
     }

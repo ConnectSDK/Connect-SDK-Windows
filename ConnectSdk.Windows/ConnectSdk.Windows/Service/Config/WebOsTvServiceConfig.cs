@@ -20,134 +20,109 @@
  */
  #endregion
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Windows.Data.Json;
 using Windows.Security.Cryptography.Certificates;
 
 namespace ConnectSdk.Windows.Service.Config
 {
-    public class WebOSTVServiceConfig : ServiceConfig
+    public class WebOsTvServiceConfig : ServiceConfig
     {
+        public static String KeyClientKey = "clientKey";
+        public static String KeyCert = "serverCertificate";
 
-        public static String KEY_CLIENT_KEY = "clientKey";
-        public static String KEY_CERT = "serverCertificate";
-        private String clientKey;
-        private Certificate cert;
-        private string pairingKey;
+        public string PairingKey { get; set; }
 
+        public string ClientKey { get; set; }
 
-        public string PairingKey
-        {
-            get { return pairingKey; }
-            set { pairingKey = value; }
-        }
+        public Certificate Cert { get; set; }
 
-        public WebOSTVServiceConfig(String serviceUUID)
-            : base(serviceUUID)
+        public WebOsTvServiceConfig(String serviceUuid)
+            : base(serviceUuid)
         {
         }
 
-        public WebOSTVServiceConfig(String serviceUUID, String clientKey) :
-            base(serviceUUID)
+        public WebOsTvServiceConfig(String serviceUuid, String clientKey) :
+            base(serviceUuid)
         {
-            this.clientKey = clientKey;
-            this.cert = null;
+            ClientKey = clientKey;
+            Cert = null;
         }
 
-        public WebOSTVServiceConfig(String serviceUUID, String clientKey, Certificate cert) :
-            base(serviceUUID)
+        public WebOsTvServiceConfig(String serviceUuid, String clientKey, Certificate cert) :
+            base(serviceUuid)
         {
-            this.clientKey = clientKey;
-            this.cert = cert;
+            ClientKey = clientKey;
+            Cert = cert;
         }
 
-        public WebOSTVServiceConfig(String serviceUUID, String clientKey, String cert) :
-            base(serviceUUID)
+        public WebOsTvServiceConfig(String serviceUuid, String clientKey, String cert) :
+            base(serviceUuid)
         {
-            this.clientKey = clientKey;
-            this.cert = loadCertificateFromPEM(cert);
+            ClientKey = clientKey;
+            Cert = null;
+            //Cert = loadCertificateFromPEM(cert);
         }
 
-        public WebOSTVServiceConfig(JsonObject json) :
+        public WebOsTvServiceConfig(JsonObject json) :
             base(json)
         {
 
-            clientKey = json.GetNamedString(KEY_CLIENT_KEY);
-            cert = null; // TODO: loadCertificateFromPEM(json.optString(KEY_CERT));
+            ClientKey = json.GetNamedString(KeyClientKey);
+            Cert = null; // TODO: loadCertificateFromPEM(json.optString(KEY_CERT));
         }
 
-        public String getClientKey()
+        public void SetServerCertificate(String cert)
         {
-            return clientKey;
+            Cert = null;
+            //Cert = loadCertificateFromPEM(cert);
         }
 
-        public void setClientKey(String clientKey)
+        public String GetServerCertificateInString()
         {
-            this.clientKey = clientKey;
-        }
-
-        public Certificate getServerCertificate()
-        {
-            return cert;
-        }
-
-        public void setServerCertificate(Certificate cert)
-        {
-            this.cert = cert;
-        }
-
-        public void setServerCertificate(String cert)
-        {
-            this.cert = loadCertificateFromPEM(cert);
-        }
-
-        public String getServerCertificateInString()
-        {
-            return exportCertificateToPEM(this.cert);
-        }
-
-        private String exportCertificateToPEM(Certificate cert)
-        {
-            //try {
-            //    if ( cert == null ) 
-            //        return null;
-            //    return Base64.encodeToString(cert.getEncoded(), Base64.DEFAULT);
-            //} catch (CertificateEncodingException e) {
-            //    e.printStackTrace();
-            //    return null;
-            //}
             return null;
+            //return ExportCertificateToPEM(Cert);
         }
 
-        private Certificate loadCertificateFromPEM(String pemString)
-        {
-            //CertificateFactory certFactory;
-            //try {
-            //    certFactory = CertificateFactory.getInstance("X.509");
-            //    ByteArrayInputStream inputStream = new ByteArrayInputStream(pemString.getBytes("US-ASCII"));
+        //private String ExportCertificateToPem(Certificate cert)
+        //{
+        //    //try {
+        //    //    if ( cert == null ) 
+        //    //        return null;
+        //    //    return Base64.encodeToString(cert.getEncoded(), Base64.DEFAULT);
+        //    //} catch (CertificateEncodingException e) {
+        //    //    e.printStackTrace();
+        //    //    return null;
+        //    //}
+        //    return null;
+        //}
 
-            //    return (X509Certificate)certFactory.generateCertificate(inputStream);
-            //} catch (CertificateException e) {
-            //    e.printStackTrace();
-            //    return null;
-            //} catch (UnsupportedEncodingException e) {
-            //    e.printStackTrace();
-            //    return null;
-            //}
-            return null;
-        }
+        //private Certificate LoadCertificateFromPem(String pemString)
+        //{
+        //    //CertificateFactory certFactory;
+        //    //try {
+        //    //    certFactory = CertificateFactory.getInstance("X.509");
+        //    //    ByteArrayInputStream inputStream = new ByteArrayInputStream(pemString.getBytes("US-ASCII"));
 
-        public JsonObject toJSONObject()
+        //    //    return (X509Certificate)certFactory.generateCertificate(inputStream);
+        //    //} catch (CertificateException e) {
+        //    //    e.printStackTrace();
+        //    //    return null;
+        //    //} catch (UnsupportedEncodingException e) {
+        //    //    e.printStackTrace();
+        //    //    return null;
+        //    //}
+        //    return null;
+        //}
+
+        public override JsonObject ToJsonObject()
         {
-            JsonObject jsonObj = base.ToJsonObject();
+            var jsonObj = base.ToJsonObject();
 
             try
             {
-                jsonObj.Add(KEY_CLIENT_KEY, JsonValue.CreateStringValue(clientKey));
-                jsonObj.Add(KEY_CERT, JsonValue.CreateStringValue(exportCertificateToPEM(cert)));
+                jsonObj.Add(KeyClientKey, JsonValue.CreateStringValue(ClientKey));
+                jsonObj.Add(KeyCert, JsonValue.CreateStringValue(""));
+                //jsonObj.Add(KeyCert, JsonValue.CreateStringValue(exportCertificateToPEM(Cert)));
             }
             catch (Exception e)
             {

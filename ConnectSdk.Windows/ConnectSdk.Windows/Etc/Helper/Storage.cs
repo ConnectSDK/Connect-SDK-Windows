@@ -49,8 +49,6 @@ namespace ConnectSdk.Windows.Etc.Helper
         /// <returns></returns>
         public bool AddOrUpdateValue(string key, Object value)
         {
-            bool valueChanged;
-
             // If the key exists
             if (settings.LocalSettings.Values.ContainsKey(key))
             {
