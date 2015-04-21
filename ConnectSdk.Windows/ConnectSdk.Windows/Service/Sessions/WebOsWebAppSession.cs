@@ -303,7 +303,8 @@ namespace ConnectSdk.Windows.Service.Sessions
                 payload.Add("type", JsonValue.CreateStringValue("p2p"));
                 payload.Add("to", JsonValue.CreateStringValue(GetFullAppId()));
                 if (message is JsonObject)
-                    payload.Add("payload", JsonValue.CreateStringValue((message as JsonObject).Stringify()));
+                    //todo: check if this is the fix
+                    payload.Add("payload", (message as JsonObject));
                 else
                     payload.Add("payload", JsonValue.CreateStringValue(message.ToString()));
             }
