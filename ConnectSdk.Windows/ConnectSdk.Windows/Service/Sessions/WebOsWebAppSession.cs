@@ -655,13 +655,13 @@ namespace ConnectSdk.Windows.Service.Sessions
                 message = new JsonObject {{"contentType", JsonValue.CreateStringValue(NamespaceKey + "mediaCommand")}};
                 var mediaCommandObject = new JsonObject
                 {
-                    {"type", JsonValue.CreateStringValue("getPlayState")},
+                    {"mimeType", JsonValue.CreateStringValue(mimeType)},
+                    {"requestId", JsonValue.CreateStringValue(requestId)},
+                    {"type", JsonValue.CreateStringValue("displayImage")},
                     {"mediaURL", JsonValue.CreateStringValue(url)},
                     {"iconURL", JsonValue.CreateStringValue(iconSrc)},
                     {"title", JsonValue.CreateStringValue(title)},
                     {"description", JsonValue.CreateStringValue(description)},
-                    {"mimeType", JsonValue.CreateStringValue(mimeType)},
-                    {"requestId", JsonValue.CreateStringValue(requestId)}
                 };
                 message.Add("mediaCommand", mediaCommandObject);
             }
@@ -712,14 +712,14 @@ namespace ConnectSdk.Windows.Service.Sessions
                 message = new JsonObject {{"contentType", JsonValue.CreateStringValue(NamespaceKey + "mediaCommand")}};
                 var mediaCommandObject = new JsonObject
                 {
-                    {"type", JsonValue.CreateStringValue("playMedia")},
-                    {"mediaURL", JsonValue.CreateStringValue(url)},
+                    {"mimeType", JsonValue.CreateStringValue(mimeType)},
+                    {"requestId", JsonValue.CreateStringValue(requestId)},
                     {"iconURL", JsonValue.CreateStringValue(iconSrc)},
                     {"title", JsonValue.CreateStringValue(title)},
+                    {"type", JsonValue.CreateStringValue("playMedia")},
                     {"description", JsonValue.CreateStringValue(description)},
-                    {"mimeType", JsonValue.CreateStringValue(mimeType)},
+                    {"mediaURL", JsonValue.CreateStringValue(url)},
                     {"shouldLoop", JsonValue.CreateBooleanValue(shouldLoop)},
-                    {"requestId", JsonValue.CreateStringValue(requestId)}
                 };
 
                 message.Add("mediaCommand", mediaCommandObject);

@@ -1,14 +1,11 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using ConnectSdk.Demo.Annotations;
 using ConnectSdk.Windows.Core;
 using ConnectSdk.Windows.Device;
 using ConnectSdk.Windows.Service.Capability;
 using UpdateControls.Collections;
-using UpdateControls.Fields;
 
 namespace ConnectSdk.Demo.Demo
 {
@@ -19,8 +16,6 @@ namespace ConnectSdk.Demo.Demo
         private string textInput;
 
         private ConnectableDevice selectedDevice;
-        private IndependentList<AppInfo> apps;
-        private IndependentList<ChannelInfo> channels;
 
         public IndependentList<TvDefinition> KnownTvs
         {
@@ -37,7 +32,12 @@ namespace ConnectSdk.Demo.Demo
         public ConnectableDevice SelectedDevice
         {
             get { return selectedDevice; }
-            set { selectedDevice = value;}
+            set
+            {
+                selectedDevice = value; 
+                OnPropertyChanged("IsNetcastVisible"); 
+                OnPropertyChanged("ConnectButtonText");
+            }
         }
 
         public string TextInput
@@ -52,44 +52,48 @@ namespace ConnectSdk.Demo.Demo
         }
 
 
-        //public bool TouchEnabled
-        //{
-        //    get { return touchEnabled; }
-        //    set
-        //    {
-        //        touchEnabled = value;
-
-        //        if (sdkConnector == null) sdkConnector = new SdkConnector(SelectedDevice);
-        //        sdkConnector.EnableMouse("", true);
-        //    }
-        //}
-
-
-        //public long UniqueId { get; set; }
-
         public IndependentList<ConnectableDevice> DiscoverredTvList { get; set; }
 
-        public IndependentList<AppInfo> Apps
+        public IndependentList<AppInfo> Apps { get; set; }
+
+        public IndependentList<ChannelInfo> Channels { get; set; }
+
+        public Visibility IsValidDeviceSelected
         {
             get
             {
-                return apps;
+                if (selectedDevice.DeviceType == null) return Visibility.Collapsed; return Visibility.Visible;
             }
-            set { apps = value; }
         }
 
-        public IndependentList<ChannelInfo> Channels
+        public Visibility IsNetcastVisible
         {
-            get { return channels; }
-            set { channels = value; }
+            get
+            {
+                if (selectedDevice == null) return Visibility.Collapsed;
+                if (selectedDevice.DeviceType == "NetCast")
+                    return Visibility.Visible;
+                return Visibility.Collapsed;
+            }
+        }
+
+        public string ConnectButtonText
+        {
+            get
+            {
+                if (selectedDevice == null || selectedDevice.DeviceType == null) return "";
+                if (selectedDevice.DeviceType == "NetCast")
+                    return "Send Pairing Key";
+                return "Connect";
+            }
         }
 
         public Model()
         {
-            //ExecuteCommand.Enabled = true;
             DiscoverredTvList = new IndependentList<ConnectableDevice>();
-            this.apps = new IndependentList<AppInfo>();
-            this.channels = new IndependentList<ChannelInfo>();
+            Apps = new IndependentList<AppInfo>();
+            Channels = new IndependentList<ChannelInfo>();
+            selectedDevice = new ConnectableDevice(); 
         }
 
 
