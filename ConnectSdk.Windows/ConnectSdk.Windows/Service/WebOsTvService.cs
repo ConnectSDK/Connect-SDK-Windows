@@ -87,6 +87,12 @@ namespace ConnectSdk.Windows.Service
         public Dictionary<string, string> AppToAppIdMappings { get; set; }
         public Dictionary<string, WebOsWebAppSession> WebAppSessions { get; set; }
 
+        public WebOstvServiceSocketClient Socket
+        {
+            get { return socket; }
+            set { socket = value; }
+        }
+
         private WebOstvServiceSocketClient socket;
         private WebOstvMouseSocketConnection mouseSocket;
 
@@ -128,32 +134,32 @@ namespace ConnectSdk.Windows.Service
 
         public override void SendCommand(ServiceCommand command)
         {
-            if (socket != null)
-                socket.SendCommand(command);
+            if (Socket != null)
+                Socket.SendCommand(command);
         }
 
         public override bool IsConnected()
         {
             if (DiscoveryManager.GetInstance().PairingLevel == DiscoveryManager.PairingLevelEnum.On)
             {
-                return socket != null && socket.IsConnected() &&
+                return Socket != null && Socket.IsConnected() &&
                        (((WebOsTvServiceConfig)serviceConfig).ClientKey != null);
             }
-            return socket != null && socket.IsConnected();
+            return Socket != null && Socket.IsConnected();
         }
 
         public override void Connect()
         {
-            if (socket == null)
+            if (Socket == null)
             {
-                socket = new WebOstvServiceSocketClient(this, WebOstvServiceSocketClient.GetUri(this))
+                Socket = new WebOstvServiceSocketClient(this, WebOstvServiceSocketClient.GetUri(this))
                 {
                     Listener = new WebOstvServiceSocketClientListener(this, Listener)
                 };
             }
 
             if (!IsConnected())
-                socket.Connect();
+                Socket.Connect();
         }
 
         public override void Disconnect()
@@ -163,11 +169,11 @@ namespace ConnectSdk.Windows.Service
             if (Listener != null)
                 Listener.OnDisconnect(this, null);
 
-            if (socket != null)
+            if (Socket != null)
             {
-                socket.Listener = null;
-                socket.Disconnect();
-                socket = null;
+                Socket.Listener = null;
+                Socket.Disconnect();
+                Socket = null;
             }
 
             if (AppToAppIdMappings != null)

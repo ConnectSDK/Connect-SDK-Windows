@@ -256,7 +256,7 @@ namespace ConnectSdk.Windows.Discovery.Provider
 
                     var u = new Uri(location);
                     foundService.IpAddress = u.DnsSafeHost;//pd.dp.IpAddress.getHostAddress();
-                    foundService.Port = u.Port;
+                    foundService.Port = 3000;
                     
                     if (!discoveredServices.ContainsKey(uuid))
                         discoveredServices.TryAdd(uuid, foundService);

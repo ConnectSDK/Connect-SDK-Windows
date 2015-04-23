@@ -61,6 +61,7 @@ namespace ConnectSdk.Windows.Service.WebOs
 
         public WebOstvServiceSocketClient(WebOstvService service, Uri uri)
         {
+            
             destinationUri = uri;
             this.service = service;
             State = State.Initial;

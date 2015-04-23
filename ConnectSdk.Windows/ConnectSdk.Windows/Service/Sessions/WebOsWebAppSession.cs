@@ -168,6 +168,9 @@ namespace ConnectSdk.Windows.Service.Sessions
 
         public new void Connect(ResponseListener connectionListener)
         {
+            // reuse the socket from the service if present. Fixes bug for displayImage
+            if (Service.Socket != null && Socket == null)
+                Socket = Service.Socket;
             Connect(false, connectionListener);
         }
 
