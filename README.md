@@ -9,7 +9,7 @@ For more information, visit our [website](http://www.connectsdk.com/).
 * Clone the repository
 * Include the ConnectSDK.Windows project into your solution
 * Reference ConnectSDK.Windows from the project you want to use it
-* Look at the ConnectSdk.Demo.Windows for an example on how to useit
+* Look at the ConnectSdk.Demo.Windows for an example on how to use it
 
 ##Contact
 * Twitter [@ConnectSDK](https://www.twitter.com/ConnectSDK)
