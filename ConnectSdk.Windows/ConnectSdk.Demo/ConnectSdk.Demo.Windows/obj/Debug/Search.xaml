@@ -11,6 +11,67 @@
         <!-- TODO: Delete this line if the key AppName is declared in App.xaml -->
         <x:String x:Key="AppName">Connect SDK - WinRT Demo</x:String>
         <x:String x:Key="ScreenName">Search</x:String>
+        <local:VisibilityConverter x:Key="VisibilityConverter"></local:VisibilityConverter>
+
+        <Style x:Key="ListBoxStyle1" TargetType="ListBox">
+            <Setter Property="Foreground" Value="{StaticResource ListBoxForegroundThemeBrush}"/>
+            <Setter Property="Background" Value="{StaticResource ListBoxBackgroundThemeBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource ListBoxBorderThemeBrush}"/>
+            <Setter Property="BorderThickness" Value="{StaticResource ListBoxBorderThemeThickness}"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.HorizontalScrollMode" Value="Disabled"/>
+            <Setter Property="ScrollViewer.IsHorizontalRailEnabled" Value="True"/>
+            <Setter Property="ScrollViewer.VerticalScrollMode" Value="Enabled"/>
+            <Setter Property="ScrollViewer.IsVerticalRailEnabled" Value="True"/>
+            <Setter Property="ScrollViewer.ZoomMode" Value="Disabled"/>
+            <Setter Property="ScrollViewer.IsDeferredScrollingEnabled" Value="False"/>
+            <Setter Property="ScrollViewer.BringIntoViewOnFocusChange" Value="True"/>
+            <Setter Property="IsTabStop" Value="False"/>
+            <Setter Property="TabNavigation" Value="Once"/>
+            <Setter Property="FontFamily" Value="{StaticResource ContentControlThemeFontFamily}"/>
+            <Setter Property="FontSize" Value="{StaticResource ControlContentThemeFontSize}"/>
+            <Setter Property="ItemsPanel">
+                <Setter.Value>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel/>
+                    </ItemsPanelTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBox">
+                        <Border x:Name="LayoutRoot" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{StaticResource AppBarBackgroundThemeBrush}">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal"/>
+                                    <VisualState x:Name="Disabled">
+                                        <Storyboard>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="BorderBrush" Storyboard.TargetName="LayoutRoot">
+                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{StaticResource ListBoxDisabledForegroundThemeBrush}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+                                <VisualStateGroup x:Name="FocusStates">
+                                    <VisualState x:Name="Focused">
+                                        <Storyboard>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Background" Storyboard.TargetName="ScrollViewer">
+                                                <DiscreteObjectKeyFrame KeyTime="0" Value="Black"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Unfocused"/>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <ScrollViewer x:Name="ScrollViewer">
+                                <ItemsPresenter/>
+                            </ScrollViewer>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Page.Resources>
 
     <!--
@@ -35,12 +96,6 @@
                 <ColumnDefinition Width="120"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Button x:Name="backButton" Margin="39,59,39,0" Command="{Binding NavigationHelper.GoBackCommand, ElementName=pageRoot}"
-                        Style="{StaticResource NavigationBackButtonNormalStyle}"
-                        VerticalAlignment="Top"
-                        AutomationProperties.Name="Back"
-                        AutomationProperties.AutomationId="BackButton"
-                        AutomationProperties.ItemType="Navigation Button"/>
             <StackPanel Grid.Column="1" Orientation="Horizontal" >
                 <TextBlock Text="{StaticResource AppName}" Style="{StaticResource HeaderTextBlockStyle}" IsHitTestVisible="false" TextWrapping="NoWrap" VerticalAlignment="Bottom" Margin="0,0,30,40"/>
                 <TextBlock Text="-" Style="{StaticResource HeaderTextBlockStyle}" IsHitTestVisible="false" TextWrapping="NoWrap" VerticalAlignment="Bottom" Margin="0,0,30,40"/>
@@ -48,44 +103,40 @@
             </StackPanel>
         </Grid>
         <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="300"></ColumnDefinition>
-                <ColumnDefinition></ColumnDefinition>
-            </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="80"></RowDefinition>
+                <RowDefinition Height="70"></RowDefinition>
                 <RowDefinition></RowDefinition>
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" Grid.Column="0" Text="TVs found" Margin="10" Style="{StaticResource SubheaderTextBlockStyle}"></TextBlock>
-            <TextBlock Grid.Row="0" Grid.Column="1" Text="Pairing" Margin="10" Style="{StaticResource SubheaderTextBlockStyle}"></TextBlock>
-
-            <ListBox x:ConnectionId='1' Grid.Row="1" Grid.Column="0" Margin="10" ItemsSource="{Binding Path=DiscoverredTvList}" HorizontalContentAlignment="Stretch"                                                 Background="Transparent">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="TVs found" Margin="12" Style="{StaticResource SubheaderTextBlockStyle}"></TextBlock>
+            <Button x:ConnectionId='1' Grid.Row="0" Grid.Column="1" Content="Send search packet" x:Name="RefreshButton"                              ></Button>
+            <ListBox x:ConnectionId='2' Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="10" ItemsSource="{Binding Path=DiscoverredTvList}" HorizontalContentAlignment="Stretch"                                                 Style="{StaticResource ListBoxStyle1}" >
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Grid>
+                        <Grid >
                             <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="200"></ColumnDefinition>
                                 <ColumnDefinition Width="*"></ColumnDefinition>
                             </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition></RowDefinition>
-                                <RowDefinition></RowDefinition>
-                                <RowDefinition></RowDefinition>
-                                <RowDefinition></RowDefinition>
-                            </Grid.RowDefinitions>
-                            <TextBlock Text="{Binding Path=FriendlyName}" TextWrapping="Wrap" FontSize="26" Grid.Row="0" Style="{StaticResource TitleTextBlockStyle}" Foreground="White" />
-                            <TextBlock Text="{Binding Path=ModelName}" TextWrapping="Wrap" Foreground="Silver" Style="{StaticResource SubtitleTextBlockStyle}" Grid.Row="1"/>
-                            <TextBlock Text="{Binding Path=DeviceType}" TextWrapping="Wrap" Foreground="Silver" Margin="0,0,0,0" Style="{StaticResource SubtitleTextBlockStyle}" Grid.Row="2"/>
-                            <TextBlock Text="{Binding Path=IpAddress}" TextWrapping="Wrap" Foreground="Silver" Margin="0,0,0,0" Style="{StaticResource SubtitleTextBlockStyle}" Grid.Row="3"/>
+                            <StackPanel>
+                                <TextBlock Text="{Binding Path=FriendlyName}" TextWrapping="Wrap" FontSize="26" Grid.Row="0" Style="{StaticResource TitleTextBlockStyle}" Foreground="White" />
+                                <TextBlock Text="{Binding Path=ModelName}" TextWrapping="Wrap" Foreground="Silver" Style="{StaticResource SubtitleTextBlockStyle}" Grid.Row="1"/>
+                                <TextBlock Text="{Binding Path=DeviceType}" TextWrapping="Wrap" Foreground="Silver" Margin="0,0,0,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                                <TextBlock Text="{Binding Path=IpAddress}" TextWrapping="Wrap" Foreground="Silver" Margin="0,0,0,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="0" Grid.Column="1" Margin="20,0,0,0">
+                                <TextBlock Text="Enter the key shown on the TV"  Visibility="{Binding Path=DeviceType, Converter={StaticResource VisibilityConverter}, ConverterParameter=PairingKeyLabel}" Style="{StaticResource SubtitleTextBlockStyle}" Foreground="White" Margin="0,0,0,10"></TextBlock>
+                                <TextBox x:Name="PairingKeyTextBox" InputScope="Number" Visibility="{Binding Path=DeviceType, Converter={StaticResource VisibilityConverter}, ConverterParameter=PairingKeyTextBox}"></TextBox>
+                                <Button x:ConnectionId='3' x:Name="PairOkButton" Content="Send Key"                               HorizontalAlignment="Left" FontSize="15" Visibility="{Binding Path=DeviceType, Converter={StaticResource VisibilityConverter}, ConverterParameter=ConnectButton}" Margin="-2,0,0,0"/>
+                                <Button x:ConnectionId='4' x:Name="PairWebOsOkButton" Content="Connect"                               HorizontalAlignment="Left" FontSize="15"  Visibility="{Binding Path=DeviceType, Converter={StaticResource VisibilityConverter}, ConverterParameter=ConnectWebOsButton}" Margin="-2,0,0,0"/>
+                            </StackPanel>
                         </Grid>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
-            <StackPanel Grid.Row="1" Grid.Column="1" Margin="10" >
-                <TextBlock Text="Select first the tv from the left list" Style="{StaticResource SubheaderTextBlockStyle}" Margin="10" Foreground="Red"></TextBlock>
-                <TextBlock Text="Enter the key shown on the TV" Style="{StaticResource SubheaderTextBlockStyle}" Margin="10"></TextBlock>
-                <TextBox x:Name="PairingKeyTextBox" InputScope="Number" Margin="10"></TextBox>
-                <Button x:ConnectionId='2' x:Name="PairOkButton" Content="Ok"                               HorizontalAlignment="Left" FontSize="22" Margin="10"/>
-            </StackPanel>
         </Grid>
 
     </Grid>

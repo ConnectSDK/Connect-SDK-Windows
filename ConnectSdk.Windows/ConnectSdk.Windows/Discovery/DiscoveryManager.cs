@@ -363,7 +363,8 @@ namespace ConnectSdk.Windows.Discovery
             if (!DeviceIsCompatible(device))
                 return;
 
-            compatibleDevices.Add(device.IpAddress, device);
+            if (!compatibleDevices.ContainsKey(device.IpAddress))
+                compatibleDevices.Add(device.IpAddress, device);
 
             foreach (var listenter in discoveryListeners)
             {

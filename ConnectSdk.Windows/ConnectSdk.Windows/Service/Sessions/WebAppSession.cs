@@ -332,16 +332,5 @@ namespace ConnectSdk.Windows.Service.Sessions
         {
             return CapabilityPriorityLevel.VeryLow;
         }
-
-        //public IWebAppSessionListener GetWebAppSessionListener()
-        //{
-        //    return webAppListener;
-        //}
-
-        //public void SetWebAppSessionListener(IWebAppSessionListener listener)
-        //{
-        //    webAppListener = listener;
-        //}
-
     }
 }

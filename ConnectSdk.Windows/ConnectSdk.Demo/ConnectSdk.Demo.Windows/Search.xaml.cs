@@ -1,16 +1,16 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
+using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Navigation;
+using ConnectSdk.Demo.Common;
 using ConnectSdk.Demo.Demo;
 using ConnectSdk.Windows.Device;
 using ConnectSdk.Windows.Discovery;
 using ConnectSdk.Windows.Service;
-using ConnectSdk.Windows.Service.Capability.Listeners;
 using ConnectSdk.Windows.Service.Config;
 using UpdateControls.Fields;
 using UpdateControls.XAML;
@@ -31,29 +31,22 @@ namespace ConnectSdk.Demo
             InitializeComponent();
             model = App.ApplicationModel;
             DataContext = ForView.Wrap(model);
-            //SearchTvs();
-
         }
 
         private void SearchTvs()
         {
-            //var a = new Task(() =>
-            //{
-                listener = new DiscoveryManagerListener();
+            listener = new DiscoveryManagerListener();
 
-                listener.Paired += (sender, o) =>
-                {
-                    model.SelectedDevice = new Independent<ConnectableDevice>(o as ConnectableDevice);
-                    this.Dispatcher.RunAsync(CoreDispatcherPriority.High, () => Frame.Navigate(typeof(Main)));
-                };
-                DiscoveryManager.Init();
-                var discoveryManager = DiscoveryManager.GetInstance();
-                discoveryManager.AddListener(listener);
-                discoveryManager.PairingLevel = DiscoveryManager.PairingLevelEnum.On;
-                discoveryManager.Start();
-            //});
-
-            //a.Start();
+            listener.Paired += (sender, o) =>
+            {
+                model.SelectedDevice = new Independent<ConnectableDevice>(o as ConnectableDevice);
+                Dispatcher.RunAsync(CoreDispatcherPriority.High, () => Frame.Navigate(typeof(Main)));
+            };
+            DiscoveryManager.Init();
+            var discoveryManager = DiscoveryManager.GetInstance();
+            discoveryManager.AddListener(listener);
+            discoveryManager.PairingLevel = DiscoveryManager.PairingLevelEnum.On;
+            discoveryManager.Start();
         }
 
         private void TvListBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -75,13 +68,18 @@ namespace ConnectSdk.Demo
 
         private void PairOkButton_OnClick(object sender, RoutedEventArgs e)
         {
+            var senderButton = sender as Button;
+            if (senderButton == null) return;
+
+            model.SelectedDevice = ForView.Unwrap<ConnectableDevice>((senderButton.DataContext));
             var tvdef = model.SelectedDevice;
             var netCastService = (NetcastTvService)tvdef.GetServiceByName(NetcastTvService.Id);
             if (netCastService != null)
             {
-                var netCastServiceConfig = (NetcastTvServiceConfig) netCastService.ServiceConfig;
+                var netCastServiceConfig = (NetcastTvServiceConfig)netCastService.ServiceConfig;
+                var txtBox = Util.FindChild<TextBox>(senderButton.Parent, "PairingKeyTextBox");
 
-                netCastServiceConfig.PairingKey = PairingKeyTextBox.Text;
+                netCastServiceConfig.PairingKey = txtBox.Text;
 
                 netCastService.ServiceConnectionState = NetcastTvService.ConnectionState.Initial;
 
@@ -91,7 +89,7 @@ namespace ConnectSdk.Demo
                     netCastService.RemovePairingKeyOnTv();
                     tvdef.OnConnectionSuccess(netCastService);
                     model.SelectedDevice = tvdef;
-                    Frame.Navigate(typeof (Main));
+                    Frame.Navigate(typeof(Main));
                 }
             }
             else
@@ -103,7 +101,6 @@ namespace ConnectSdk.Demo
                     {
                         webOstvService.ServiceConfig = new WebOsTvServiceConfig(webOstvService.ServiceConfig.ServiceUuid);
                     }
-                    var webOsServiceConfig = (WebOsTvServiceConfig)webOstvService.ServiceConfig;
                     tvdef.AddListener(listener);
                     tvdef.Connect();
                     model.SelectedDevice.OnConnectionSuccess(webOstvService);
@@ -122,5 +119,38 @@ namespace ConnectSdk.Demo
             SearchTvs();
         }
 
+        private void RefreshButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            SearchTvs();
+        }
+    }
+
+    public class VisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            var target = parameter as string;
+            var device = value as string;
+
+            if (target == null || device == null) return Visibility.Visible;
+
+            switch (target)
+            {
+                case "PairingKeyLabel":
+                    return device.Equals("webOS TV") ? Visibility.Collapsed : Visibility.Visible;
+                case "PairingKeyTextBox":
+                    return device.Equals("webOS TV") ? Visibility.Collapsed : Visibility.Visible;
+                case "ConnectButton":
+                    return device.Equals("webOS TV") ? Visibility.Collapsed : Visibility.Visible;
+                case "ConnectWebOsButton":
+                    return device.Equals("webOS TV") ? Visibility.Visible : Visibility.Collapsed;
+            }
+            return Visibility.Visible;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

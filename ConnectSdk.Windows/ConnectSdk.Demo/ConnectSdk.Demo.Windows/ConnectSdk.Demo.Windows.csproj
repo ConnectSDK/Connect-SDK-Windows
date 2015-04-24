@@ -114,10 +114,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Common\NavigationHelper.cs" />
     <Compile Include="Common\ObservableDictionary.cs" />
-    <Compile Include="Common\RelayCommand.cs" />
-    <Compile Include="Common\SuspensionManager.cs" />
+    <Compile Include="Common\Util.cs" />
     <Compile Include="Main.xaml.cs">
       <DependentUpon>Main.xaml</DependentUpon>
     </Compile>

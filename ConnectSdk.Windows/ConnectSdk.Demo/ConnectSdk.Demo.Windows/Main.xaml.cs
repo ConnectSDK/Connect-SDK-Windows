@@ -1,13 +1,11 @@
 ﻿using Windows.UI.Core;
 using Windows.UI.Popups;
 using Windows.UI.Xaml.Media.Imaging;
-using ConnectSdk.Demo.Common;
 using System;
 using System.Collections.Generic;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Navigation;
 
 // The Basic Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234237
 using ConnectSdk.Demo.Demo;
@@ -15,9 +13,7 @@ using ConnectSdk.Windows.Core;
 using ConnectSdk.Windows.Service;
 using ConnectSdk.Windows.Service.Capability;
 using ConnectSdk.Windows.Service.Capability.Listeners;
-using ConnectSdk.Windows.Service.Command;
 using ConnectSdk.Windows.Service.Sessions;
-using UpdateControls.Collections;
 using WinRTXamlToolkit.Controls;
 
 namespace ConnectSdk.Demo
@@ -27,40 +23,22 @@ namespace ConnectSdk.Demo
     /// </summary>
     public sealed partial class Main : Page
     {
-
-        private readonly NavigationHelper navigationHelper;
-
         private readonly Model model;
 
         WebOsWebAppSession launchSession;
         private LaunchSession applaunchSession;
 
-        /// <summary>
-        /// NavigationHelper is used on each page to aid in navigation and 
-        /// process lifetime management
-        /// </summary>
-        public NavigationHelper NavigationHelper
-        {
-            get { return navigationHelper; }
-        }
-
-
         public Main()
         {
             model = App.ApplicationModel;
-
             InitializeComponent();
-            navigationHelper = new NavigationHelper(this);
-
             DataContext = model;
         }
-
 
         private void ScrollPadOnManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs manipulationDeltaRoutedEventArgs)
         {
             model.Move(manipulationDeltaRoutedEventArgs.Delta.Translation.X, manipulationDeltaRoutedEventArgs.Delta.Translation.Y);
         }
-
 
         private void ScrollPadOnTapped(object sender, TappedRoutedEventArgs e)
         {
@@ -114,81 +92,6 @@ namespace ConnectSdk.Demo
             }
 
         }
-
-
-        #region NavigationHelper registration
-
-        protected override void OnNavigatedTo(NavigationEventArgs e)
-        {
-            var channelListResponseListener = new ResponseListener
-            (
-                loadEventArg =>
-                {
-                    var loadEventArgs = loadEventArg as LoadEventArgs;
-                    if (loadEventArgs != null)
-                    {
-                        var channels = loadEventArgs.Load.GetPayload() as List<ChannelInfo>;
-                        model.Channels = new IndependentList<ChannelInfo>(channels);
-                        Dispatcher.RunAsync(CoreDispatcherPriority.High, () => { model.OnPropertyChanged("Channels"); });
-                    }
-                },
-                serviceCommandError =>
-                {
-
-                }
-            );
-
-            var appListResponseListener = new ResponseListener
-            (
-                loadEventArg =>
-                {
-                    var loadEventArgs = loadEventArg as LoadEventArgs;
-                    if (loadEventArgs != null)
-                    {
-                        var apps = loadEventArgs.Load.GetPayload() as List<AppInfo>;
-                        var netCastService1 = (NetcastTvService)model.SelectedDevice.GetServiceByName(NetcastTvService.Id);
-                        var webostvService1 = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
-                        var port = netCastService1 != null
-                            ? netCastService1.ServiceDescription.Port.ToString()
-                            : webostvService1.ServiceDescription.Port.ToString();
-
-                        for (int i = 0; i < apps.Count; i++)
-                        {
-                            apps[i].SetUrl(model.SelectedDevice.IpAddress, port);
-                        }
-                        model.Apps = new IndependentList<AppInfo>(apps);
-                        Dispatcher.RunAsync(CoreDispatcherPriority.High, () => { model.OnPropertyChanged("Apps"); });
-                    }
-                },
-                serviceCommandError =>
-                {
-
-                }
-            );
-
-            var netCastService = (NetcastTvService)model.SelectedDevice.GetServiceByName(NetcastTvService.Id);
-            if (netCastService != null)
-            {
-                netCastService.GetAppList(appListResponseListener);
-                netCastService.GetChannelList(channelListResponseListener);
-            }
-            else
-            {
-                var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
-                if (webostvService != null)
-                {
-                    webostvService.GetAppList(appListResponseListener);
-                    webostvService.GetChannelList(channelListResponseListener);
-                }
-            }
-        }
-
-        protected override void OnNavigatedFrom(NavigationEventArgs e)
-        {
-            navigationHelper.OnNavigatedFrom(e);
-        }
-
-        #endregion
         
         public void CallCaptureImage(RoutedEventArgs eva)
         {

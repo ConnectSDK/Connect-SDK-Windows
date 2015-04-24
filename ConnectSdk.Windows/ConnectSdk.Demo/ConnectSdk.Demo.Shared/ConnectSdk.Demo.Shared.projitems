@@ -29,7 +29,4 @@
     <Compile Include="$(MSBuildThisFileDirectory)ModelCommandsImplementation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ScrollDirection.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)ConnectSdk.Demo.Shared.licenseheader" />
-  </ItemGroup>
 </Project>
