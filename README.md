@@ -4,8 +4,12 @@ Connect SDK is an open source framework that connects your mobile apps with mult
 For more information, visit our [website](http://www.connectsdk.com/).
 
 * [General information about Connect SDK](http://www.connectsdk.com/discover/)
+
 ##Including Connect SDK in your app
-sss
+* Clone the repository
+* Include the ConnectSDK.Windows project into your solution
+* Reference ConnectSDK.Windows from the project you want to use it
+* Look at the ConnectSdk.Demo.Windows for an example on how to useit
 
 ##Contact
 * Twitter [@ConnectSDK](https://www.twitter.com/ConnectSDK)
