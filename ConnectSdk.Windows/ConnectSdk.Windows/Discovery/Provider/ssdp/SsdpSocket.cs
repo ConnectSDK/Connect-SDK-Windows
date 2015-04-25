@@ -27,6 +27,7 @@ using System.Threading.Tasks;
 using Windows.Networking.Connectivity;
 using Windows.Networking.Sockets;
 using ConnectSdk.Windows.Core.Upnp.Ssdp;
+using ConnectSdk.Windows.Etc.Helper;
 
 namespace ConnectSdk.Windows.Discovery.Provider.ssdp
 {
@@ -61,7 +62,14 @@ namespace ConnectSdk.Windows.Discovery.Provider.ssdp
                 }
             };
 
-            socket.BindServiceNameAsync("", profile.NetworkAdapter);
+            try
+            {
+                socket.BindServiceNameAsync("", profile.NetworkAdapter);
+            }
+            catch (Exception e)
+            {
+                Logger.Current.AddMessage("There was an error binding the multicast socket: " + e.Message);
+            }
 
             var remoteHost = new global::Windows.Networking.HostName(SSDP.Address);
             var reqBuff = Encoding.UTF8.GetBytes(data);
