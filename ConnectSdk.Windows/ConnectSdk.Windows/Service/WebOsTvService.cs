@@ -28,6 +28,7 @@ using Windows.Foundation;
 using ConnectSdk.Windows.Core;
 using ConnectSdk.Windows.Device;
 using ConnectSdk.Windows.Discovery;
+using ConnectSdk.Windows.Etc.Helper;
 using ConnectSdk.Windows.Service.Capability;
 using ConnectSdk.Windows.Service.Capability.Listeners;
 using ConnectSdk.Windows.Service.Command;
@@ -164,6 +165,7 @@ namespace ConnectSdk.Windows.Service
 
         public override void Disconnect()
         {
+            Logger.Current.AddMessage("attempting to disconnect from " + ServiceDescription.IpAddress);
             //Log.d("Connect SDK", "attempting to disconnect to " + serviceDescription.getIpAddress());
 
             if (Listener != null)
@@ -1469,6 +1471,10 @@ namespace ConnectSdk.Windows.Service
                 {
                     payload.Add("inputId", JsonValue.CreateStringValue(input.Id));
                 }
+                else
+                {
+                    Logger.Current.AddMessage("ExternalInputInfo has no id");
+                }
             }
             catch (Exception)
             {
@@ -1589,6 +1595,10 @@ namespace ConnectSdk.Windows.Service
             {
                 mouseSocket.Scroll(dx, dy);
             }
+            else
+            {
+                Logger.Current.AddMessage("Mouse socket is not ready yet");
+            }
         }
 
         public void Scroll(Point distance)
@@ -1596,6 +1606,10 @@ namespace ConnectSdk.Windows.Service
             if (mouseSocket != null)
             {
                 Scroll(distance.X, distance.Y);
+            }
+            else
+            {
+                Logger.Current.AddMessage("Mouse socket is not ready yet");
             }
         }
 
@@ -2341,7 +2355,7 @@ namespace ConnectSdk.Windows.Service
 
             if (IsConnected())
             {
-                //Log.w("Connect SDK", "Permissions changed -- you will need to re-pair to the TV.");
+                Logger.Current.AddMessage("Permissions changed -- you will need to re-pair to the TV.");
                 Disconnect();
             }
         }

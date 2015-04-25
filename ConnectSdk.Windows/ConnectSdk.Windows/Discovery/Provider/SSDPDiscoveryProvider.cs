@@ -27,6 +27,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ConnectSdk.Windows.Core.Upnp.Ssdp;
 using ConnectSdk.Windows.Discovery.Provider.ssdp;
+using ConnectSdk.Windows.Etc.Helper;
 using ConnectSdk.Windows.Service.Config;
 
 namespace ConnectSdk.Windows.Discovery.Provider
@@ -165,6 +166,7 @@ namespace ConnectSdk.Windows.Discovery.Provider
         {
             if (filter.ServiceFilter == null)
             {
+                Logger.Current.AddMessage("This device filter does not have ssdp filter info");
             }
             else
             {

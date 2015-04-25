@@ -24,6 +24,7 @@ using System.Diagnostics;
 using System.Text;
 using Windows.Networking.Sockets;
 using Windows.Storage.Streams;
+using ConnectSdk.Windows.Etc.Helper;
 
 namespace ConnectSdk.Windows.Service.WebOs
 {
@@ -35,6 +36,8 @@ namespace ConnectSdk.Windows.Service.WebOs
 
         public WebOstvMouseSocketConnection(String socketPath)
         {
+            Logger.Current.AddMessage("PointerAndKeyboardFragment - got socketPath" + socketPath);
+
             this.socketPath = socketPath.StartsWith("wss:") ? socketPath.Replace("wss:", "ws:").Replace(":3001/", ":3000/") : socketPath;
 
             CreateSocket();

@@ -26,9 +26,11 @@ using System.Linq;
 using System.Reflection;
 using ConnectSdk.Windows.Core;
 using ConnectSdk.Windows.Device;
+using ConnectSdk.Windows.Etc.Helper;
 using ConnectSdk.Windows.Service;
 using ConnectSdk.Windows.Service.Command;
 using ConnectSdk.Windows.Service.Config;
+using Microsoft.VisualBasic.CompilerServices;
 
 namespace ConnectSdk.Windows.Discovery
 {
@@ -46,7 +48,7 @@ namespace ConnectSdk.Windows.Discovery
         private IConnectableDeviceStore connectableDeviceStore;
 
         private readonly ConcurrentDictionary<string, ConnectableDevice> allDevices;
-        private readonly Dictionary<string, ConnectableDevice> compatibleDevices;
+        private readonly ConcurrentDictionary<string, ConnectableDevice> compatibleDevices;
 
         private readonly Dictionary<string, Type> deviceClasses;
         private readonly List<IDiscoveryProvider> discoveryProviders;
@@ -92,7 +94,7 @@ namespace ConnectSdk.Windows.Discovery
             this.connectableDeviceStore = connectableDeviceStore;
 
             allDevices = new ConcurrentDictionary<string, ConnectableDevice>();
-            compatibleDevices = new Dictionary<string, ConnectableDevice>();
+            compatibleDevices = new ConcurrentDictionary<string, ConnectableDevice>();
 
             deviceClasses = new Dictionary<string, Type>();
             discoveryProviders = new List<IDiscoveryProvider>();
@@ -211,7 +213,7 @@ namespace ConnectSdk.Windows.Discovery
 
             foreach (var device in allDevices.Values.Where(DeviceIsCompatible))
             {
-                compatibleDevices.Add(device.IpAddress, device);
+                compatibleDevices.TryAdd(device.IpAddress, device);
 
                 HandleDeviceAdd(device);
             }
@@ -327,6 +329,7 @@ namespace ConnectSdk.Windows.Discovery
             }
             else
             {
+                Logger.Current.AddMessage("Wifi is not connected yet");
                 foreach (var discoveryManagerListener in discoveryListeners)
                 {
                     discoveryManagerListener.OnDiscoveryFailed(this,
@@ -364,7 +367,7 @@ namespace ConnectSdk.Windows.Discovery
                 return;
 
             if (!compatibleDevices.ContainsKey(device.IpAddress))
-                compatibleDevices.Add(device.IpAddress, device);
+                compatibleDevices.TryAdd(device.IpAddress, device);
 
             foreach (var listenter in discoveryListeners)
             {
@@ -390,7 +393,8 @@ namespace ConnectSdk.Windows.Discovery
             }
             else
             {
-                compatibleDevices.Remove(device.IpAddress);
+                ConnectableDevice c;
+                compatibleDevices.TryRemove(device.IpAddress,out c);
                 HandleDeviceLoss(device);
             }
         }
@@ -419,7 +423,7 @@ namespace ConnectSdk.Windows.Discovery
             return allDevices;
         }
 
-        public Dictionary<string, ConnectableDevice> GetCompatibleDevices()
+        public ConcurrentDictionary<string, ConnectableDevice> GetCompatibleDevices()
         {
             return compatibleDevices;
         }
@@ -467,6 +471,7 @@ namespace ConnectSdk.Windows.Discovery
 
         public void OnServiceAdded(IDiscoveryProvider provider, ServiceDescription serviceDescription)
         {
+            Logger.Current.AddMessage(string.Format("Service added: {0}({1})", serviceDescription.FriendlyName, serviceDescription.ServiceId));
             var deviceIsNew = !allDevices.ContainsKey(serviceDescription.IpAddress);
 
             var device =
@@ -497,6 +502,12 @@ namespace ConnectSdk.Windows.Discovery
 
         public void OnServiceRemoved(IDiscoveryProvider provider, ServiceDescription serviceDescription)
         {
+            if (serviceDescription == null)
+                Logger.Current.AddMessage(string.Format("Service removed: {0}({1})", "unknown service"));
+            else
+            {
+                Logger.Current.AddMessage(string.Format("Service removed: {0}", serviceDescription.FriendlyName));
+            }
             var device = allDevices[serviceDescription.IpAddress];
 
             if (device != null)
@@ -519,10 +530,12 @@ namespace ConnectSdk.Windows.Discovery
 
         public void OnServiceDiscoveryFailed(IDiscoveryProvider provider, ServiceCommandError error)
         {
+            Logger.Current.AddMessage(string.Format("Service discovery failed. {0}", error.GetPayload()));
         }
 
         public void AddServiceDescriptionToDevice(ServiceDescription desc, ConnectableDevice device)
         {
+            Logger.Current.AddMessage(string.Format("Adding service: {0} to device with address {1} and id {2}", desc.ServiceId, device.IpAddress, device.Id));
             var deviceServiceClass = deviceClasses[desc.ServiceId];
 
             if (deviceServiceClass == null)

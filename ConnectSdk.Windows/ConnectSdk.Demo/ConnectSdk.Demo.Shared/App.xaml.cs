@@ -7,6 +7,7 @@ using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -18,6 +19,7 @@ using Windows.UI.Xaml.Navigation;
 
 // The Blank Application template is documented at http://go.microsoft.com/fwlink/?LinkId=234227
 using ConnectSdk.Demo.Demo;
+using ConnectSdk.Windows.Etc.Helper;
 
 namespace ConnectSdk.Demo
 {
@@ -27,6 +29,7 @@ namespace ConnectSdk.Demo
     public sealed partial class App : Application
     {
         public static Model ApplicationModel;
+        public static CoreDispatcher MainDispatcher;
 
 
 #if WINDOWS_PHONE_APP
@@ -59,7 +62,7 @@ namespace ConnectSdk.Demo
                 this.DebugSettings.EnableFrameRateCounter = true;
             }
 #endif
-
+            MainDispatcher = CoreWindow.GetForCurrentThread().Dispatcher;
             Frame rootFrame = Window.Current.Content as Frame;
 
             // Do not repeat app initialization when the Window already has content,

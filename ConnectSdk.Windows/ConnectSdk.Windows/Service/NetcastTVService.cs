@@ -204,6 +204,7 @@ namespace ConnectSdk.Windows.Service
         {
             if (ServiceConnectionState != ConnectionState.Initial)
             {
+                Logger.Current.AddMessage("Already connecting; not trying to connect again: " + ServiceConnectionState);
                 return; // don't try to connect again while connected
             }
 
@@ -1457,12 +1458,14 @@ namespace ConnectSdk.Windows.Service
             (
                 loadEventArg =>
                 {
+                    Logger.Current.AddMessage("Netcast TV's mouse has been connected");
                     mMouseDistance = new Point(0, 0);
                     mMouseIsMoving = false;
                     isMouseConnected = true;
                 },
                 serviceCommandError =>
                 {
+                    Logger.Current.AddMessage("Netcast TV's mouse has connection has failed");
                     isMouseConnected = false;
                 }
             );
@@ -1540,6 +1543,7 @@ namespace ConnectSdk.Windows.Service
                 },
                 serviceCommandError =>
                 {
+                    Logger.Current.AddMessage("Netcast TV's mouse move has failed");
                     mMouseIsMoving = false;
                 }
             );
@@ -1604,6 +1608,7 @@ namespace ConnectSdk.Windows.Service
 
         public void SendText(string input)
         {
+            Logger.Current.AddMessage("Add text to queue: " + input);
             keyboardstring.Clear();
             keyboardstring.Append(input);
             HandleKeyboardInput("Editing", keyboardstring.ToString());

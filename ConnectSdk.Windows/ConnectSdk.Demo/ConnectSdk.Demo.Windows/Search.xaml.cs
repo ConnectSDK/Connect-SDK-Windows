@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Windows.Storage;
+using Windows.Storage.Streams;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -10,6 +14,7 @@ using ConnectSdk.Demo.Common;
 using ConnectSdk.Demo.Demo;
 using ConnectSdk.Windows.Device;
 using ConnectSdk.Windows.Discovery;
+using ConnectSdk.Windows.Etc.Helper;
 using ConnectSdk.Windows.Service;
 using ConnectSdk.Windows.Service.Config;
 using UpdateControls.Fields;

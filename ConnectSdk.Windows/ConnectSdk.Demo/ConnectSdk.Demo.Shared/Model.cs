@@ -1,11 +1,15 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using ConnectSdk.Demo.Annotations;
 using ConnectSdk.Windows.Core;
 using ConnectSdk.Windows.Device;
+using ConnectSdk.Windows.Etc.Helper;
 using ConnectSdk.Windows.Service.Capability;
 using UpdateControls.Collections;
+using Windows.ApplicationModel.Core;
+using UpdateControls.Fields;
 
 namespace ConnectSdk.Demo.Demo
 {
@@ -13,6 +17,7 @@ namespace ConnectSdk.Demo.Demo
     {
         private ConnectableDevice selectedDevice;
         private string textInput;
+        private string logContent;
 
         public ConnectableDevice SelectedDevice
         {
@@ -20,8 +25,8 @@ namespace ConnectSdk.Demo.Demo
             set
             {
                 selectedDevice = value; 
-                OnPropertyChanged("IsNetcastVisible"); 
-                OnPropertyChanged("ConnectButtonText");
+                //OnPropertyChanged("IsNetcastVisible"); 
+                //OnPropertyChanged("ConnectButtonText");
             }
         }
 
@@ -42,44 +47,51 @@ namespace ConnectSdk.Demo.Demo
 
         public IndependentList<ChannelInfo> Channels { get; set; }
 
-        public Visibility IsValidDeviceSelected
+        public string LogContent
         {
-            get
-            {
-                if (selectedDevice.DeviceType == null) 
-                    return Visibility.Collapsed; 
-                return Visibility.Visible;
-            }
+            get { return logContent; }
+            set { logContent = value; OnPropertyChanged("LogContent"); }
         }
 
-        public Visibility IsNetcastVisible
-        {
-            get
-            {
-                if (selectedDevice == null) return Visibility.Collapsed;
-                if (selectedDevice.DeviceType == "NetCast")
-                    return Visibility.Visible;
-                return Visibility.Collapsed;
-            }
-        }
+        //public Visibility IsValidDeviceSelected
+        //{
+        //    get
+        //    {
+        //        if (selectedDevice.DeviceType == null) 
+        //            return Visibility.Collapsed; 
+        //        return Visibility.Visible;
+        //    }
+        //}
 
-        public string ConnectButtonText
-        {
-            get
-            {
-                if (selectedDevice == null || selectedDevice.DeviceType == null) return "";
-                if (selectedDevice.DeviceType == "NetCast")
-                    return "Send Pairing Key";
-                return "Connect";
-            }
-        }
+        //public Visibility IsNetcastVisible
+        //{
+        //    get
+        //    {
+        //        if (selectedDevice == null) return Visibility.Collapsed;
+        //        if (selectedDevice.DeviceType == "NetCast")
+        //            return Visibility.Visible;
+        //        return Visibility.Collapsed;
+        //    }
+        //}
+
+        //public string ConnectButtonText
+        //{
+        //    get
+        //    {
+        //        if (selectedDevice == null || selectedDevice.DeviceType == null) return "";
+        //        if (selectedDevice.DeviceType == "NetCast")
+        //            return "Send Pairing Key";
+        //        return "Connect";
+        //    }
+        //}
+
 
         public Model()
         {
             DiscoverredTvList = new IndependentList<ConnectableDevice>();
             Apps = new IndependentList<AppInfo>();
             Channels = new IndependentList<ChannelInfo>();
-            selectedDevice = new ConnectableDevice(); 
+            selectedDevice = new ConnectableDevice();
         }
 
 

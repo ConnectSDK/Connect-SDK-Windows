@@ -31,6 +31,7 @@ using Windows.Security.ExchangeActiveSyncProvisioning;
 using Windows.Storage.Streams;
 using ConnectSdk.Windows.Core;
 using ConnectSdk.Windows.Discovery;
+using ConnectSdk.Windows.Etc.Helper;
 using ConnectSdk.Windows.Service.Capability.Listeners;
 using ConnectSdk.Windows.Service.Command;
 using ConnectSdk.Windows.Service.Config;
@@ -174,6 +175,7 @@ namespace ConnectSdk.Windows.Service.WebOs
 
         public void OnMessage(String data)
         {
+            Logger.Current.AddMessage("webOS Socket [IN] : " + data);
             HandleMessage(data);
         }
 
@@ -265,13 +267,13 @@ namespace ConnectSdk.Windows.Service.WebOs
             {
                 if (request != null)
                 {
+                    Logger.Current.AddMessage("Found requests. Need to handle response.");
                     if (payload != null)
                     {
                         try
                         {
                             Util.PostSuccess(request.ResponseListenerValue, payload);
                         }
-                            // ReSharper disable once EmptyGeneralCatchClause
                         catch
                         {
                         }
@@ -322,18 +324,24 @@ namespace ConnectSdk.Windows.Service.WebOs
                     return;
 
                 int errorCode;
+                string errorDesc;
                 try
                 {
                     var parts = error.Split(' ');
                     errorCode = int.Parse(parts[0]);
+                    errorDesc = parts[1];
                 }
                 // ReSharper disable once RedundantCatchClause
                 catch
                 {
                     throw;
                 }
+                if (payload != null)
+                    Logger.Current.AddMessage("Error payload: " + payload);
 
                 if (!message.ContainsKey("id")) return;
+                    Logger.Current.AddMessage("Error desc: " + errorDesc);
+
                 if (request == null) return;
                 Util.PostError(request.ResponseListenerValue,
                     new ServiceCommandError(errorCode, payload));
@@ -529,6 +537,7 @@ namespace ConnectSdk.Windows.Service.WebOs
                 var tempHashSet = new List<ServiceCommand>(commandQueue);
                 foreach (var command in tempHashSet)
                 {
+                    Logger.Current.AddMessage("Executing queued command for: " + command.Target);
                     SendCommandImmediately(command);
                     commandQueue.Dequeue();
                 }
@@ -689,7 +698,7 @@ namespace ConnectSdk.Windows.Service.WebOs
             if (IsConnected())
             {
                 var message = packet.Stringify();
-                log.AppendLine(string.Format("{0} : {1} : {2}", DateTime.Now, "sent", message));
+                Logger.Current.AddMessage("webOS Socket [OUT]: " + message);
                 try
                 {
                     messageWebSocket.Control.MessageType = SocketMessageType.Utf8;
@@ -698,7 +707,6 @@ namespace ConnectSdk.Windows.Service.WebOs
                         dr = new DataWriter(messageWebSocket.OutputStream);
                     dr.WriteString(message);
                     dr.StoreAsync();
-                    Debug.WriteLine("{0} : {1} : {2}", DateTime.Now, "sent", message);
                 }
                     // ReSharper disable once EmptyGeneralCatchClause
                 catch
