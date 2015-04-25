@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Xml.Linq;
 using ConnectSdk.Windows.Device;
 using ConnectSdk.Windows.Discovery;
 using ConnectSdk.Windows.Service;
@@ -14,7 +16,8 @@ namespace ConnectSdk.Demo.Demo
 
         public void OnDeviceAdded(DiscoveryManager manager, ConnectableDevice device)
         {
-            App.ApplicationModel.DiscoverredTvList.Add(device);
+            if (App.ApplicationModel.DiscoverredTvList.FirstOrDefault(x => x.DeviceType == device.DeviceType && x.IpAddress == device.IpAddress) == null)
+                App.ApplicationModel.DiscoverredTvList.Add(device);
         }
 
         public void OnDeviceUpdated(DiscoveryManager manager, ConnectableDevice device)

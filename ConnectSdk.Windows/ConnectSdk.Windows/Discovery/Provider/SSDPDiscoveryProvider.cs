@@ -255,7 +255,7 @@ namespace ConnectSdk.Windows.Discovery.Provider
                 {
                     foundService = new ServiceDescription { Uuid = uuid, ServiceFilter = serviceFilter };
 
-
+                    Logger.Current.AddMessage("SSDPDiscoveryProvider reported new service found: id: "  + foundService.ServiceId);
                     var u = new Uri(location);
                     foundService.IpAddress = u.DnsSafeHost;//pd.dp.IpAddress.getHostAddress();
                     foundService.Port = 3000;
@@ -264,6 +264,7 @@ namespace ConnectSdk.Windows.Discovery.Provider
                         discoveredServices.TryAdd(uuid, foundService);
 
                     GetLocationData(location, uuid, serviceFilter);
+                    Logger.Current.AddMessage("SSDPDiscoveryProvider reported new service found: id: " + foundService.ServiceId + " id :" + foundService.Uuid);
                 }
 
                 if (foundService != null)
