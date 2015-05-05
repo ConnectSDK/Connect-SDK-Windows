@@ -16,6 +16,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		ConnectSdk.Windows..testsettings = ConnectSdk.Windows..testsettings
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectSdk.Windows.Test", "ConnectSdk.Windows.Test\ConnectSdk.Windows.Test.csproj", "{7FC95454-1DAB-4615-9043-46FAE5E8CE05}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fakes", "Fakes", "{E2A1F38D-8770-4A1D-8CE0-38962554B298}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		ConnectSdk.Demo\ConnectSdk.Demo.Shared\ConnectSdk.Demo.Shared.projitems*{7f59fb63-4870-41eb-ba3c-b9d1ce39415a}*SharedItemsImports = 4
@@ -66,6 +70,30 @@ Global
 		{7F59FB63-4870-41EB-BA3C-B9D1CE39415A}.Release|x86.ActiveCfg = Release|x86
 		{7F59FB63-4870-41EB-BA3C-B9D1CE39415A}.Release|x86.Build.0 = Release|x86
 		{7F59FB63-4870-41EB-BA3C-B9D1CE39415A}.Release|x86.Deploy.0 = Release|x86
+		{7FC95454-1DAB-4615-9043-46FAE5E8CE05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FC95454-1DAB-4615-9043-46FAE5E8CE05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FC95454-1DAB-4615-9043-46FAE5E8CE05}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{7FC95454-1DAB-4615-9043-46FAE5E8CE05}.Debug|ARM.ActiveCfg = Debug|ARM
+		{7FC95454-1DAB-4615-9043-46FAE5E8CE05}.Debug|ARM.Build.0 = Debug|ARM
+		{7FC95454-1DAB-4615-9043-46FAE5E8CE05}.Debug|ARM.Deploy.0 = Debug|ARM
+		{7FC95454-1DAB-4615-9043-46FAE5E8CE05}.Debug|x64.ActiveCfg = Debug|x64
+		{7FC95454-1DAB-4615-9043-46FAE5E8CE05}.Debug|x64.Build.0 = Debug|x64
+		{7FC95454-1DAB-4615-9043-46FAE5E8CE05}.Debug|x64.Deploy.0 = Debug|x64
+		{7FC95454-1DAB-4615-9043-46FAE5E8CE05}.Debug|x86.ActiveCfg = Debug|x86
+		{7FC95454-1DAB-4615-9043-46FAE5E8CE05}.Debug|x86.Build.0 = Debug|x86
+		{7FC95454-1DAB-4615-9043-46FAE5E8CE05}.Debug|x86.Deploy.0 = Debug|x86
+		{7FC95454-1DAB-4615-9043-46FAE5E8CE05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FC95454-1DAB-4615-9043-46FAE5E8CE05}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7FC95454-1DAB-4615-9043-46FAE5E8CE05}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{7FC95454-1DAB-4615-9043-46FAE5E8CE05}.Release|ARM.ActiveCfg = Release|ARM
+		{7FC95454-1DAB-4615-9043-46FAE5E8CE05}.Release|ARM.Build.0 = Release|ARM
+		{7FC95454-1DAB-4615-9043-46FAE5E8CE05}.Release|ARM.Deploy.0 = Release|ARM
+		{7FC95454-1DAB-4615-9043-46FAE5E8CE05}.Release|x64.ActiveCfg = Release|x64
+		{7FC95454-1DAB-4615-9043-46FAE5E8CE05}.Release|x64.Build.0 = Release|x64
+		{7FC95454-1DAB-4615-9043-46FAE5E8CE05}.Release|x64.Deploy.0 = Release|x64
+		{7FC95454-1DAB-4615-9043-46FAE5E8CE05}.Release|x86.ActiveCfg = Release|x86
+		{7FC95454-1DAB-4615-9043-46FAE5E8CE05}.Release|x86.Build.0 = Release|x86
+		{7FC95454-1DAB-4615-9043-46FAE5E8CE05}.Release|x86.Deploy.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -73,5 +101,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{ED5CC1F3-ADA9-4068-8646-9B3159B807D7} = {E97B6AA0-61E0-4AFA-8FCD-64C72D215D8A}
 		{7F59FB63-4870-41EB-BA3C-B9D1CE39415A} = {E97B6AA0-61E0-4AFA-8FCD-64C72D215D8A}
+		{E2A1F38D-8770-4A1D-8CE0-38962554B298} = {E97B6AA0-61E0-4AFA-8FCD-64C72D215D8A}
 	EndGlobalSection
 EndGlobal

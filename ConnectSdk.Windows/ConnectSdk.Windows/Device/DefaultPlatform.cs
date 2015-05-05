@@ -33,7 +33,8 @@ namespace ConnectSdk.Windows.Device
             var devicesList = new Dictionary<Type, Type>
             {
                 {typeof (WebOstvService), typeof (SsdpDiscoveryProvider)},
-                {typeof (NetcastTvService), typeof (SsdpDiscoveryProvider)}
+                {typeof (NetcastTvService), typeof (SsdpDiscoveryProvider)},
+                {typeof (DlnaService), typeof (SsdpDiscoveryProvider)}
             };
             //devicesList.Add(typeof(DLNAService), typeof(SsdpDiscoveryProvider));
             //devicesList.Add(typeof(DIALService), typeof(SsdpDiscoveryProvider));

@@ -20,6 +20,7 @@ using Windows.UI.Xaml.Navigation;
 // The Blank Application template is documented at http://go.microsoft.com/fwlink/?LinkId=234227
 using ConnectSdk.Demo.Demo;
 using ConnectSdk.Windows.Etc.Helper;
+using ConnectSdk.Windows.Fakes;
 
 namespace ConnectSdk.Demo
 {
@@ -45,6 +46,8 @@ namespace ConnectSdk.Demo
             this.InitializeComponent();
             this.Suspending += this.OnSuspending;
             ApplicationModel = new Model();
+
+            //MessageFakeFactory.Start();
 
         }
 

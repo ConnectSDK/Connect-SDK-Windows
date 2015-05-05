@@ -6,6 +6,7 @@ using ConnectSdk.Demo.Annotations;
 using ConnectSdk.Windows.Core;
 using ConnectSdk.Windows.Device;
 using ConnectSdk.Windows.Etc.Helper;
+using ConnectSdk.Windows.Service;
 using ConnectSdk.Windows.Service.Capability;
 using UpdateControls.Collections;
 using Windows.ApplicationModel.Core;
@@ -25,8 +26,6 @@ namespace ConnectSdk.Demo.Demo
             set
             {
                 selectedDevice = value; 
-                //OnPropertyChanged("IsNetcastVisible"); 
-                //OnPropertyChanged("ConnectButtonText");
             }
         }
 
@@ -41,7 +40,7 @@ namespace ConnectSdk.Demo.Demo
             }
         }
 
-        public IndependentList<ConnectableDevice> DiscoverredTvList { get; set; }
+        public IndependentList<DeviceServiceViewModel> DiscoverredTvList { get; set; }
 
         public IndependentList<AppInfo> Apps { get; set; }
 
@@ -50,45 +49,12 @@ namespace ConnectSdk.Demo.Demo
         public string LogContent
         {
             get { return logContent; }
-            set { logContent = value; OnPropertyChanged("LogContent"); }
+            set { logContent = value; OnPropertyChanged(); }
         }
-
-        //public Visibility IsValidDeviceSelected
-        //{
-        //    get
-        //    {
-        //        if (selectedDevice.DeviceType == null) 
-        //            return Visibility.Collapsed; 
-        //        return Visibility.Visible;
-        //    }
-        //}
-
-        //public Visibility IsNetcastVisible
-        //{
-        //    get
-        //    {
-        //        if (selectedDevice == null) return Visibility.Collapsed;
-        //        if (selectedDevice.DeviceType == "NetCast")
-        //            return Visibility.Visible;
-        //        return Visibility.Collapsed;
-        //    }
-        //}
-
-        //public string ConnectButtonText
-        //{
-        //    get
-        //    {
-        //        if (selectedDevice == null || selectedDevice.DeviceType == null) return "";
-        //        if (selectedDevice.DeviceType == "NetCast")
-        //            return "Send Pairing Key";
-        //        return "Connect";
-        //    }
-        //}
-
 
         public Model()
         {
-            DiscoverredTvList = new IndependentList<ConnectableDevice>();
+            DiscoverredTvList = new IndependentList<DeviceServiceViewModel>();
             Apps = new IndependentList<AppInfo>();
             Channels = new IndependentList<ChannelInfo>();
             selectedDevice = new ConnectableDevice();
@@ -103,5 +69,11 @@ namespace ConnectSdk.Demo.Demo
             var handler = PropertyChanged;
             if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
         }
+    }
+
+    public class DeviceServiceViewModel
+    {
+        public ConnectableDevice Device { get; set; }
+        public DeviceService Service { get; set; }
     }
 }

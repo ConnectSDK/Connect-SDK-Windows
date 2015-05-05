@@ -59,6 +59,8 @@
     <Compile Include="Core\TextInputStatusInfo.cs" />
     <Compile Include="Core\TextInputType.cs" />
     <Compile Include="Core\Upnp\Device.cs" />
+    <Compile Include="Core\Upnp\HttpClientFacade.cs" />
+    <Compile Include="Discovery\Provider\ssdp\DatagramSocketFacade.cs" />
     <Compile Include="Discovery\Provider\ssdp\Icon.cs" />
     <Compile Include="Discovery\Provider\ssdp\Service.cs" />
     <Compile Include="Core\Upnp\Ssdp\MessageReceivedArgs.cs" />
@@ -90,6 +92,7 @@
     <Compile Include="Etc\Helper\HttpMessage.cs" />
     <Compile Include="Etc\Helper\Logger.cs" />
     <Compile Include="Etc\Helper\Storage.cs" />
+    <Compile Include="Fakes\MessageFakeFactory.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\Capability\AppState.cs" />

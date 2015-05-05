@@ -18,14 +18,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- #endregion
+#endregion
 using System;
-using System.IO;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Networking;
 using Windows.Networking.Connectivity;
-using Windows.Networking.Sockets;
 using ConnectSdk.Windows.Core.Upnp.Ssdp;
 using ConnectSdk.Windows.Etc.Helper;
 
@@ -37,7 +36,7 @@ namespace ConnectSdk.Windows.Discovery.Provider.ssdp
         public event EventHandler<string> NotifyReceivedChanged;
         public delegate void EventHandler(object sender, EventArgs e);
 
-        private DatagramSocket socket;
+        private DatagramSocketFacade socket;
 
         public bool IsConnected { get; private set; }
 
@@ -49,17 +48,13 @@ namespace ConnectSdk.Windows.Discovery.Provider.ssdp
         public async Task<int> Send(string data)
         {
 
-            socket = new DatagramSocket();
+            socket = new DatagramSocketFacade();
             var profile = NetworkInformation.GetInternetConnectionProfile();
 
 
             socket.MessageReceived += (sender, args) =>
             {
-                var reader = new StreamReader(args.GetDataStream().AsStreamForRead());
-                {
-                    string response = reader.ReadToEndAsync().Result;
-                    OnMessageReceived(new MessageReceivedArgs(response));
-                }
+                HandleDatagramMessage(args);
             };
 
             try
@@ -71,7 +66,7 @@ namespace ConnectSdk.Windows.Discovery.Provider.ssdp
                 Logger.Current.AddMessage("There was an error binding the multicast socket: " + e.Message);
             }
 
-            var remoteHost = new global::Windows.Networking.HostName(SSDP.Address);
+            var remoteHost = new HostName(SSDP.Address);
             var reqBuff = Encoding.UTF8.GetBytes(data);
 
             var stream = await socket.GetOutputStreamAsync(remoteHost, SSDP.Port.ToString());
@@ -84,6 +79,11 @@ namespace ConnectSdk.Windows.Discovery.Provider.ssdp
 
             return 0;
 
+        }
+
+        private void HandleDatagramMessage(string message)
+        {
+            OnMessageReceived(new MessageReceivedArgs(message));
         }
 
         protected virtual void OnMessageReceived(MessageReceivedArgs e)

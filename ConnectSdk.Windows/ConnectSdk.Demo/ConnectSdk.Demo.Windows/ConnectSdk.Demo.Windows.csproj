@@ -137,6 +137,9 @@
     <Content Include="Assets\SmallLogo.scale-100.png" />
     <Content Include="Assets\SplashScreen.scale-100.png" />
     <Content Include="Assets\StoreLogo.scale-100.png" />
+    <Content Include="Fakes\LGWebOSLocationXML.txt" />
+    <Content Include="Fakes\SSDP.txt" />
+    <Content Include="Fakes\xbox.xml" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="Main.xaml">
@@ -159,6 +162,7 @@
       <HintPath>..\..\packages\winrtxamltoolkit.1.6.1.3\lib\netcore451\WinRTXamlToolkit.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">
     <VisualStudioVersion>12.0</VisualStudioVersion>
   </PropertyGroup>

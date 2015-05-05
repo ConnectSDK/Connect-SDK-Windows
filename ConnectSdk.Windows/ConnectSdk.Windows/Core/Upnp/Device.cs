@@ -28,6 +28,7 @@ using System.Net.Http;
 using System.Xml;
 using ConnectSdk.Windows.Core.Upnp.Ssdp;
 using ConnectSdk.Windows.Discovery.Provider.ssdp;
+using ConnectSdk.Windows.Etc.Helper;
 
 namespace ConnectSdk.Windows.Core.Upnp
 {
@@ -147,8 +148,8 @@ namespace ConnectSdk.Windows.Core.Upnp
 
             var device = newDevice;
 
-            var cl = new HttpClient();
-            var response = cl.GetAsync(url).Result;
+            var cl = new HttpClientFacade();
+            var response = cl.GetAsync(url);
             if (device.Headers == null)
                 device.Headers = new Dictionary<string, List<string>>();
             foreach (var header in response.Headers)
@@ -162,31 +163,32 @@ namespace ConnectSdk.Windows.Core.Upnp
             var reader = Util.GenerateStreamFromstring(device.LocationXml);
             var xmlReader = XmlReader.Create(reader);
 
-            while (xmlReader.Read())
+            while (!xmlReader.EOF)
             {
+                var hasRead = false;
                 if (xmlReader.Name == TagDeviceType)
-                    device.DeviceType = xmlReader.ReadElementContentAsString();
+                    device.DeviceType = xmlReader.ReadElementContentAsString(out hasRead);
                 if (xmlReader.Name == TagFriendlyName)
-                    device.FriendlyName = xmlReader.ReadElementContentAsString();
+                    device.FriendlyName = xmlReader.ReadElementContentAsString(out hasRead);
                 if (xmlReader.Name == TagModelNumber)
-                    device.ModelNumber = xmlReader.ReadElementContentAsString();
+                    device.ModelNumber = xmlReader.ReadElementContentAsString(out hasRead);
                 if (xmlReader.Name == TagManufacturer)
-                    device.Manufacturer = xmlReader.ReadElementContentAsString();
+                    device.Manufacturer = xmlReader.ReadElementContentAsString(out hasRead);
                 if (xmlReader.Name == TagManufacturerUrl)
-                    device.ManufacturerUrl = xmlReader.ReadElementContentAsString();
+                    device.ManufacturerUrl = xmlReader.ReadElementContentAsString(out hasRead);
                 if (xmlReader.Name == TagModelDescription)
-                    device.ModelDescription = xmlReader.ReadElementContentAsString();
+                    device.ModelDescription = xmlReader.ReadElementContentAsString(out hasRead);
 
                 if (xmlReader.Name == TagModelName)
-                    device.ModelName = xmlReader.ReadElementContentAsString();
+                    device.ModelName = xmlReader.ReadElementContentAsString(out hasRead);
                 if (xmlReader.Name == TagModelUrl)
-                    device.ModelUrl = xmlReader.ReadElementContentAsString();
+                    device.ModelUrl = xmlReader.ReadElementContentAsString(out hasRead);
                 if (xmlReader.Name == TagSerialNumber)
-                    device.SerialNumber = xmlReader.ReadElementContentAsString();
+                    device.SerialNumber = xmlReader.ReadElementContentAsString(out hasRead);
                 if (xmlReader.Name == TagUdn)
-                    device.Udn = xmlReader.ReadElementContentAsString();
+                    device.Udn = xmlReader.ReadElementContentAsString(out hasRead);
                 if (xmlReader.Name == TagUpc)
-                    device.Upc = xmlReader.ReadElementContentAsString();
+                    device.Upc = xmlReader.ReadElementContentAsString(out hasRead);
 
                 if (xmlReader.Name == "icon" && xmlReader.NodeType == XmlNodeType.Element)
                 {
@@ -196,15 +198,15 @@ namespace ConnectSdk.Windows.Core.Upnp
                 }
 
                 if (xmlReader.Name == Icon.TagMimeType)
-                    device.IconList[device.IconList.Count - 1].MimeType = xmlReader.ReadElementContentAsString();
+                    device.IconList[device.IconList.Count - 1].MimeType = xmlReader.ReadElementContentAsString(out hasRead);
                 if (xmlReader.Name == Icon.TagWidth)
-                    device.IconList[device.IconList.Count - 1].Width = xmlReader.ReadElementContentAsString();
+                    device.IconList[device.IconList.Count - 1].Width = xmlReader.ReadElementContentAsString(out hasRead);
                 if (xmlReader.Name == Icon.TagHeight)
-                    device.IconList[device.IconList.Count - 1].Height = xmlReader.ReadElementContentAsString();
+                    device.IconList[device.IconList.Count - 1].Height = xmlReader.ReadElementContentAsString(out hasRead);
                 if (xmlReader.Name == Icon.TagDepth)
-                    device.IconList[device.IconList.Count - 1].Depth = xmlReader.ReadElementContentAsString();
+                    device.IconList[device.IconList.Count - 1].Depth = xmlReader.ReadElementContentAsString(out hasRead);
                 if (xmlReader.Name == Icon.TagUrl)
-                    device.IconList[device.IconList.Count - 1].Url = xmlReader.ReadElementContentAsString();
+                    device.IconList[device.IconList.Count - 1].Url = xmlReader.ReadElementContentAsString(out hasRead);
 
                 if (xmlReader.Name == "service" && xmlReader.NodeType == XmlNodeType.Element)
                 {
@@ -214,16 +216,21 @@ namespace ConnectSdk.Windows.Core.Upnp
                 }
 
                 if (xmlReader.Name == Discovery.Provider.ssdp.Service.TAG_SERVICE_TYPE)
-                    device.ServiceList[device.ServiceList.Count - 1].ServiceType = xmlReader.ReadElementContentAsString();
+                    device.ServiceList[device.ServiceList.Count - 1].ServiceType = xmlReader.ReadElementContentAsString(out hasRead);
                 if (xmlReader.Name == Discovery.Provider.ssdp.Service.TAG_SERVICE_ID)
-                    device.ServiceList[device.ServiceList.Count - 1].ServiceId = xmlReader.ReadElementContentAsString();
+                    device.ServiceList[device.ServiceList.Count - 1].ServiceId = xmlReader.ReadElementContentAsString(out hasRead);
                 if (xmlReader.Name == Discovery.Provider.ssdp.Service.TAG_SCPD_URL)
-                    device.ServiceList[device.ServiceList.Count - 1].ScpdUrl = xmlReader.ReadElementContentAsString();
+                    device.ServiceList[device.ServiceList.Count - 1].ScpdUrl = xmlReader.ReadElementContentAsString(out hasRead);
                 if (xmlReader.Name == Discovery.Provider.ssdp.Service.TAG_CONTROL_URL)
-                    device.ServiceList[device.ServiceList.Count - 1].ControlUrl = xmlReader.ReadElementContentAsString();
+                    device.ServiceList[device.ServiceList.Count - 1].ControlUrl = xmlReader.ReadElementContentAsString(out hasRead);
                 if (xmlReader.Name == Discovery.Provider.ssdp.Service.TAG_EVENTSUB_URL)
-                    device.ServiceList[device.ServiceList.Count - 1].EventSubUrl = xmlReader.ReadElementContentAsString();
+                    device.ServiceList[device.ServiceList.Count - 1].EventSubUrl = xmlReader.ReadElementContentAsString(out hasRead);
+
+                if (!hasRead) xmlReader.Read();
             }
+
+            //Logger.Current.AddMessage("Received message description: " + device.LocationXml);
+
             return device;
         }
 
@@ -270,4 +277,15 @@ namespace ConnectSdk.Windows.Core.Upnp
             return FriendlyName;
         }
     }
+
+    public static class XmlReaderExtensions
+    {
+        public static string ReadElementContentAsString(this XmlReader str, out bool changed)
+        {
+            var value = str.ReadElementContentAsString();
+            changed = true;
+            return value;
+        }
+    }
 }
+

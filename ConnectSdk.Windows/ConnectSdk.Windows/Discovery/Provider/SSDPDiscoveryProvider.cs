@@ -73,11 +73,13 @@ namespace ConnectSdk.Windows.Discovery.Provider
         private void SsdpSocketOnNotifyReceivedChanged(object sender, string message)
         {
             HandleDatagramPacket(new ParsedDatagram(message));
+            //Logger.Current.AddMessage("SSDPDiscoveryProvider received message: " + message);
         }
 
         private void SsdpSocketOnMessageReceivedChanged(object sender, string message)
         {
             HandleDatagramPacket(new ParsedDatagram(message));
+            //Logger.Current.AddMessage("SSDPDiscoveryProvider received message: " + message);
         }
 
 
@@ -255,7 +257,7 @@ namespace ConnectSdk.Windows.Discovery.Provider
                 {
                     foundService = new ServiceDescription { Uuid = uuid, ServiceFilter = serviceFilter };
 
-                    Logger.Current.AddMessage("SSDPDiscoveryProvider reported new service found: id: "  + foundService.ServiceId);
+                    Logger.Current.AddMessage("SSDPDiscoveryProvider reported new service found: id: "  + foundService.Uuid);
                     var u = new Uri(location);
                     foundService.IpAddress = u.DnsSafeHost;//pd.dp.IpAddress.getHostAddress();
                     foundService.Port = 3000;
@@ -264,7 +266,7 @@ namespace ConnectSdk.Windows.Discovery.Provider
                         discoveredServices.TryAdd(uuid, foundService);
 
                     GetLocationData(location, uuid, serviceFilter);
-                    Logger.Current.AddMessage("SSDPDiscoveryProvider reported new service found: id: " + foundService.ServiceId + " id :" + foundService.Uuid);
+                    //Logger.Current.AddMessage("SSDPDiscoveryProvider reported new service found: id: " + foundService.ServiceId + " id :" + foundService.Uuid);
                 }
 
                 if (foundService != null)
@@ -287,22 +289,26 @@ namespace ConnectSdk.Windows.Discovery.Provider
 
                     if (hasServices)
                     {
-                        var service = discoveredServices[uuid];
-                        service.ServiceId = ServiceIdForFilter(serviceFilter);
-                        service.ServiceFilter = serviceFilter;
-                        service.FriendlyName = device.FriendlyName ?? "LG Smart TV";
-                        service.ModelName = device.ModelName;
-                        service.ModelNumber = device.ModelNumber;
-                        service.ModelDescription = device.ModelDescription;
-                        service.Manufacturer = device.Manufacturer;
-                        service.ApplicationUrl = device.ApplicationUrl;
-                        service.ServiceList = device.ServiceList;
-                        service.ResponseHeaders = device.Headers;
-                        service.LocationXml = device.LocationXml;
+                        ServiceDescription service;
+                        discoveredServices.TryGetValue(uuid, out service);
+                        if (service != null)
+                        {
+                            service.ServiceId = ServiceIdForFilter(serviceFilter);
+                            service.ServiceFilter = serviceFilter;
+                            service.FriendlyName = device.FriendlyName ?? "LG Smart TV";
+                            service.ModelName = device.ModelName;
+                            service.ModelNumber = device.ModelNumber;
+                            service.ModelDescription = device.ModelDescription;
+                            service.Manufacturer = device.Manufacturer;
+                            service.ApplicationUrl = device.ApplicationUrl;
+                            service.ServiceList = device.ServiceList;
+                            service.ResponseHeaders = device.Headers;
+                            service.LocationXml = device.LocationXml;
 
-                        foundServices.TryAdd(uuid, service);
+                            foundServices.TryAdd(uuid, service);
 
-                        NotifyListenersOfNewService(service);
+                            NotifyListenersOfNewService(service);
+                        }
                     }
                 }
             }

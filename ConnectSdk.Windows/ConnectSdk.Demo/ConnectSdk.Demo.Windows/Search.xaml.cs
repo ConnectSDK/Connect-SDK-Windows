@@ -56,11 +56,11 @@ namespace ConnectSdk.Demo
 
         private void TvListBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var tvdef = ForView.Unwrap<ConnectableDevice>(e.AddedItems[0]);
+            var tvdef = ForView.Unwrap<DeviceServiceViewModel>(e.AddedItems[0]);
 
-            App.ApplicationModel.SelectedDevice = tvdef;
+            App.ApplicationModel.SelectedDevice = tvdef.Device;
 
-            var netCastService = (NetcastTvService)tvdef.GetServiceByName(NetcastTvService.Id);
+            var netCastService = (NetcastTvService)tvdef.Device.GetServiceByName(NetcastTvService.Id);
             if (netCastService != null)
             {
                 if (!(netCastService.ServiceConfig is NetcastTvServiceConfig))
@@ -76,7 +76,8 @@ namespace ConnectSdk.Demo
             var senderButton = sender as Button;
             if (senderButton == null) return;
 
-            model.SelectedDevice = ForView.Unwrap<ConnectableDevice>((senderButton.DataContext));
+            var tvdeft = ForView.Unwrap<DeviceServiceViewModel>((senderButton.DataContext));
+            model.SelectedDevice = tvdeft.Device;
             var tvdef = model.SelectedDevice;
             var netCastService = (NetcastTvService)tvdef.GetServiceByName(NetcastTvService.Id);
             if (netCastService != null)
@@ -142,15 +143,15 @@ namespace ConnectSdk.Demo
             switch (target)
             {
                 case "PairingKeyLabel":
-                    return device.Equals("webOS TV") ? Visibility.Collapsed : Visibility.Visible;
+                    return !device.Equals("Netcast TV") ? Visibility.Collapsed : Visibility.Visible;
                 case "PairingKeyTextBox":
-                    return device.Equals("webOS TV") ? Visibility.Collapsed : Visibility.Visible;
+                    return !device.Equals("Netcast TV") ? Visibility.Collapsed : Visibility.Visible;
                 case "ConnectButton":
-                    return device.Equals("webOS TV") ? Visibility.Collapsed : Visibility.Visible;
+                    return !device.Equals("Netcast TV") ? Visibility.Collapsed : Visibility.Visible;
                 case "ConnectWebOsButton":
-                    return device.Equals("webOS TV") ? Visibility.Visible : Visibility.Collapsed;
+                    return !device.Equals("Netcast TV") ? Visibility.Visible : Visibility.Collapsed;
             }
-            return Visibility.Visible;
+            return Visibility.Collapsed;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)

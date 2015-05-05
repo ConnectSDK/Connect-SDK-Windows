@@ -411,8 +411,25 @@ namespace ConnectSdk.Windows.Discovery
 
         public bool IsNetcast(ServiceDescription description)
         {
+            bool isNetcastTV = false;
+
             var modelName = description.ModelName;
             var modelDescription = description.ModelDescription;
+
+            if (modelName != null && modelName.ToUpper().Equals("LG TV"))
+            {
+                if (modelDescription != null && !(modelDescription.ToUpper().Contains("WEBOS")))
+                {
+                    if (description.ServiceId.Equals(NetcastTvService.Id)) ;
+                    {
+                        isNetcastTV = true;
+                    }
+                }
+            }
+
+            return isNetcastTV;
+
+
 
             if (modelName == null || !modelName.ToUpper().Equals("LG TV")) return false;
             return modelDescription != null && !modelDescription.ToUpper().Contains("WEBOS");
