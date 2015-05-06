@@ -1,0 +1,104 @@
+﻿HTTP/1.1 200 OK
+Location: http://192.168.0.104:1755/
+Cache-Control: max-age=1800
+Server: Linux/i686 UPnP/1,0 DLNADOC/1.50 LGE WebOS TV/Version 0.9
+EXT: 
+USN: uuid:4156b176-3c14-bf92-898f-9af747e8cba0::urn:schemas-upnp-org:device:MediaRenderer:1
+ST: urn:schemas-upnp-org:device:MediaRenderer:1
+Date: Tue, 05 May 2015 17:07:39 GMT
+DLNADeviceName.lge.com: LG%20Smart%2b%20TV
+
+HTTP/1.1 200 OK
+Location: http://192.168.0.104:1755/
+Cache-Control: max-age=1800
+Server: Linux/i686 UPnP/1,0 DLNADOC/1.50 LGE WebOS TV/Version 0.9
+EXT: 
+USN: uuid:4156b176-3c14-bf92-898f-9af747e8cba0::urn:schemas-upnp-org:device:MediaRenderer:1
+ST: urn:schemas-upnp-org:device:MediaRenderer:1
+Date: Tue, 05 May 2015 17:07:39 GMT
+DLNADeviceName.lge.com: LG%20Smart%2b%20TV
+
+HTTP/1.1 200 OK
+Location: http://192.168.0.104:1755/
+Cache-Control: max-age=1800
+Server: Linux/i686 UPnP/1,0 DLNADOC/1.50 LGE WebOS TV/Version 0.9
+EXT: 
+USN: uuid:4156b176-3c14-bf92-898f-9af747e8cba0::urn:schemas-upnp-org:device:MediaRenderer:1
+ST: urn:schemas-upnp-org:device:MediaRenderer:1
+Date: Tue, 05 May 2015 17:07:40 GMT
+DLNADeviceName.lge.com: LG%20Smart%2b%20TV
+
+HTTP/1.1 200 OK
+Location: http://192.168.0.104:1718/
+Cache-Control: max-age=1800
+Server: WebOS/4.0.3 UPnP/1.0
+EXT: 
+USN: uuid:b72a2636-adb6-47dd-a00b-92c3bcea5f4c::urn:lge-com:service:webos-second-screen:1
+ST: urn:lge-com:service:webos-second-screen:1
+Date: Tue, 05 May 2015 17:07:40 GMT
+
+HTTP/1.1 200 OK
+Location: http://192.168.0.104:1755/
+Cache-Control: max-age=1800
+Server: Linux/i686 UPnP/1,0 DLNADOC/1.50 LGE WebOS TV/Version 0.9
+EXT: 
+USN: uuid:4156b176-3c14-bf92-898f-9af747e8cba0::urn:schemas-upnp-org:device:MediaRenderer:1
+ST: urn:schemas-upnp-org:device:MediaRenderer:1
+Date: Tue, 05 May 2015 17:07:40 GMT
+DLNADeviceName.lge.com: LG%20Smart%2b%20TV
+
+HTTP/1.1 200 OK
+Location: http://192.168.0.104:1755/
+Cache-Control: max-age=1800
+Server: Linux/i686 UPnP/1,0 DLNADOC/1.50 LGE WebOS TV/Version 0.9
+EXT: 
+USN: uuid:4156b176-3c14-bf92-898f-9af747e8cba0::urn:schemas-upnp-org:device:MediaRenderer:1
+ST: urn:schemas-upnp-org:device:MediaRenderer:1
+Date: Tue, 05 May 2015 17:07:41 GMT
+DLNADeviceName.lge.com: LG%20Smart%2b%20TV
+
+HTTP/1.1 200 OK
+Location: http://192.168.0.104:1755/
+Cache-Control: max-age=1800
+Server: Linux/i686 UPnP/1,0 DLNADOC/1.50 LGE WebOS TV/Version 0.9
+EXT: 
+USN: uuid:4156b176-3c14-bf92-898f-9af747e8cba0::urn:schemas-upnp-org:device:MediaRenderer:1
+ST: urn:schemas-upnp-org:device:MediaRenderer:1
+Date: Tue, 05 May 2015 17:07:41 GMT
+DLNADeviceName.lge.com: LG%20Smart%2b%20TV
+
+HTTP/1.1 200 OK
+Location: http://192.168.0.104:1718/
+Cache-Control: max-age=1800
+Server: WebOS/4.0.3 UPnP/1.0
+EXT: 
+USN: uuid:b72a2636-adb6-47dd-a00b-92c3bcea5f4c::urn:lge-com:service:webos-second-screen:1
+ST: urn:lge-com:service:webos-second-screen:1
+Date: Tue, 05 May 2015 17:07:42 GMT
+
+HTTP/1.1 200 OK
+Location: http://192.168.0.104:1718/
+Cache-Control: max-age=1800
+Server: WebOS/4.0.3 UPnP/1.0
+EXT: 
+USN: uuid:b72a2636-adb6-47dd-a00b-92c3bcea5f4c::urn:lge-com:service:webos-second-screen:1
+ST: urn:lge-com:service:webos-second-screen:1
+Date: Tue, 05 May 2015 17:07:42 GMT
+
+HTTP/1.1 200 OK
+Location: http://192.168.0.104:1718/
+Cache-Control: max-age=1800
+Server: WebOS/4.0.3 UPnP/1.0
+EXT: 
+USN: uuid:b72a2636-adb6-47dd-a00b-92c3bcea5f4c::urn:lge-com:service:webos-second-screen:1
+ST: urn:lge-com:service:webos-second-screen:1
+Date: Tue, 05 May 2015 17:07:43 GMT
+
+HTTP/1.1 200 OK
+Location: http://192.168.0.104:1718/
+Cache-Control: max-age=1800
+Server: WebOS/4.0.3 UPnP/1.0
+EXT: 
+USN: uuid:b72a2636-adb6-47dd-a00b-92c3bcea5f4c::urn:lge-com:service:webos-second-screen:1
+ST: urn:lge-com:service:webos-second-screen:1
+Date: Tue, 05 May 2015 17:07:43 GMT
