@@ -125,13 +125,14 @@
     <None Include="ConnectSdk.Windows.Test_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Fakes\LGWebOSLocationXML.txt">
+    <Content Include="Fakes\LGWebOSLocation.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Fakes\NetCastLocation.xml" />
     <Content Include="Fakes\SSDP.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Fakes\xbox.xml">
+    <Content Include="Fakes\XboxLocation.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Images\UnitTestLogo.scale-100.png">

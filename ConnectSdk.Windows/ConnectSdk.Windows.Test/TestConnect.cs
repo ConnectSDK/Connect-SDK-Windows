@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using ConnectSdk.Windows.Device;
 using ConnectSdk.Windows.Discovery;
 using ConnectSdk.Windows.Fakes;
@@ -19,7 +20,7 @@ namespace ConnectSdk.Windows.Test
         }
 
         [TestMethod]
-        public void ConnectToWebOsTv()
+        public async Task DiscoverTest()
         {
             var listener = new DiscoveryManagerListener(model);
 
@@ -32,13 +33,16 @@ namespace ConnectSdk.Windows.Test
             discoveryManager.AddListener(listener);
             discoveryManager.PairingLevel = DiscoveryManager.PairingLevelEnum.On;
             discoveryManager.Start();
+            
+            await AssertAsync();
+        }
 
-            // wait for a while 
-            Task t = new Task(() =>
-            {
-                Assert.AreEqual(model.DiscoverredDeviceServices.Count,2);
-            });
-            t.Start();
+        public static async Task AssertAsync()
+        {
+            // wait to ensure that all calls went through
+            await Task.Delay(500);
+            //we expect 2 services: webos and dlna. There is also a Netcast but WebOs is also implicitly netcase so it is not added to the list
+            Assert.AreEqual(2, model.DiscoverredDeviceServices.Count);
         }
     }
 }

@@ -28,7 +28,8 @@ namespace ConnectSdk.Windows.Wrappers
             {
                 MessageFakeFactory.Instance.NewDatagraMessage += (sender, s) =>
                 {
-                    MessageReceived(this, s);
+                    if (MessageReceived != null)
+                        MessageReceived(this, s);
                 };
             }
         }

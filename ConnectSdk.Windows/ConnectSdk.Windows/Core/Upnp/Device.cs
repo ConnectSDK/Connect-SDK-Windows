@@ -230,7 +230,7 @@ namespace ConnectSdk.Windows.Core.Upnp
                 if (!hasRead) xmlReader.Read();
             }
 
-            //Logger.Current.AddMessage("Received message description: " + device.LocationXml);
+            Logger.Current.AddMessage("Received message description: " + device.LocationXml);
 
             return device;
         }

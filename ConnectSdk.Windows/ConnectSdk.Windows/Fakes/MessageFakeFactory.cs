@@ -51,8 +51,9 @@ namespace ConnectSdk.Windows.Fakes
 
         public async Task<HttpResponseMessage> GetResponseMessage(string url)
         {
-            //StorageFile file = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///Fakes/LGWebOSLocationXML.txt"));
-            StorageFile file = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///Fakes/xbox.xml"));
+            //StorageFile file = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///Fakes/LGWebOSLocation.xml"));
+            StorageFile file = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///Fakes/NetcastLocation.xml"));
+            //StorageFile file = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///Fakes/XboxLocation.xml"));
             string locationXMLMessage;
 
             using (StreamReader stream = new StreamReader(await file.OpenStreamForReadAsync()))

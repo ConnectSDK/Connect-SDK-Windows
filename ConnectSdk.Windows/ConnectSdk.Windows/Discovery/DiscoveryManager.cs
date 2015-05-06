@@ -30,7 +30,6 @@ using ConnectSdk.Windows.Etc.Helper;
 using ConnectSdk.Windows.Service;
 using ConnectSdk.Windows.Service.Command;
 using ConnectSdk.Windows.Service.Config;
-using Microsoft.VisualBasic.CompilerServices;
 
 namespace ConnectSdk.Windows.Discovery
 {
@@ -103,86 +102,7 @@ namespace ConnectSdk.Windows.Discovery
 
             capabilityFilters = new List<CapabilityFilter>();
             PairingLevel = PairingLevelEnum.Off;
-
-            //TODO : check the code below. why do we do this?
-
-            // WifiManager wifiMgr = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-            //multicastLock = wifiMgr.createMulticastLock("Connect SDK");
-            //multicastLock.setReferenceCounted(true);
-
-            //capabilityFilters = new ArrayList<CapabilityFilter>();
-            //pairingLevel = PairingLevel.OFF;
-
-            //receiver = new BroadcastReceiver() { 
-
-            //    @Override 
-            //    public void onReceive(Context context, Intent intent) { 
-            //        String action = intent.getAction();
-
-            //        if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
-            //            NetworkInfo networkInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-
-            //            switch (networkInfo.getState()) {
-            //            case CONNECTED:
-            //                if (mSearching) {
-            //                    for (DiscoveryProvider provider : discoveryProviders) {
-            //                        provider.restart();
-            //                    }
-            //                }
-
-            //                break;
-
-            //            case DISCONNECTED:
-            //                Log.w("Connect SDK", "Network connection is disconnected"); 
-
-            //                for (DiscoveryProvider provider : discoveryProviders) {
-            //                    provider.reset();
-            //                }
-
-            //                allDevices.clear();
-
-            //                for (ConnectableDevice device: compatibleDevices.values()) {
-            //                    handleDeviceLoss(device);
-            //                }
-            //                compatibleDevices.clear();
-
-            //                break;
-
-            //            case CONNECTING:
-            //                break;
-            //            case DISCONNECTING:
-            //                break;
-            //            case SUSPENDED:
-            //                break;
-            //            case UNKNOWN:
-            //                break;
-            //            }
-            //        }
-            //    } 
-            //};
-
-            //registerBroadcastReceiver();
         }
-
-/*
-        private void RegisterBroadcastReceiver()
-        {
-            if (isBroadcastReceiverRegistered == false)
-            {
-                isBroadcastReceiverRegistered = true;
-            }
-        }
-*/
-
-/*
-        private void UnregisterBroadcastReceiver()
-        {
-            if (isBroadcastReceiverRegistered)
-            {
-                isBroadcastReceiverRegistered = false;
-            }
-        }
-*/
 
         public void AddListener(IDiscoveryManagerListener listener)
         {
@@ -411,7 +331,7 @@ namespace ConnectSdk.Windows.Discovery
 
         public bool IsNetcast(ServiceDescription description)
         {
-            bool isNetcastTV = false;
+            bool isNetcastTv = false;
 
             var modelName = description.ModelName;
             var modelDescription = description.ModelDescription;
@@ -420,19 +340,14 @@ namespace ConnectSdk.Windows.Discovery
             {
                 if (modelDescription != null && !(modelDescription.ToUpper().Contains("WEBOS")))
                 {
-                    if (description.ServiceId.Equals(NetcastTvService.Id)) ;
+                    if (description.ServiceId.Equals(NetcastTvService.Id)) 
                     {
-                        isNetcastTV = true;
+                        isNetcastTv = true;
                     }
                 }
             }
 
-            return isNetcastTV;
-
-
-
-            if (modelName == null || !modelName.ToUpper().Equals("LG TV")) return false;
-            return modelDescription != null && !modelDescription.ToUpper().Contains("WEBOS");
+            return isNetcastTv;
         }
 
         public ConcurrentDictionary<string, ConnectableDevice> GetAllDevices()
@@ -519,28 +434,29 @@ namespace ConnectSdk.Windows.Discovery
 
         public void OnServiceRemoved(IDiscoveryProvider provider, ServiceDescription serviceDescription)
         {
-            if (serviceDescription == null)
-                Logger.Current.AddMessage(string.Format("Service removed: {0}({1})", "unknown service"));
-            else
+            Logger.Current.AddMessage(serviceDescription == null
+                ? string.Format("Service removed: {0}", "unknown service")
+                : string.Format("Service removed: {0}", serviceDescription.FriendlyName));
+
+            if (serviceDescription != null)
             {
-                Logger.Current.AddMessage(string.Format("Service removed: {0}", serviceDescription.FriendlyName));
-            }
-            var device = allDevices[serviceDescription.IpAddress];
+                var device = allDevices[serviceDescription.IpAddress];
 
-            if (device != null)
-            {
-                device.RemoveServiceWithId(serviceDescription.ServiceId);
-
-                if (device.GetServices().Count == 0)
+                if (device != null)
                 {
-                    ConnectableDevice dev;
-                    allDevices.TryRemove(serviceDescription.IpAddress,out dev);
+                    device.RemoveServiceWithId(serviceDescription.ServiceId);
 
-                    HandleDeviceLoss(device);
-                }
-                else
-                {
-                    HandleDeviceUpdate(device);
+                    if (device.GetServices().Count == 0)
+                    {
+                        ConnectableDevice dev;
+                        allDevices.TryRemove(serviceDescription.IpAddress,out dev);
+
+                        HandleDeviceLoss(device);
+                    }
+                    else
+                    {
+                        HandleDeviceUpdate(device);
+                    }
                 }
             }
         }

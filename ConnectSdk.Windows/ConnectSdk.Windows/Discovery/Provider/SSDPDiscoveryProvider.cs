@@ -79,7 +79,7 @@ namespace ConnectSdk.Windows.Discovery.Provider
         private void SsdpSocketOnMessageReceivedChanged(object sender, string message)
         {
             HandleDatagramPacket(new ParsedDatagram(message));
-            //Logger.Current.AddMessage("SSDPDiscoveryProvider received message: " + message);
+            Logger.Current.AddMessage("SSDPDiscoveryProvider received message: " + message);
         }
 
 
