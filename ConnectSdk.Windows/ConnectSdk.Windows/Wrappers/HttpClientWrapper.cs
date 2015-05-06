@@ -1,13 +1,13 @@
 using System.Net.Http;
 using ConnectSdk.Windows.Fakes;
 
-namespace ConnectSdk.Windows.Core.Upnp
+namespace ConnectSdk.Windows.Wrappers
 {
-    public class HttpClientFacade
+    public class HttpClientWrapper
     {
         private readonly HttpClient client;
 
-        public HttpClientFacade()
+        public HttpClientWrapper()
         {
             client = new HttpClient();
         }

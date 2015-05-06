@@ -59,8 +59,8 @@
     <Compile Include="Core\TextInputStatusInfo.cs" />
     <Compile Include="Core\TextInputType.cs" />
     <Compile Include="Core\Upnp\Device.cs" />
-    <Compile Include="Core\Upnp\HttpClientFacade.cs" />
-    <Compile Include="Discovery\Provider\ssdp\DatagramSocketFacade.cs" />
+    <Compile Include="Wrappers\HttpClientWrapper.cs" />
+    <Compile Include="Wrappers\DatagramSocketWrapper.cs" />
     <Compile Include="Discovery\Provider\ssdp\Icon.cs" />
     <Compile Include="Discovery\Provider\ssdp\Service.cs" />
     <Compile Include="Core\Upnp\Ssdp\MessageReceivedArgs.cs" />

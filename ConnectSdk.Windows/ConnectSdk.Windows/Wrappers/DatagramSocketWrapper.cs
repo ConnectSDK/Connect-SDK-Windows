@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Net.Http;
 using Windows.Foundation;
 using Windows.Networking;
 using Windows.Networking.Connectivity;
@@ -8,9 +7,9 @@ using Windows.Networking.Sockets;
 using Windows.Storage.Streams;
 using ConnectSdk.Windows.Fakes;
 
-namespace ConnectSdk.Windows.Discovery.Provider.ssdp
+namespace ConnectSdk.Windows.Wrappers
 {
-    public class DatagramSocketFacade : IDisposable
+    public class DatagramSocketWrapper : IDisposable
     {
         private DatagramSocket socket;
         public event EventHandler<string> MessageReceived;
@@ -20,7 +19,7 @@ namespace ConnectSdk.Windows.Discovery.Provider.ssdp
             return socket.BindServiceNameAsync(localServiceName, adapter);
         }
 
-        public DatagramSocketFacade()
+        public DatagramSocketWrapper()
         {
             socket = new DatagramSocket();
             socket.MessageReceived += SocketOnMessageReceived;

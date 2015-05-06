@@ -29,6 +29,7 @@ using System.Xml;
 using ConnectSdk.Windows.Core.Upnp.Ssdp;
 using ConnectSdk.Windows.Discovery.Provider.ssdp;
 using ConnectSdk.Windows.Etc.Helper;
+using ConnectSdk.Windows.Wrappers;
 
 namespace ConnectSdk.Windows.Core.Upnp
 {
@@ -148,7 +149,7 @@ namespace ConnectSdk.Windows.Core.Upnp
 
             var device = newDevice;
 
-            var cl = new HttpClientFacade();
+            var cl = new HttpClientWrapper();
             var response = cl.GetAsync(url);
             if (device.Headers == null)
                 device.Headers = new Dictionary<string, List<string>>();

@@ -27,6 +27,7 @@ using Windows.Networking;
 using Windows.Networking.Connectivity;
 using ConnectSdk.Windows.Core.Upnp.Ssdp;
 using ConnectSdk.Windows.Etc.Helper;
+using ConnectSdk.Windows.Wrappers;
 
 namespace ConnectSdk.Windows.Discovery.Provider.ssdp
 {
@@ -36,7 +37,7 @@ namespace ConnectSdk.Windows.Discovery.Provider.ssdp
         public event EventHandler<string> NotifyReceivedChanged;
         public delegate void EventHandler(object sender, EventArgs e);
 
-        private DatagramSocketFacade socket;
+        private DatagramSocketWrapper socket;
 
         public bool IsConnected { get; private set; }
 
@@ -48,7 +49,7 @@ namespace ConnectSdk.Windows.Discovery.Provider.ssdp
         public async Task<int> Send(string data)
         {
 
-            socket = new DatagramSocketFacade();
+            socket = new DatagramSocketWrapper();
             var profile = NetworkInformation.GetInternetConnectionProfile();
 
 
