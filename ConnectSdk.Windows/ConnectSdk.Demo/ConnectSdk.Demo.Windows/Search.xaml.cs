@@ -120,7 +120,7 @@ namespace ConnectSdk.Demo
             base.OnNavigatedTo(e);
 
             model.SelectedDevice = null;
-            model.DiscoverredTvList.Clear();
+            model.DiscoverredDeviceServices.Clear();
 
             SearchTvs();
         }

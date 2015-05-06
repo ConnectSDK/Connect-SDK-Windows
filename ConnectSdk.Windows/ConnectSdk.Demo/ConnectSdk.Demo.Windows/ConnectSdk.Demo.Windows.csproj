@@ -137,9 +137,6 @@
     <Content Include="Assets\SmallLogo.scale-100.png" />
     <Content Include="Assets\SplashScreen.scale-100.png" />
     <Content Include="Assets\StoreLogo.scale-100.png" />
-    <Content Include="Fakes\LGWebOSLocationXML.txt" />
-    <Content Include="Fakes\SSDP.txt" />
-    <Content Include="Fakes\xbox.xml" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="Main.xaml">

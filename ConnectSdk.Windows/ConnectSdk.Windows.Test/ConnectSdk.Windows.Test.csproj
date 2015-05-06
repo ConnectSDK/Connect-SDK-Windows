@@ -113,7 +113,9 @@
     <SDKReference Include="TestPlatform, Version=11.0" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="UnitTest1.cs" />
+    <Compile Include="DiscoveryManagerListener.cs" />
+    <Compile Include="Model.cs" />
+    <Compile Include="TestConnect.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -123,6 +125,15 @@
     <None Include="ConnectSdk.Windows.Test_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Fakes\LGWebOSLocationXML.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Fakes\SSDP.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Fakes\xbox.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Images\UnitTestLogo.scale-100.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -135,6 +146,12 @@
     <Content Include="Images\UnitTestStoreLogo.scale-100.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ConnectSdk.Windows\ConnectSdk.Windows.csproj">
+      <Project>{CC946AFF-1338-4A99-8BFA-3D028BDB1E38}</Project>
+      <Name>ConnectSdk.Windows</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">
     <VisualStudioVersion>12.0</VisualStudioVersion>

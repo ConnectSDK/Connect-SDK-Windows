@@ -44,7 +44,6 @@ namespace ConnectSdk.Windows.Fakes
 
             for (int i = 0; i < messages.Count; i++)
             {
-                await Task.Delay(TimeSpan.FromSeconds(1));
                 if (NewDatagraMessage != null)
                     NewDatagraMessage(this, messages[i]);
             }

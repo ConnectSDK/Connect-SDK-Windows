@@ -1,16 +1,11 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using Windows.UI.Core;
-using Windows.UI.Xaml;
 using ConnectSdk.Demo.Annotations;
 using ConnectSdk.Windows.Core;
 using ConnectSdk.Windows.Device;
-using ConnectSdk.Windows.Etc.Helper;
 using ConnectSdk.Windows.Service;
 using ConnectSdk.Windows.Service.Capability;
 using UpdateControls.Collections;
-using Windows.ApplicationModel.Core;
-using UpdateControls.Fields;
 
 namespace ConnectSdk.Demo.Demo
 {
@@ -18,7 +13,6 @@ namespace ConnectSdk.Demo.Demo
     {
         private ConnectableDevice selectedDevice;
         private string textInput;
-        private string logContent;
 
         public ConnectableDevice SelectedDevice
         {
@@ -40,26 +34,19 @@ namespace ConnectSdk.Demo.Demo
             }
         }
 
-        public IndependentList<DeviceServiceViewModel> DiscoverredTvList { get; set; }
+        public IndependentList<DeviceServiceViewModel> DiscoverredDeviceServices { get; set; }
 
         public IndependentList<AppInfo> Apps { get; set; }
 
         public IndependentList<ChannelInfo> Channels { get; set; }
 
-        public string LogContent
-        {
-            get { return logContent; }
-            set { logContent = value; OnPropertyChanged(); }
-        }
-
         public Model()
         {
-            DiscoverredTvList = new IndependentList<DeviceServiceViewModel>();
+            DiscoverredDeviceServices = new IndependentList<DeviceServiceViewModel>();
             Apps = new IndependentList<AppInfo>();
             Channels = new IndependentList<ChannelInfo>();
             selectedDevice = new ConnectableDevice();
         }
-
 
         public event PropertyChangedEventHandler PropertyChanged;
 

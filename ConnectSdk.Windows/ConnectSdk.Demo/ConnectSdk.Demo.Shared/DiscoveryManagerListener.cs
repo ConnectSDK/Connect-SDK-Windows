@@ -18,23 +18,20 @@ namespace ConnectSdk.Demo.Demo
         {
             foreach (var deviceService in device.GetServices())
             {
-                App.ApplicationModel.DiscoverredTvList.Add(new DeviceServiceViewModel() {Device = device, Service = deviceService});
+                App.ApplicationModel.DiscoverredDeviceServices.Add(new DeviceServiceViewModel() { Device = device, Service = deviceService });
             }
-            //if (App.ApplicationModel.DiscoverredTvList.FirstOrDefault(x => x.DeviceType == device.DeviceType && x.IpAddress == device.IpAddress) == null)
-            //    App.ApplicationModel.DiscoverredTvList.Add(device);
         }
 
         public void OnDeviceUpdated(DiscoveryManager manager, ConnectableDevice device)
         {
             foreach (var deviceService in device.GetServices())
             {
-                var f = (from t in App.ApplicationModel.DiscoverredTvList
+                var f = (from t in App.ApplicationModel.DiscoverredDeviceServices
                     where t.Service.ServiceConfig.ServiceUuid == deviceService.ServiceConfig.ServiceUuid
                     select t).FirstOrDefault();
                 if (f == null)
-                    App.ApplicationModel.DiscoverredTvList.Add(new DeviceServiceViewModel() { Device = device, Service = deviceService });
+                    App.ApplicationModel.DiscoverredDeviceServices.Add(new DeviceServiceViewModel() { Device = device, Service = deviceService });
             }
-            //throw new NotImplementedException();
         }
 
         public void OnDeviceRemoved(DiscoveryManager manager, ConnectableDevice device)
