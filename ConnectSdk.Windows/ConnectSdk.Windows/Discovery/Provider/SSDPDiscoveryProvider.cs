@@ -36,7 +36,8 @@ namespace ConnectSdk.Windows.Discovery.Provider
     {
         // ReSharper disable InconsistentNaming
         private const int RESCAN_INTERVAL = 10000;
-        private const int RESCAN_ATTEMPTS = 3;
+        //todo: set this to 3 for production
+        private const int RESCAN_ATTEMPTS = 1;
         private const int SSDP_TIMEOUT = RESCAN_INTERVAL * RESCAN_ATTEMPTS;
         // ReSharper restore InconsistentNaming
 

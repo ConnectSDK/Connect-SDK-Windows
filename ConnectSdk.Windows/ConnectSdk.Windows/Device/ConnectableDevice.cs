@@ -68,20 +68,20 @@ namespace ConnectSdk.Windows.Device
             set { id = value; }
         }
 
-        public string DeviceType
-        {
-            get
-            {
-                try
-                {
-                    return (from t in services select t.Key).FirstOrDefault();
-                }
-                catch
-                {
-                    return "Unknown type of device";
-                }
-            }
-        }
+        //public string DeviceType
+        //{
+        //    get
+        //    {
+        //        try
+        //        {
+        //            return (from t in services select t.Key).FirstOrDefault();
+        //        }
+        //        catch
+        //        {
+        //            return "Unknown type of device";
+        //        }
+        //    }
+        //}
 
         public string IpAddress { get; set; }
         public string FriendlyName { get; set; }

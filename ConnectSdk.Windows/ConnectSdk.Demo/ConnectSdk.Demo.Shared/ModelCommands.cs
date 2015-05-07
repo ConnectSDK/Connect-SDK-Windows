@@ -82,7 +82,7 @@ namespace ConnectSdk.Demo.Demo
                        (qMenuCommand =
                            new Command(QMenuExecute)
                            {
-                               Enabled = selectedDevice.DeviceType.ToUpper().Contains("Netcast")
+                               Enabled = false
                            });
             }
             set { qMenuCommand = value; }
@@ -90,7 +90,7 @@ namespace ConnectSdk.Demo.Demo
 
         public Command RatioCommand
         {
-            get { return ratioCommand ?? (ratioCommand = new Command(RatioExecute) { Enabled = selectedDevice.DeviceType.ToUpper().Contains("Netcast") }); }
+            get { return ratioCommand ?? (ratioCommand = new Command(RatioExecute) { Enabled = false }); }
             set { ratioCommand = value; }
         }
 
