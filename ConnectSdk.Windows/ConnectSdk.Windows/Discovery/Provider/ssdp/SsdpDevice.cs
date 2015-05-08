@@ -210,6 +210,8 @@ namespace ConnectSdk.Windows.Discovery.Provider.ssdp
                     if (ServiceList == null)
                         ServiceList = new List<Service>();
                     ServiceList.Add(new Service());
+                    ServiceList[ServiceList.Count - 1].BaseUrl = BaseUrl;
+
                 }
 
                 if (xmlReader.Name == Service.TAG_SERVICE_TYPE)

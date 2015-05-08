@@ -82,7 +82,7 @@ namespace ConnectSdk.Demo.Demo
                        (qMenuCommand =
                            new Command(QMenuExecute)
                            {
-                               Enabled = false
+                               Enabled = selectedDevice.HasCapability(KeyControl.SendKey)
                            });
             }
             set { qMenuCommand = value; }
@@ -90,7 +90,15 @@ namespace ConnectSdk.Demo.Demo
 
         public Command RatioCommand
         {
-            get { return ratioCommand ?? (ratioCommand = new Command(RatioExecute) { Enabled = false }); }
+            get
+            {
+                return ratioCommand ??
+                    (ratioCommand =
+                    new Command(RatioExecute)
+                    {
+                        Enabled = selectedDevice.HasCapability(KeyControl.SendKey)
+                    });
+            }
             set { ratioCommand = value; }
         }
 

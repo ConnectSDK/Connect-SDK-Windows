@@ -18,7 +18,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- #endregion
+#endregion
 namespace ConnectSdk.Windows.Service.Capability
 {
     public class KeyControl : CapabilityMethods
@@ -42,9 +42,31 @@ namespace ConnectSdk.Windows.Service.Capability
             Right,
             Ok,
             Back,
-            Home
+            Home,
+            SendKey
         };
     }
+
+    public enum KeyCode
+    {
+        // ReSharper disable InconsistentNaming
+        NUM_0 = 0,
+        NUM_1 = 1,
+        NUM_2 = 2,
+        NUM_3 = 3,
+        NUM_4 = 4,
+        NUM_5 = 5,
+        NUM_6 = 6,
+        NUM_7 = 7,
+        NUM_8 = 8,
+        NUM_9 = 9,
+
+        DASH = 10,
+        ENTER = 11
+        // ReSharper restore InconsistentNaming
+
+    }
+
 }
 
 

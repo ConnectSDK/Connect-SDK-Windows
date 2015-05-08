@@ -1711,7 +1711,7 @@ namespace ConnectSdk.Windows.Service
             return CapabilityPriorityLevel.High;
         }
 
-        private void SendSpecialKey(String key)
+        private void SendSpecialKey(String key, ResponseListener listener)
         {
             if (mouseSocket != null)
             {
@@ -1736,10 +1736,11 @@ namespace ConnectSdk.Windows.Service
                         }
 
                         mouseSocket.Button(key);
+                        Util.PostSuccess(listener, null);
                     },
                     serviceCommandError =>
                     {
-
+                        Util.PostError(listener, null);
                     }
                 );
 
@@ -1749,22 +1750,22 @@ namespace ConnectSdk.Windows.Service
 
         public void Up(ResponseListener listener)
         {
-            SendSpecialKey("UP");
+            SendSpecialKey("UP", listener);
         }
 
         public void Down(ResponseListener listener)
         {
-            SendSpecialKey("DOWN");
+            SendSpecialKey("DOWN", listener);
         }
 
         public void Left(ResponseListener listener)
         {
-            SendSpecialKey("LEFT");
+            SendSpecialKey("LEFT", listener);
         }
 
         public void Right(ResponseListener listener)
         {
-            SendSpecialKey("RIGHT");
+            SendSpecialKey("RIGHT", listener);
         }
 
         public void Ok(ResponseListener listener)
@@ -1805,17 +1806,39 @@ namespace ConnectSdk.Windows.Service
 
         public void Back(ResponseListener listener)
         {
-            SendSpecialKey("BACK");
+            SendSpecialKey("Back", listener);
         }
 
         public void Home(ResponseListener listener)
         {
-            SendSpecialKey("HOME");
+            SendSpecialKey("HOME", listener);
         }
 
-        public void SendKeyCode(int keyCode, ResponseListener pListener)
+        public void SendKeyCode(KeyCode keyCode, ResponseListener pListener)
         {
-            Util.PostError(pListener, ServiceCommandError.NotSupported());
+            switch (keyCode)
+            {
+                case KeyCode.NUM_0:
+                case KeyCode.NUM_1:
+                case KeyCode.NUM_2:
+                case KeyCode.NUM_3:
+                case KeyCode.NUM_4:
+                case KeyCode.NUM_5:
+                case KeyCode.NUM_6:
+                case KeyCode.NUM_7:
+                case KeyCode.NUM_8:
+                case KeyCode.NUM_9:
+                    SendSpecialKey(keyCode.ToString(), pListener);
+                    break;
+                case KeyCode.DASH:
+                    SendSpecialKey("DASH", pListener);
+                    break;
+                case KeyCode.ENTER:
+                    SendSpecialKey("ENTER", pListener); break;
+                default:
+                    Util.PostError(pListener, new ServiceCommandError(0, "The keycode is not available"));
+                    break;
+            }
         }
 
         #endregion

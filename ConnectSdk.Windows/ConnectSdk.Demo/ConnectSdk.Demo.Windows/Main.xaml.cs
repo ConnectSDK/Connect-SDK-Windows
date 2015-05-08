@@ -229,7 +229,8 @@ namespace ConnectSdk.Demo
 
             }
             );
-            webostvService.LaunchAppStore("", responseListener);
+            if (launchSession == null && webostvService != null)
+                webostvService.LaunchAppStore("", responseListener);
         }
 
         private void GetAppList_Click(object sender, RoutedEventArgs e)
@@ -263,8 +264,8 @@ namespace ConnectSdk.Demo
 
                 }
             );
-
-            webostvService.GetAppList(appListResponseListener);
+            if (launchSession == null && webostvService != null)
+                webostvService.GetAppList(appListResponseListener);
         }
 
         private void LauncApp_Click(object sender, RoutedEventArgs e)
@@ -286,8 +287,8 @@ namespace ConnectSdk.Demo
 
                 }
             );
-
-            webostvService.LaunchApp(model.Apps[1].Id, responseListener);
+            if (launchSession == null && webostvService != null)
+                webostvService.LaunchApp(model.Apps[1].Id, responseListener);
         }
 
         private void CloseApp_Click(object sender, RoutedEventArgs e)
@@ -305,8 +306,8 @@ namespace ConnectSdk.Demo
 
                 }
             );
-
-            webostvService.CloseApp(applaunchSession, responseListener);
+            if (launchSession == null && webostvService != null)
+                webostvService.CloseApp(applaunchSession, responseListener);
             
         }
 
@@ -325,8 +326,8 @@ namespace ConnectSdk.Demo
 
                 }
             );
-
-            webostvService.GetRunningApp(responseListener);
+            if (launchSession == null && webostvService != null)
+                webostvService.GetRunningApp(responseListener);
         }
 
 
@@ -334,7 +335,7 @@ namespace ConnectSdk.Demo
         {
             var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
 
-            if (launchSession == null)
+            if (launchSession == null && webostvService != null)
             {
                 const string webappname = "MediaPlayer";
 
@@ -382,7 +383,7 @@ namespace ConnectSdk.Demo
         {
             var webostvService = (WebOstvService)model.SelectedDevice.GetServiceByName(WebOstvService.Id);
 
-            if (launchSession == null)
+            if (launchSession == null && webostvService != null)
             {
                 const string webappname = "MediaPlayer";
                 var listener = new ResponseListener

@@ -32,13 +32,13 @@ using System.Xml.Serialization;
 using Windows.Data.Json;
 using Windows.Foundation;
 using ConnectSdk.Windows.Core;
-using ConnectSdk.Windows.Device.Netcast;
 using ConnectSdk.Windows.Discovery;
 using ConnectSdk.Windows.Etc.Helper;
 using ConnectSdk.Windows.Service.Capability;
 using ConnectSdk.Windows.Service.Capability.Listeners;
 using ConnectSdk.Windows.Service.Command;
 using ConnectSdk.Windows.Service.Config;
+using ConnectSdk.Windows.Service.NetCast;
 using ConnectSdk.Windows.Service.Sessions;
 
 namespace ConnectSdk.Windows.Service
@@ -941,12 +941,12 @@ namespace ConnectSdk.Windows.Service
 
         public void ChannelUp(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.ChannelUp, listener);
+            SendVirtualKeyCode((int)NetcastVirtualKeycodes.CHANNEL_UP, listener);
         }
 
         public void ChannelDown(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.ChannelDown, listener);
+            SendVirtualKeyCode((int)NetcastVirtualKeycodes.CHANNEL_DOWN, listener);
         }
 
         public void SetChannel(ChannelInfo channelInfo, ResponseListener listener)
@@ -1097,7 +1097,7 @@ namespace ConnectSdk.Windows.Service
                 {
                     if (enabled != (bool)loadEventArg)
                     {
-                        SendKeyCode((int)VirtualKeycodes.Video3D, listener);
+                        SendVirtualKeyCode((int)NetcastVirtualKeycodes.VIDEO_3D, listener);
                     }
                 },
                 serviceCommandError => Util.PostError(listener, serviceCommandError)
@@ -1157,12 +1157,12 @@ namespace ConnectSdk.Windows.Service
 
         public void VolumeUp(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.VolumeUp, listener);
+            SendVirtualKeyCode((int)NetcastVirtualKeycodes.VOLUME_UP, listener);
         }
 
         public void VolumeDown(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.VolumeDown, listener);
+            SendVirtualKeyCode((int)NetcastVirtualKeycodes.VOLUME_DOWN, listener);
         }
 
         public void SetVolume(float volume, ResponseListener listener)
@@ -1186,7 +1186,7 @@ namespace ConnectSdk.Windows.Service
         {
             var responseListener = new ResponseListener
             (
-                loadEventArg => SendKeyCode((int)VirtualKeycodes.Mute, listener),
+                loadEventArg => SendVirtualKeyCode((int)NetcastVirtualKeycodes.MUTE, listener),
                 serviceCommandError => Util.PostError(listener, serviceCommandError)
             );
             GetVolumeStatus(responseListener);
@@ -1373,27 +1373,27 @@ namespace ConnectSdk.Windows.Service
 
         public void Play(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.Play, listener);
+            SendVirtualKeyCode((int)NetcastVirtualKeycodes.PLAY, listener);
         }
 
         public void Pause(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.Pause, listener);
+            SendVirtualKeyCode((int)NetcastVirtualKeycodes.PAUSE, listener);
         }
 
         public void Stop(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.Stop, listener);
+            SendVirtualKeyCode((int)NetcastVirtualKeycodes.STOP, listener);
         }
 
         public void Rewind(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.Rewind, listener);
+            SendVirtualKeyCode((int)NetcastVirtualKeycodes.REWIND, listener);
         }
 
         public void FastForward(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.FastForward, listener);
+            SendVirtualKeyCode((int)NetcastVirtualKeycodes.FAST_FORWARD, listener);
         }
 
         public void Seek(long position, ResponseListener listener)
@@ -1618,7 +1618,7 @@ namespace ConnectSdk.Windows.Service
         {
             var responseListener = new ResponseListener();
             HandleKeyboardInput("EditEnd", keyboardstring.ToString());
-            SendKeyCode((int)VirtualKeycodes.Red, responseListener); // Send RED Key to enter the "ENTER" button
+            SendVirtualKeyCode((int)NetcastVirtualKeycodes.RED, responseListener); // Send RED Key to enter the "ENTER" button
         }
 
         public void SendDelete()
@@ -1665,37 +1665,37 @@ namespace ConnectSdk.Windows.Service
 
         public void Up(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.KeyUp, listener);
+            SendVirtualKeyCode((int)NetcastVirtualKeycodes.KEY_DOWN, listener);
         }
 
         public void Down(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.KeyDown, listener);
+            SendVirtualKeyCode((int)NetcastVirtualKeycodes.KEY_DOWN, listener);
         }
 
         public void Left(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.KeyLeft, listener);
+            SendVirtualKeyCode((int)NetcastVirtualKeycodes.KEY_RIGHT, listener);
         }
 
         public void Right(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.KeyRight, listener);
+            SendVirtualKeyCode((int)NetcastVirtualKeycodes.KEY_RIGHT, listener);
         }
 
         public void Ok(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.Ok, listener);
+            SendVirtualKeyCode((int)NetcastVirtualKeycodes.OK, listener);
         }
 
         public void Back(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.Back, listener);
+            SendVirtualKeyCode((int)NetcastVirtualKeycodes.BACK, listener);
         }
 
         public void Home(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.Home, listener);
+            SendVirtualKeyCode((int)NetcastVirtualKeycodes.HOME, listener);
         }
 
         #endregion
@@ -1714,7 +1714,7 @@ namespace ConnectSdk.Windows.Service
 
         public void PowerOff(ResponseListener listener)
         {
-            SendKeyCode((int)VirtualKeycodes.Power, new ResponseListener());
+            SendVirtualKeyCode((int)NetcastVirtualKeycodes.POWER, new ResponseListener());
         }
 
         public void PowerOn(ResponseListener listener)
@@ -1751,20 +1751,66 @@ namespace ConnectSdk.Windows.Service
         }
 
 
-        public void SendKeyCode(int keycode, ResponseListener pListener)
+        public void SendKeyCode(KeyCode keycode, ResponseListener pListener)
+        {
+            switch (keycode)
+            {
+                case KeyCode.NUM_0:
+                    SendVirtualKeyCode((int)NetcastVirtualKeycodes.NUMBER_0, pListener);
+                    break;
+                case KeyCode.NUM_1:
+                    SendVirtualKeyCode((int)NetcastVirtualKeycodes.NUMBER_1, pListener);
+                    break;
+                case KeyCode.NUM_2:
+                    SendVirtualKeyCode((int)NetcastVirtualKeycodes.NUMBER_2, pListener);
+                    break;
+                case KeyCode.NUM_3:
+                    SendVirtualKeyCode((int)NetcastVirtualKeycodes.NUMBER_3, pListener);
+                    break;
+                case KeyCode.NUM_4:
+                    SendVirtualKeyCode((int)NetcastVirtualKeycodes.NUMBER_4, pListener);
+                    break;
+                case KeyCode.NUM_5:
+                    SendVirtualKeyCode((int)NetcastVirtualKeycodes.NUMBER_5, pListener);
+                    break;
+                case KeyCode.NUM_6:
+                    SendVirtualKeyCode((int)NetcastVirtualKeycodes.NUMBER_6, pListener);
+                    break;
+                case KeyCode.NUM_7:
+                    SendVirtualKeyCode((int)NetcastVirtualKeycodes.NUMBER_7, pListener);
+                    break;
+                case KeyCode.NUM_8:
+                    SendVirtualKeyCode((int)NetcastVirtualKeycodes.NUMBER_8, pListener);
+                    break;
+                case KeyCode.NUM_9:
+                    SendVirtualKeyCode((int)NetcastVirtualKeycodes.NUMBER_9, pListener);
+                    break;
+                case KeyCode.DASH:
+                    SendVirtualKeyCode((int)NetcastVirtualKeycodes.DASH, pListener);
+                    break;
+                case KeyCode.ENTER:
+                    SendVirtualKeyCode((int)NetcastVirtualKeycodes.OK, pListener);
+                    break;
+                default:
+                    Util.PostError(pListener, new ServiceCommandError(0, "The keycode is not available"));
+                    break;
+            }
+        }
+
+        private void SendVirtualKeyCode(int keycode, ResponseListener listener)
         {
             var responseListener = new ResponseListener
-            (
+                (
                 loadEventArg =>
                 {
                     var requestUrl = GetUdapRequestUrl(UdapPathCommand);
                     var httpMessage = GetHttpMessageForHandleKeyInput(keycode);
 
-                    var request = new ServiceCommand(this, requestUrl, httpMessage, pListener);
+                    var request = new ServiceCommand(this, requestUrl, httpMessage, listener);
                     request.Send();
                 },
-                serviceCommandError => Util.PostError(pListener, serviceCommandError)
-            );
+                serviceCommandError => Util.PostError(listener, serviceCommandError)
+                );
 
             SetMouseCursorVisible(false, responseListener);
         }
@@ -1810,77 +1856,6 @@ namespace ConnectSdk.Windows.Service
         public override void Unsubscribe(UrlServiceSubscription subscription)
         {
             subscriptions.Remove(subscription);
-        }
-
-        protected void SetCapabilities()
-        {
-
-            if (DiscoveryManager.GetInstance().PairingLevel == DiscoveryManager.PairingLevelEnum.On)
-            {
-                AddCapabilities(TextInputControl.Capabilities.ToList());
-                AddCapabilities(MouseControl.Capabilities.ToList());
-                AddCapabilities(KeyControl.Capabilities.ToList());
-                AddCapabilities(MediaPlayer.Capabilities.ToList());
-
-                AddCapabilities(
-                    new List<string>
-                    {
-                        PowerControl.Off,
-
-                        MediaControl.Play,
-                        MediaControl.Pause,
-                        MediaControl.Stop,
-                        MediaControl.Rewind,
-                        MediaControl.FastForward,
-                        MediaControl.Duration,
-                        MediaControl.Position,
-                        MediaControl.Seek, 
-                        //MediaControl.MetaData_Title, 
-                        //MediaControl.MetaData_MimeType, 
-
-                        Launcher.Application,
-                        Launcher.ApplicationClose,
-                        Launcher.ApplicationList,
-                        Launcher.Browser,
-                        Launcher.Hulu,
-                        Launcher.Netflix,
-                        Launcher.YouTube,
-                        Launcher.AppStore,
-
-                        TvControl.ChannelUp,
-                        TvControl.ChannelDown,
-                        TvControl.ChannelGet,
-                        TvControl.ChannelList,
-                        TvControl.ChannelSubscribe,
-                        TvControl.Get_3D,
-                        TvControl.Set_3D,
-                        TvControl.Subscribe_3D,
-
-                        ExternalInputControl.PickerLaunch,
-                        ExternalInputControl.PickerClose,
-
-                        VolumeControl.VolumeGet,
-                        VolumeControl.VolumeUpDown,
-                        VolumeControl.MuteGet,
-                        VolumeControl.MuteSet
-                    }
-                    );
-            }
-            else
-            {
-                AddCapabilities(MediaPlayer.Capabilities.ToList());
-                AddCapabilities(new List<string>
-                {
-                    MediaControl.Play,
-                    MediaControl.Pause,
-                    MediaControl.Stop,
-                    MediaControl.Rewind,
-                    MediaControl.FastForward,
-
-                    Launcher.YouTube
-                }
-                    );
-            }
         }
 
         public void GetPlayState(ResponseListener listener)

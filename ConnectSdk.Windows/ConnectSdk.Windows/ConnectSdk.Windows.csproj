@@ -59,6 +59,7 @@
     <Compile Include="Core\TextInputStatusInfo.cs" />
     <Compile Include="Core\TextInputType.cs" />
     <Compile Include="Core\Upnp\Device.cs" />
+    <Compile Include="Service\NetCast\NetcastVirtualKeycodes.cs" />
     <Compile Include="Wrappers\HttpClientWrapper.cs" />
     <Compile Include="Wrappers\DatagramSocketWrapper.cs" />
     <Compile Include="Discovery\Provider\ssdp\Icon.cs" />
@@ -78,7 +79,6 @@
     <Compile Include="Device\IConnectableDeviceListener.cs" />
     <Compile Include="Device\IConnectableDeviceStore.cs" />
     <Compile Include="Device\Netcast\NetcastChannelParser.cs" />
-    <Compile Include="Device\Netcast\VirtualKeycodes.cs" />
     <Compile Include="Discovery\CapabilityFilter.cs" />
     <Compile Include="Discovery\DiscoveryFilter.cs" />
     <Compile Include="Discovery\DiscoveryManager.cs" />
@@ -164,7 +164,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Service\AirPlay\" />
-    <Folder Include="Service\NetCast\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

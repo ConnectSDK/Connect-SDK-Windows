@@ -1,7 +1,10 @@
-﻿using Windows.UI.Popups;
+﻿using System;
+using Windows.UI.Popups;
 using ConnectSdk.Windows.Device.Netcast;
+using ConnectSdk.Windows.Service;
 using ConnectSdk.Windows.Service.Capability;
 using ConnectSdk.Windows.Service.Capability.Listeners;
+using ConnectSdk.Windows.Service.NetCast;
 using ConnectSdk.Windows.Service.Sessions;
 
 namespace ConnectSdk.Demo.Demo
@@ -41,7 +44,7 @@ namespace ConnectSdk.Demo.Demo
             
             try
             {
-                selectedDevice.GetControl<IKeyControl>().SendKeyCode((int)VirtualKeycodes.QuickMenu, null);
+                throw new NotImplementedException();
             }
             catch
             {
@@ -54,7 +57,7 @@ namespace ConnectSdk.Demo.Demo
         {
             try
             {
-                selectedDevice.GetControl<IKeyControl>().SendKeyCode((int)VirtualKeycodes.AspectRatio, null);
+                throw new NotImplementedException();
             }
             catch
             {

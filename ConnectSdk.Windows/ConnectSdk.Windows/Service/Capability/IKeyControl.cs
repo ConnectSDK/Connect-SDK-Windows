@@ -35,6 +35,6 @@ namespace ConnectSdk.Windows.Service.Capability
         void Ok(ResponseListener listener);
         void Back(ResponseListener listener);
         void Home(ResponseListener listener);
-        void SendKeyCode(int keyCode, ResponseListener pListener);
+        void SendKeyCode(KeyCode keyCode, ResponseListener pListener);
     }
 }
