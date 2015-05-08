@@ -423,7 +423,7 @@ namespace ConnectSdk.Windows.Discovery
 
             AddServiceDescriptionToDevice(serviceDescription, device);
 
-            if (device.GetServices().Count == 0)
+            if (device.Services.Count == 0)
                 return; // we get here when a non-LG DLNA TV is found
 
             if (deviceIsNew)
@@ -446,7 +446,7 @@ namespace ConnectSdk.Windows.Discovery
                 {
                     device.RemoveServiceWithId(serviceDescription.ServiceId);
 
-                    if (device.GetServices().Count == 0)
+                    if (device.Services.Count == 0)
                     {
                         ConnectableDevice dev;
                         allDevices.TryRemove(serviceDescription.IpAddress,out dev);
@@ -498,7 +498,7 @@ namespace ConnectSdk.Windows.Discovery
             var hasType = false;
             var hasService = false;
 
-            foreach (DeviceService service in device.GetServices())
+            foreach (DeviceService service in device.Services)
             {
                 if (!service.ServiceDescription.ServiceId.Equals(desc.ServiceId)) continue;
                 hasType = true;
@@ -518,7 +518,7 @@ namespace ConnectSdk.Windows.Discovery
                     var alreadyAddedService = device.GetServiceByName(desc.ServiceId);
 
                     if (alreadyAddedService != null)
-                        alreadyAddedService.ServiceDescription = desc;
+                        alreadyAddedService.SetServiceDescription(desc);
 
                     return;
                 }
@@ -530,7 +530,7 @@ namespace ConnectSdk.Windows.Discovery
 
             if (deviceService == null) return;
 
-            deviceService.ServiceDescription = desc;
+            deviceService.SetServiceDescription(desc);
             device.AddService(deviceService);
 
 

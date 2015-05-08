@@ -18,14 +18,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- #endregion
+#endregion
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Xml;
+using ConnectSdk.Windows.Core;
+using ConnectSdk.Windows.Core.Upnp;
+using ConnectSdk.Windows.Wrappers;
 
 namespace ConnectSdk.Windows.Discovery.Provider.ssdp
 {
     public class SsdpDevice
     {
+
+        // ReSharper disable InconsistentNaming
+        public static string TAG_DEVICE_TYPE = "deviceType";
+        public static string TAG_FRIENDLY_NAME = "friendlyName";
+        public static string TAG_MANUFACTURER = "manufacturer";
+        public static string TAG_MANUFACTURER_URL = "manufacturerURL";
+        public static string TAG_MODEL_DESCRIPTION = "modelDescription";
+        public static string TAG_MODEL_NAME = "modelName";
+        public static string TAG_MODEL_NUMBER = "modelNumber";
+        public static string TAG_MODEL_URL = "modelURL";
+        public static string TAG_SERIAL_NUMBER = "serialNumber";
+        public static string TAG_UDN = "UDN";
+        public static string TAG_UPC = "UPC";
+        public static string TAG_ICON_LIST = "iconList";
+        public static string TAG_SERVICE_LIST = "serviceList";
+
+        public static string TAG_SEC_CAPABILITY = "sec:Capability";
+        public static string TAG_PORT = "port";
+        public static string TAG_LOCATION = "location";
+        // ReSharper restore InconsistentNaming
+
         /// <summary>
         /// Required. UPnP device type.
         /// </summary>
@@ -103,12 +130,12 @@ namespace ConnectSdk.Windows.Discovery.Provider.ssdp
 
         public Dictionary<string, List<string>> Headers { get; set; }
 
-        public SsdpDevice(String url)
-            : this(new Uri(url))
+        public SsdpDevice(String url, string st)
+            : this(new Uri(url), st)
         {
         }
 
-        public SsdpDevice(Uri urlObject)
+        public SsdpDevice(Uri urlObject, string st)
         {
             IconList = new List<Icon>();
             ServiceList = new List<Service>();
@@ -124,6 +151,80 @@ namespace ConnectSdk.Windows.Discovery.Provider.ssdp
 
         public void Parse(Uri url)
         {
+            var cl = new HttpClientWrapper();
+            var response = cl.GetAsync(url.AbsoluteUri);
+
+            var content = response.Content.ReadAsStreamAsync().Result;
+            var description = new StreamReader(content).ReadToEnd();
+
+            var reader = Util.GenerateStreamFromstring(description);
+            var xmlReader = XmlReader.Create(reader);
+
+            while (!xmlReader.EOF)
+            {
+                var hasRead = false;
+                if (xmlReader.Name == TAG_DEVICE_TYPE)
+                    DeviceType = xmlReader.ReadElementContentAsString(out hasRead);
+                if (xmlReader.Name == TAG_FRIENDLY_NAME)
+                    FriendlyName = xmlReader.ReadElementContentAsString(out hasRead);
+                if (xmlReader.Name == TAG_MODEL_NUMBER)
+                    ModelNumber = xmlReader.ReadElementContentAsString(out hasRead);
+                if (xmlReader.Name == TAG_MANUFACTURER)
+                    Manufacturer = xmlReader.ReadElementContentAsString(out hasRead);
+                if (xmlReader.Name == TAG_MANUFACTURER_URL)
+                    ManufacturerUrl = xmlReader.ReadElementContentAsString(out hasRead);
+                if (xmlReader.Name == TAG_MODEL_DESCRIPTION)
+                    ModelDescription = xmlReader.ReadElementContentAsString(out hasRead);
+
+                if (xmlReader.Name == TAG_MODEL_NAME)
+                    ModelName = xmlReader.ReadElementContentAsString(out hasRead);
+                if (xmlReader.Name == TAG_MODEL_URL)
+                    ModelUrl = xmlReader.ReadElementContentAsString(out hasRead);
+                if (xmlReader.Name == TAG_SERIAL_NUMBER)
+                    SerialNumber = xmlReader.ReadElementContentAsString(out hasRead);
+                if (xmlReader.Name == TAG_UDN)
+                    Udn = xmlReader.ReadElementContentAsString(out hasRead);
+                if (xmlReader.Name == TAG_UPC)
+                    Upc = xmlReader.ReadElementContentAsString(out hasRead);
+
+                if (xmlReader.Name == "icon" && xmlReader.NodeType == XmlNodeType.Element)
+                {
+                    if (IconList == null)
+                        IconList = new List<Icon>();
+                    IconList.Add(new Icon());
+                }
+
+                if (xmlReader.Name == Icon.TagMimeType)
+                    IconList[IconList.Count - 1].MimeType = xmlReader.ReadElementContentAsString(out hasRead);
+                if (xmlReader.Name == Icon.TagWidth)
+                    IconList[IconList.Count - 1].Width = xmlReader.ReadElementContentAsString(out hasRead);
+                if (xmlReader.Name == Icon.TagHeight)
+                    IconList[IconList.Count - 1].Height = xmlReader.ReadElementContentAsString(out hasRead);
+                if (xmlReader.Name == Icon.TagDepth)
+                    IconList[IconList.Count - 1].Depth = xmlReader.ReadElementContentAsString(out hasRead);
+                if (xmlReader.Name == Icon.TagUrl)
+                    IconList[IconList.Count - 1].Url = xmlReader.ReadElementContentAsString(out hasRead);
+
+                if (xmlReader.Name == "service" && xmlReader.NodeType == XmlNodeType.Element)
+                {
+                    if (ServiceList == null)
+                        ServiceList = new List<Service>();
+                    ServiceList.Add(new Service());
+                }
+
+                if (xmlReader.Name == Service.TAG_SERVICE_TYPE)
+                    ServiceList[ServiceList.Count - 1].ServiceType = xmlReader.ReadElementContentAsString(out hasRead);
+                if (xmlReader.Name == Service.TAG_SERVICE_ID)
+                    ServiceList[ServiceList.Count - 1].ServiceId = xmlReader.ReadElementContentAsString(out hasRead);
+                if (xmlReader.Name == Service.TAG_SCPD_URL)
+                    ServiceList[ServiceList.Count - 1].ScpdUrl = xmlReader.ReadElementContentAsString(out hasRead);
+                if (xmlReader.Name == Service.TAG_CONTROL_URL)
+                    ServiceList[ServiceList.Count - 1].ControlUrl = xmlReader.ReadElementContentAsString(out hasRead);
+                if (xmlReader.Name == Service.TAG_EVENTSUB_URL)
+                    ServiceList[ServiceList.Count - 1].EventSubUrl = xmlReader.ReadElementContentAsString(out hasRead);
+
+                if (!hasRead) xmlReader.Read();
+            }
             //SAXParserFactory factory = SAXParserFactory.newInstance();
             //SAXParser saxParser;
 
@@ -157,6 +258,16 @@ namespace ConnectSdk.Windows.Discovery.Provider.ssdp
         public override string ToString()
         {
             return FriendlyName;
+        }
+    }
+
+    public static class XmlReaderExtensions
+    {
+        public static string ReadElementContentAsString(this XmlReader str, out bool changed)
+        {
+            var value = str.ReadElementContentAsString();
+            changed = true;
+            return value;
         }
     }
 }

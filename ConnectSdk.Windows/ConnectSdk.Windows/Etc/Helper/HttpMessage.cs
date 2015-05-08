@@ -40,10 +40,10 @@ namespace ConnectSdk.Windows.Etc.Helper
         public static HttpRequestMessage GetHttpPost(string uri)
         {
             var post = new HttpRequestMessage(HttpMethod.Post, uri);
-            post.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("text/xml")
-            {
-                CharSet = "utf-8"
-            };
+            //post.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("text/xml")
+            //{
+            //    CharSet = "utf-8"
+            //};
 
             return post;
         }

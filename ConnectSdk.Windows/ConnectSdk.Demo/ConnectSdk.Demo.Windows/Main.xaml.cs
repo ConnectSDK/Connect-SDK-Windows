@@ -155,6 +155,7 @@ namespace ConnectSdk.Demo
             (
                 loadEventArg =>
                 {
+                    launchSession = null;
                     //var v = param as LoadEventArgs;
                     //if (v != null)
                     //    launchSession = v.Load.GetPayload() as LaunchSession;
@@ -297,7 +298,7 @@ namespace ConnectSdk.Demo
             (
                 loadEventArg =>
                 {
-
+                    launchSession = null;
                 },
                 serviceCommandError =>
                 {
@@ -306,6 +307,7 @@ namespace ConnectSdk.Demo
             );
 
             webostvService.CloseApp(applaunchSession, responseListener);
+            
         }
 
         private void GetRunningApp_Click(object sender, RoutedEventArgs e)
@@ -350,6 +352,7 @@ namespace ConnectSdk.Demo
                                 loadEventArg2 => webostvService.PlayMedia("http://connectsdk.com/files/8913/9657/0225/test_video.mp4", "video/mp4", "Sintel Trailer", "Blender Open Movie Project", "http://www.connectsdk.com/files/7313/9657/0225/test_video_icon.jpg", false, null),
                                 serviceCommandError =>
                                 {
+
                                 });
 
 
@@ -432,26 +435,27 @@ namespace ConnectSdk.Demo
             var appinfo = e.AddedItems[0] as AppInfo;
             if (appinfo != null)
             {
-                var dservice = model.SelectedDevice.GetServices()[0];
-
-                var responseListener = new ResponseListener
-                (
-                    loadEventArg =>
+                foreach (var deviceService in model.SelectedDevice.Services)
+                {
+                    if (deviceService is ILauncher)
                     {
+                        var responseListener = new ResponseListener
+                        (
+                            loadEventArg =>
+                            {
 
-                    },
-                    serviceCommandError =>
-                    {
-                        var msg =
-                            new MessageDialog(
-                                "Something went wrong; The application could not be started. Press 'Close' to continue");
-                        msg.ShowAsync();
+                            },
+                            serviceCommandError =>
+                            {
+                                var msg =
+                                    new MessageDialog(
+                                        "Something went wrong; The application could not be started. Press 'Close' to continue");
+                                msg.ShowAsync();
+                            }
+                        );
+                        (deviceService as ILauncher).LaunchAppWithInfo(appinfo, responseListener);
                     }
-                );
-
-                if (dservice is ILauncher)
-                    (dservice as ILauncher).LaunchAppWithInfo(appinfo, responseListener);
-
+                }
             }
         }
 
@@ -460,25 +464,27 @@ namespace ConnectSdk.Demo
             var channelInfo = e.AddedItems[0] as ChannelInfo;
             if (channelInfo != null)
             {
-                var dservice = model.SelectedDevice.GetServices()[0];
-
-                var responseListener = new ResponseListener
-                (
-                    loadEventArg =>
+                foreach (var deviceService in model.SelectedDevice.Services)
+                {
+                    if (deviceService is ITvControl)
                     {
+                        var responseListener = new ResponseListener
+                        (
+                            loadEventArg =>
+                            {
 
-                    },
-                    serviceCommandError =>
-                    {
-                        var msg =
-                            new MessageDialog(
-                                "Something went wrong; The application could not be started. Press 'Close' to continue");
-                        msg.ShowAsync();
+                            },
+                            serviceCommandError =>
+                            {
+                                var msg =
+                                    new MessageDialog(
+                                        "Something went wrong; The application could not be started. Press 'Close' to continue");
+                                msg.ShowAsync();
+                            }
+                        );
+                        (deviceService as ITvControl).SetChannel(channelInfo, responseListener);
                     }
-                );
-
-                if (dservice is ITvControl)
-                    (dservice as ITvControl).SetChannel(channelInfo, responseListener);
+                }
             }
         }
 

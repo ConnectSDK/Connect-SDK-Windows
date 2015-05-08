@@ -329,7 +329,7 @@ namespace ConnectSdk.Windows.Service.WebOs
                 {
                     var parts = error.Split(' ');
                     errorCode = int.Parse(parts[0]);
-                    errorDesc = parts[1];
+                    errorDesc = error.Replace(parts[0], "");
                 }
                 // ReSharper disable once RedundantCatchClause
                 catch

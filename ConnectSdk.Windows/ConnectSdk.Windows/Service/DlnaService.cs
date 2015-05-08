@@ -26,6 +26,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using Windows.Data.Json;
+using ConnectSdk.Windows.Annotations;
 using ConnectSdk.Windows.Core;
 using ConnectSdk.Windows.Discovery;
 using ConnectSdk.Windows.Etc.Helper;
@@ -61,6 +62,9 @@ namespace ConnectSdk.Windows.Service
         // ReSharper restore InconsistentNaming
 
         private readonly string controlUrl;
+        private string avTransportUrl;
+        private string renderingControlUrl;
+        private string connectionControlUrl;
 
         public DlnaService(ServiceDescription serviceDescription, ServiceConfig serviceConfig)
             : base(serviceDescription, serviceConfig)
@@ -826,23 +830,40 @@ namespace ConnectSdk.Windows.Service
         }
 
 
-        public void SetServiceDescription(ServiceDescription serviceDescriptionParam)
+        public override void SetServiceDescription(ServiceDescription serviceDescriptionParam) 
         {
             var serviceList = serviceDescriptionParam.ServiceList;
 
             if (serviceList == null) return;
             foreach (Discovery.Provider.ssdp.Service service in serviceList)
             {
+                if (!service.BaseUrl.EndsWith("/"))
+                {
+                    service.BaseUrl += "/";
+                }
+
                 if (service.ServiceType.Contains(AV_TRANSPORT))
                 {
+                    avTransportUrl = MakeControlUrl(service.BaseUrl, service.ControlUrl);
                 }
                 else if ((service.ServiceType.Contains(RENDERING_CONTROL)) && !(service.ServiceType.Contains(GROUP_RENDERING_CONTROL)))
                 {
+                    renderingControlUrl = MakeControlUrl(service.BaseUrl, service.ControlUrl);
                 }
                 else if ((service.ServiceType.Contains(CONNECTION_MANAGER)))
                 {
+                    connectionControlUrl = MakeControlUrl(service.BaseUrl, service.ControlUrl);
                 }
             }
+        }
+
+        private String MakeControlUrl(String basePath, String path)
+        {
+            if (path.StartsWith("/"))
+            {
+                return basePath + path.Substring(1);
+            }
+            return basePath + path;
         }
 
         public static JsonObject GetSetAvTransportUriBody(string method, string instanceId, string mediaUrl, string mime,
@@ -883,15 +904,38 @@ namespace ConnectSdk.Windows.Service
         public override void SendCommand(ServiceCommand command)
         {
             var httpClient = new HttpClient();
+            var method = command.Target;
+            var payload = (string)command.Payload;
 
-            var payload = (JsonObject)command.Payload;
 
-            var request = HttpMessage.GetDlnaHttpPost(controlUrl, command.Target);
-            request.Headers.Add(ACTION, payload.GetNamedString(ACTION));
+            string targetURL = null;
+            string serviceURN = null;
+
+            if (payload.Contains(AV_TRANSPORT_URN))
+            {
+                targetURL = avTransportUrl;
+                serviceURN = AV_TRANSPORT_URN;
+            }
+            else if (payload.Contains(RENDERING_CONTROL_URN))
+            {
+                targetURL = renderingControlUrl;
+                serviceURN = RENDERING_CONTROL_URN;
+            }
+            else if (payload.Contains(CONNECTION_MANAGER_URN))
+            {
+                targetURL = connectionControlUrl;
+                serviceURN = CONNECTION_MANAGER_URN;
+            }
+
+           // var request = HttpMessage.GetDlnaHttpPost(controlUrl, command.Target);
+
+            var request = new HttpRequestMessage(HttpMethod.Post, controlUrl);
+            request.Headers.Add("Content-Type", "text/xml; charset=utf-8");
+            request.Headers.Add("SOAPAction", String.Format("\"{0}#{1}\"", serviceURN, method));
             try
             {
                 request.Content =
-                    new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes(payload.GetNamedString(DATA))));
+                    new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes(payload)));
             }
             catch (Exception e)
             {

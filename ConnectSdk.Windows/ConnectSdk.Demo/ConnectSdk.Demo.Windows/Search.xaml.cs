@@ -1,8 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Windows.Storage;
-using Windows.Storage.Streams;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -14,7 +12,6 @@ using ConnectSdk.Demo.Common;
 using ConnectSdk.Demo.Demo;
 using ConnectSdk.Windows.Device;
 using ConnectSdk.Windows.Discovery;
-using ConnectSdk.Windows.Etc.Helper;
 using ConnectSdk.Windows.Service;
 using ConnectSdk.Windows.Service.Config;
 using UpdateControls.Fields;
@@ -25,7 +22,7 @@ namespace ConnectSdk.Demo
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class Search : Page
+    public sealed partial class Search
     {
         private readonly Model model;
         private WebOstvService webOstvService;
@@ -56,11 +53,11 @@ namespace ConnectSdk.Demo
 
         private void TvListBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var tvdef = ForView.Unwrap<DeviceServiceViewModel>(e.AddedItems[0]);
+            var device = (ConnectableDevice)(e.AddedItems[0]);
 
-            App.ApplicationModel.SelectedDevice = tvdef.Device;
+            App.ApplicationModel.SelectedDevice = device;
 
-            var netCastService = (NetcastTvService)tvdef.Device.GetServiceByName(NetcastTvService.Id);
+            var netCastService = (NetcastTvService)device.GetServiceByName(NetcastTvService.Id);
             if (netCastService != null)
             {
                 if (!(netCastService.ServiceConfig is NetcastTvServiceConfig))
@@ -76,10 +73,10 @@ namespace ConnectSdk.Demo
             var senderButton = sender as Button;
             if (senderButton == null) return;
 
-            var tvdeft = ForView.Unwrap<DeviceServiceViewModel>((senderButton.DataContext));
-            model.SelectedDevice = tvdeft.Device;
-            var tvdef = model.SelectedDevice;
-            var netCastService = (NetcastTvService)tvdef.GetServiceByName(NetcastTvService.Id);
+            var devicet = (ConnectableDevice)senderButton.DataContext;
+            model.SelectedDevice = devicet;
+            var device = model.SelectedDevice;
+            var netCastService = (NetcastTvService)device.GetServiceByName(NetcastTvService.Id);
             if (netCastService != null)
             {
                 var netCastServiceConfig = (NetcastTvServiceConfig)netCastService.ServiceConfig;
@@ -89,26 +86,26 @@ namespace ConnectSdk.Demo
 
                 netCastService.ServiceConnectionState = NetcastTvService.ConnectionState.Initial;
 
-                tvdef.Connect();
-                if (tvdef.IsConnected())
+                device.Connect();
+                if (device.IsConnected())
                 {
                     netCastService.RemovePairingKeyOnTv();
-                    tvdef.OnConnectionSuccess(netCastService);
-                    model.SelectedDevice = tvdef;
+                    device.OnConnectionSuccess(netCastService);
+                    model.SelectedDevice = device;
                     Frame.Navigate(typeof(Main));
                 }
             }
             else
             {
-                webOstvService = (WebOstvService)tvdef.GetServiceByName(WebOstvService.Id);
+                webOstvService = (WebOstvService)device.GetServiceByName(WebOstvService.Id);
                 if (webOstvService != null)
                 {
                     if (!(webOstvService.ServiceConfig is WebOsTvServiceConfig))
                     {
                         webOstvService.ServiceConfig = new WebOsTvServiceConfig(webOstvService.ServiceConfig.ServiceUuid);
                     }
-                    tvdef.AddListener(listener);
-                    tvdef.Connect();
+                    device.AddListener(listener);
+                    device.Connect();
                     model.SelectedDevice.OnConnectionSuccess(webOstvService);
 
                 }
@@ -120,7 +117,7 @@ namespace ConnectSdk.Demo
             base.OnNavigatedTo(e);
 
             model.SelectedDevice = null;
-            model.DiscoverredDeviceServices.Clear();
+            model.DiscoverredDevices.Clear();
 
             SearchTvs();
         }
@@ -136,20 +133,23 @@ namespace ConnectSdk.Demo
         public object Convert(object value, Type targetType, object parameter, string language)
         {
             var target = parameter as string;
-            var device = value as string;
+            //var device = value as string;
 
-            if (target == null || device == null) return Visibility.Visible;
+            //if (target == null || device == null) return Visibility.Visible;
+
+            var services = value as List<DeviceService>;
+            var isNetcast = services.Any(x => x.ServiceName == "Netcast TV");
 
             switch (target)
             {
                 case "PairingKeyLabel":
-                    return !device.Equals("Netcast TV") ? Visibility.Collapsed : Visibility.Visible;
+                    return !isNetcast ? Visibility.Collapsed : Visibility.Visible;
                 case "PairingKeyTextBox":
-                    return !device.Equals("Netcast TV") ? Visibility.Collapsed : Visibility.Visible;
+                    return !isNetcast ? Visibility.Collapsed : Visibility.Visible;
                 case "ConnectButton":
-                    return !device.Equals("Netcast TV") ? Visibility.Collapsed : Visibility.Visible;
+                    return !isNetcast ? Visibility.Collapsed : Visibility.Visible;
                 case "ConnectWebOsButton":
-                    return !device.Equals("Netcast TV") ? Visibility.Visible : Visibility.Collapsed;
+                    return !isNetcast ? Visibility.Visible : Visibility.Collapsed;
             }
             return Visibility.Collapsed;
         }

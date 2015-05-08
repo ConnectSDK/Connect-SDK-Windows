@@ -68,20 +68,6 @@ namespace ConnectSdk.Windows.Device
             set { id = value; }
         }
 
-        //public string DeviceType
-        //{
-        //    get
-        //    {
-        //        try
-        //        {
-        //            return (from t in services select t.Key).FirstOrDefault();
-        //        }
-        //        catch
-        //        {
-        //            return "Unknown type of device";
-        //        }
-        //    }
-        //}
 
         public string IpAddress { get; set; }
         public string FriendlyName { get; set; }
@@ -206,9 +192,12 @@ namespace ConnectSdk.Windows.Device
         /// <summary> 
         /// Array of all currently discovered DeviceServices this ConnectableDevice has associated with it. 
         /// </summary>
-        public List<DeviceService> GetServices()
+        public List<DeviceService> Services
         {
-            return services.Values.ToList();
+            get
+            {
+                return services.Values.ToList();
+            }
         }
 
         /// <summary>
@@ -218,7 +207,7 @@ namespace ConnectSdk.Windows.Device
         /// <returns>DeviceService with the specified serviceName or nil, if none exists</returns>
         public DeviceService GetServiceByName(string serviceName)
         {
-            return GetServices().FirstOrDefault(service => service.ServiceName.Equals(serviceName));
+            return Services.FirstOrDefault(service => service.ServiceName.Equals(serviceName));
         }
 
         /// <summary>
@@ -238,7 +227,7 @@ namespace ConnectSdk.Windows.Device
         /// <param name="serviceUuid">UUID of the DeviceService to be returned</param>
         public DeviceService GetServiceWithUuid(string serviceUuid)
         {
-            return GetServices().FirstOrDefault(service => service.ServiceDescription.Uuid.Equals(serviceUuid));
+            return Services.FirstOrDefault(service => service.ServiceDescription.Uuid.Equals(serviceUuid));
         }
 
         /// <summary>

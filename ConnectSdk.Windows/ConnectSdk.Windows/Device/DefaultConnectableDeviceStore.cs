@@ -18,7 +18,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- #endregion
+#endregion
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -117,7 +117,7 @@ namespace ConnectSdk.Windows.Device
 
         public void AddDevice(ConnectableDevice device)
         {
-            if (device == null || device.GetServices().Count == 0)
+            if (device == null || device.Services.Count == 0)
                 return;
 
             if (!activeDevices.ContainsKey(device.Id))
@@ -153,7 +153,7 @@ namespace ConnectSdk.Windows.Device
 
         public void UpdateDevice(ConnectableDevice device)
         {
-            if (device == null || device.GetServices().Count == 0)
+            if (device == null || device.Services.Count == 0)
                 return;
 
             var storedDevice = GetStoredDevice(device.Id);
@@ -171,7 +171,7 @@ namespace ConnectSdk.Windows.Device
 
             var tempServices = storedDevice.GetNamedObject(ConnectableDevice.KeyServices) ?? new JsonObject();
 
-            foreach (var service in device.GetServices())
+            foreach (var service in device.Services)
             {
                 var serviceInfo = service.ToJsonObject();
 
@@ -224,8 +224,26 @@ namespace ConnectSdk.Windows.Device
         {
             var foundDevice = activeDevices.ContainsKey(uuid) ? activeDevices[uuid] : null;
 
-            if (foundDevice != null) return foundDevice;
-            return activeDevices.Values.SelectMany(device => device.GetServices()).Any(service => uuid.Equals(service.ServiceDescription.Uuid)) ? foundDevice : foundDevice;
+            if (foundDevice == null)
+            {
+                foreach (var device in activeDevices.Values)
+                {
+                    foreach (var service in device.Services)
+                    {
+                        if (uuid.Equals(service.ServiceDescription.Uuid))
+                        {
+                            return foundDevice;
+                        }
+                    }
+                }
+            }
+            return foundDevice;
+
+
+            //var foundDevice = activeDevices.ContainsKey(uuid) ? activeDevices[uuid] : null;
+
+            //if (foundDevice != null) return foundDevice;
+            //return activeDevices.Values.SelectMany(device => device.Services).Any(service => uuid.Equals(service.ServiceDescription.Uuid)) ? foundDevice : foundDevice;
         }
 
         private JsonObject GetStoredDevice(string uuidParam)
@@ -233,12 +251,13 @@ namespace ConnectSdk.Windows.Device
             var foundDevice = storedDevices.GetNamedObject(uuidParam, null);
 
             return foundDevice ??
-                   (from 
-                        pair 
-                        in storedDevices 
-                    select storedDevices.GetNamedObject(pair.Key) into device 
-                    let services = device.GetNamedObject(ConnectableDevice.KeyServices) 
-                    where services != null && services.ContainsKey(uuidParam) select device
+                   (from
+                        pair
+                        in storedDevices
+                    select storedDevices.GetNamedObject(pair.Key) into device
+                    let services = device.GetNamedObject(ConnectableDevice.KeyServices)
+                    where services != null && services.ContainsKey(uuidParam)
+                    select device
                     ).FirstOrDefault();
         }
 

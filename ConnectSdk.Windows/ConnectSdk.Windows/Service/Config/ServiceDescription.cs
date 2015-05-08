@@ -98,6 +98,8 @@ namespace ConnectSdk.Windows.Service.Config
 
         public double LastDetection { get; set; }
 
+        public string ServiceUri { get; set; }
+
         public static ServiceDescription GetDescription(JsonObject json)
         {
             return new ServiceDescription(json);

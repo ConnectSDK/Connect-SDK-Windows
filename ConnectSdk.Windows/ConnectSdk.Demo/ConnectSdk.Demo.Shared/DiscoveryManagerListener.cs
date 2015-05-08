@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using Windows.UI.Core;
 using ConnectSdk.Windows.Device;
 using ConnectSdk.Windows.Discovery;
 using ConnectSdk.Windows.Service;
@@ -16,22 +17,30 @@ namespace ConnectSdk.Demo.Demo
 
         public void OnDeviceAdded(DiscoveryManager manager, ConnectableDevice device)
         {
-            foreach (var deviceService in device.GetServices())
+            App.MainDispatcher.RunAsync(CoreDispatcherPriority.High, () =>
             {
-                App.ApplicationModel.DiscoverredDeviceServices.Add(new DeviceServiceViewModel() { Device = device, Service = deviceService });
-            }
+                if (App.ApplicationModel.DiscoverredDevices.All(x => x.Id != device.Id))
+                    App.ApplicationModel.DiscoverredDevices.Add(device);
+            });
         }
 
         public void OnDeviceUpdated(DiscoveryManager manager, ConnectableDevice device)
         {
-            foreach (var deviceService in device.GetServices())
+            App.MainDispatcher.RunAsync(CoreDispatcherPriority.High, () =>
             {
-                var f = (from t in App.ApplicationModel.DiscoverredDeviceServices
-                    where t.Service.ServiceConfig.ServiceUuid == deviceService.ServiceConfig.ServiceUuid
-                    select t).FirstOrDefault();
-                if (f == null)
-                    App.ApplicationModel.DiscoverredDeviceServices.Add(new DeviceServiceViewModel() { Device = device, Service = deviceService });
-            }
+                if (App.ApplicationModel.DiscoverredDevices.Contains(device))
+                {
+                    App.ApplicationModel.DiscoverredDevices.Remove(device);
+                    App.ApplicationModel.DiscoverredDevices.Add(device);
+                }
+            });
+
+            ////force refresh
+            //if (App.ApplicationModel.DiscoverredDevices.Contains(device))
+            //{
+            //    App.ApplicationModel.DiscoverredDevices.Remove(device);
+            //    App.ApplicationModel.DiscoverredDevices.Add(device);
+            //}
         }
 
         public void OnDeviceRemoved(DiscoveryManager manager, ConnectableDevice device)
@@ -57,7 +66,7 @@ namespace ConnectSdk.Demo.Demo
 
         public void OnPairingRequired(ConnectableDevice device, DeviceService service, PairingType pairingType)
         {
-            
+
         }
 
         public void OnCapabilityUpdated(ConnectableDevice device, List<string> added, List<string> removed)

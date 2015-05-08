@@ -112,9 +112,9 @@ namespace ConnectSdk.Windows.Service
         {
         }
 
-        public void SetServiceDescription(ServiceDescription serviceDescription)
+        public override void SetServiceDescription(ServiceDescription serviceDescription)
         {
-            ServiceDescription = serviceDescription;
+            base.SetServiceDescription(serviceDescription);
 
             if (ServiceDescription.Version != null || ServiceDescription.ResponseHeaders == null) return;
 

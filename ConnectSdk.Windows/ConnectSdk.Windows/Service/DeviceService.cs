@@ -73,7 +73,7 @@ namespace ConnectSdk.Windows.Service
 
         public List<ServiceCommand> Requests = new List<ServiceCommand>();
 
-        public ServiceDescription ServiceDescription { get; set; }
+        private ServiceDescription serviceDescription;
 
         public ServiceConfig ServiceConfig
         {
@@ -91,7 +91,7 @@ namespace ConnectSdk.Windows.Service
 
         public DeviceService(ServiceDescription serviceDescription, ServiceConfig serviceConfig)
         {
-            ServiceDescription = serviceDescription;
+            SetServiceDescription(serviceDescription);
             ServiceConfig = serviceConfig;
 
             capabilities = new List<string>();
@@ -105,6 +105,16 @@ namespace ConnectSdk.Windows.Service
 
             capabilities = new List<string>();
             UpdateCapabilities();
+        }
+
+        public virtual void SetServiceDescription(ServiceDescription sd)
+        {
+            serviceDescription = sd;
+        }
+
+        public ServiceDescription GetServiceDescription()
+        {
+            return ServiceDescription;
         }
 
         public static DeviceService GetService(JsonObject json)
@@ -314,6 +324,11 @@ namespace ConnectSdk.Windows.Service
         public string ServiceName
         {
             get { return ServiceDescription.ServiceId; }
+        }
+
+        public ServiceDescription ServiceDescription
+        {
+            get { return serviceDescription; }
         }
 
         public void CloseLaunchSession(LaunchSession launchSession, ResponseListener lst)

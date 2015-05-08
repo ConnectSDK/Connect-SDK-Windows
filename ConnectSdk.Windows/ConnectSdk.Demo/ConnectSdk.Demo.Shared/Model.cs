@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using ConnectSdk.Demo.Annotations;
 using ConnectSdk.Windows.Core;
@@ -34,7 +35,7 @@ namespace ConnectSdk.Demo.Demo
             }
         }
 
-        public IndependentList<DeviceServiceViewModel> DiscoverredDeviceServices { get; set; }
+        public ObservableCollection<ConnectableDevice> DiscoverredDevices { get; set; }
 
         public IndependentList<AppInfo> Apps { get; set; }
 
@@ -42,7 +43,7 @@ namespace ConnectSdk.Demo.Demo
 
         public Model()
         {
-            DiscoverredDeviceServices = new IndependentList<DeviceServiceViewModel>();
+            DiscoverredDevices = new ObservableCollection<ConnectableDevice>();
             Apps = new IndependentList<AppInfo>();
             Channels = new IndependentList<ChannelInfo>();
             selectedDevice = new ConnectableDevice();
@@ -56,11 +57,5 @@ namespace ConnectSdk.Demo.Demo
             var handler = PropertyChanged;
             if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
         }
-    }
-
-    public class DeviceServiceViewModel
-    {
-        public ConnectableDevice Device { get; set; }
-        public DeviceService Service { get; set; }
     }
 }

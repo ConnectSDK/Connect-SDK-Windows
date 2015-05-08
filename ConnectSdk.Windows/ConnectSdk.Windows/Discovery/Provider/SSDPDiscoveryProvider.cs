@@ -80,7 +80,7 @@ namespace ConnectSdk.Windows.Discovery.Provider
         private void SsdpSocketOnMessageReceivedChanged(object sender, string message)
         {
             HandleDatagramPacket(new ParsedDatagram(message));
-            Logger.Current.AddMessage("SSDPDiscoveryProvider received message: " + message);
+            //Logger.Current.AddMessage("SSDPDiscoveryProvider received message: " + message);
         }
 
 
@@ -279,7 +279,17 @@ namespace ConnectSdk.Windows.Discovery.Provider
 
         public void GetLocationData(string location, string uuid, string serviceFilter)
         {
-            var device = Core.Upnp.Device.CreateInstanceFromXml(location, serviceFilter);
+             SsdpDevice device = null;
+            try
+            {
+                device = new SsdpDevice(location, serviceFilter);
+            }
+            catch (Exception e)
+            {
+            }
+
+
+            //var device = Core.Upnp.Device.CreateInstanceFromXml(location, serviceFilter);
 
             if (device != null)
             {
@@ -296,7 +306,7 @@ namespace ConnectSdk.Windows.Discovery.Provider
                         {
                             service.ServiceId = ServiceIdForFilter(serviceFilter);
                             service.ServiceFilter = serviceFilter;
-                            service.FriendlyName = device.FriendlyName ?? "LG Smart TV";
+                            service.FriendlyName = device.FriendlyName;
                             service.ModelName = device.ModelName;
                             service.ModelNumber = device.ModelNumber;
                             service.ModelDescription = device.ModelDescription;
@@ -305,6 +315,8 @@ namespace ConnectSdk.Windows.Discovery.Provider
                             service.ServiceList = device.ServiceList;
                             service.ResponseHeaders = device.Headers;
                             service.LocationXml = device.LocationXml;
+                            service.ServiceUri = device.ServiceUri;
+                            service.Port = device.Port;
 
                             foundServices.TryAdd(uuid, service);
 
@@ -341,7 +353,7 @@ namespace ConnectSdk.Windows.Discovery.Provider
         }
 
 
-        public bool ContainsServicesWithFilter(Core.Upnp.Device device, string filter)
+        public bool ContainsServicesWithFilter(SsdpDevice device, string filter)
         {
             //  TODO  Implement this method.  Not sure why needs to happen since there are now required services.
             return true;
