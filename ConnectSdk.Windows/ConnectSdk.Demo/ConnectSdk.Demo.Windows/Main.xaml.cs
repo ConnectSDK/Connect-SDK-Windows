@@ -156,9 +156,6 @@ namespace ConnectSdk.Demo
                 loadEventArg =>
                 {
                     launchSession = null;
-                    //var v = param as LoadEventArgs;
-                    //if (v != null)
-                    //    launchSession = v.Load.GetPayload() as LaunchSession;
                 },
                 serviceCommandError =>
                 {
