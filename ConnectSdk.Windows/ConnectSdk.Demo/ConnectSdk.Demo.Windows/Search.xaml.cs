@@ -126,6 +126,14 @@ namespace ConnectSdk.Demo
         {
             SearchTvs();
         }
+
+        private void ShowKeyButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            var senderButton = sender as Button;
+            var device = (ConnectableDevice)senderButton.DataContext;
+            var netCastService = (NetcastTvService)device.GetServiceByName(NetcastTvService.Id);
+            netCastService.ShowPairingKeyOnTv();
+        }
     }
 
     public class VisibilityConverter : IValueConverter
@@ -150,6 +158,9 @@ namespace ConnectSdk.Demo
                     return !isNetcast ? Visibility.Collapsed : Visibility.Visible;
                 case "ConnectWebOsButton":
                     return !isNetcast ? Visibility.Visible : Visibility.Collapsed;
+                case "ShowKeyButton":
+                    return !isNetcast ? Visibility.Collapsed : Visibility.Visible;
+                    
             }
             return Visibility.Collapsed;
         }

@@ -130,6 +130,7 @@
                             <StackPanel Grid.Row="0" Grid.Column="1" Margin="20,0,0,0">
                                 <TextBlock Text="Enter the key shown on the TV"  Visibility="{Binding Path=Services, Converter={StaticResource VisibilityConverter}, ConverterParameter=PairingKeyLabel}" Style="{StaticResource SubtitleTextBlockStyle}" Foreground="White" Margin="0,0,0,10"></TextBlock>
                                 <TextBox x:Name="PairingKeyTextBox" InputScope="Number" Visibility="{Binding Path=Services, Converter={StaticResource VisibilityConverter}, ConverterParameter=PairingKeyTextBox}"></TextBox>
+                                <Button x:Name="ShowKeyButton" Content="Show pairing key" Click="ShowKeyButton_OnClick" HorizontalAlignment="Left" FontSize="15" Visibility="{Binding Path=Services, Converter={StaticResource VisibilityConverter}, ConverterParameter=ShowKeyButton}" Margin="-2,0,0,0"/>
                                 <Button x:Name="PairOkButton" Content="Send Key" Click="PairOkButton_OnClick"  HorizontalAlignment="Left" FontSize="15" Visibility="{Binding Path=Services, Converter={StaticResource VisibilityConverter}, ConverterParameter=ConnectButton}" Margin="-2,0,0,0"/>
                                 <Button x:Name="PairWebOsOkButton" Content="Connect" Click="PairOkButton_OnClick"  HorizontalAlignment="Left" FontSize="15"  Visibility="{Binding Path=Services, Converter={StaticResource VisibilityConverter}, ConverterParameter=ConnectWebOsButton}" Margin="-2,0,0,0"/>
                             </StackPanel>
