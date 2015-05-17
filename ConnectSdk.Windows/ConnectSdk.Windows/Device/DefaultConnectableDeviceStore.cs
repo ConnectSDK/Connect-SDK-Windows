@@ -84,28 +84,6 @@ namespace ConnectSdk.Windows.Device
 
         public DefaultConnectableDeviceStore()
         {
-            //String dirPath;
-            //if (Environment. .getExternalStorageState().equals(Environment.MEDIA_MOUNTED))
-            //{
-            //    dirPath = Environment.getExternalStorageDirectory().getAbsolutePath();
-            //}
-            //else
-            //{
-            //    dirPath = Environment.MEDIA_UNMOUNTED;
-            //}
-            //fileFullPath = dirPath + DIRPATH + FILENAME;
-            //global::Windows.Storage.ApplicationData settings;
-
-
-            //try
-            //{
-            //    fileFullPath = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).applicationInfo.dataDir + "/" + FILENAME;
-            //}
-            //catch (NameNotFoundException e)
-            //{
-            //    e.printStackTrace();
-            //}
-
             Load();
         }
 
@@ -261,23 +239,23 @@ namespace ConnectSdk.Windows.Device
                     ).FirstOrDefault();
         }
 
-        public ServiceConfig GetServiceConfig(string uuidParam)
-        {
-            if (string.IsNullOrEmpty(uuidParam))
-                return null;
+        //public ServiceConfig GetServiceConfig(string uuidParam)
+        //{
+        //    if (string.IsNullOrEmpty(uuidParam))
+        //        return null;
 
-            var device = GetStoredDevice(uuidParam);
-            if (device == null) return null;
-            var tempServices = device.GetNamedObject(ConnectableDevice.KeyServices);
+        //    var device = GetStoredDevice(uuidParam);
+        //    if (device == null) return null;
+        //    var tempServices = device.GetNamedObject(ConnectableDevice.KeyServices);
 
-            if (tempServices == null) return null;
-            var service = tempServices.GetNamedObject(uuidParam);
+        //    if (tempServices == null) return null;
+        //    var service = tempServices.GetNamedObject(uuidParam);
 
-            if (service == null) return null;
-            var serviceConfigInfo = service.GetNamedObject(DeviceService.KEY_CONFIG);
+        //    if (service == null) return null;
+        //    var serviceConfigInfo = service.GetNamedObject(DeviceService.KEY_CONFIG);
 
-            return serviceConfigInfo != null ? ServiceConfig.GetConfig(serviceConfigInfo) : null;
-        }
+        //    return serviceConfigInfo != null ? ServiceConfig.GetConfig(serviceConfigInfo) : null;
+        //}
 
         private void Load()
         {
@@ -319,6 +297,33 @@ namespace ConnectSdk.Windows.Device
         {
             waitToWrite = true;
             Storage.Current.AddOrUpdateValue(Storage.StoredDevicesKeyName, deviceStore.Stringify());
+        }
+
+
+        public ServiceConfig GetServiceConfig(ServiceDescription serviceDescription)
+        {
+            if (serviceDescription == null) return null;
+
+            var uuidValue = serviceDescription.Uuid;
+            if (string.IsNullOrEmpty(uuidValue)) return null;
+
+            var device = GetStoredDevice(uuidValue);
+
+            if (device != null)
+            {
+                var servicesParam = device.GetNamedObject(ConnectableDevice.KeyServices, null);
+                if (servicesParam != null)
+                {
+                    var service = servicesParam.GetNamedObject(uuidValue, null);
+                    if (service != null)
+                    {
+                        var serviceConfigInfo = service.GetNamedObject(DeviceService.KEY_CONFIG);
+                        if (serviceConfigInfo != null)
+                            return ServiceConfig.GetConfig(serviceConfigInfo);
+                    }
+                }
+            }
+            return null;
         }
     }
 }

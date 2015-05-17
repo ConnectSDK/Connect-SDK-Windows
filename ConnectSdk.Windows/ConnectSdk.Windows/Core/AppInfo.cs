@@ -38,6 +38,10 @@ namespace ConnectSdk.Windows.Core
         private string port;
         private string url;
 
+        /// <summary>
+        /// Default constructor method.
+        /// </summary>
+        /// <param name="id"></param>
         public AppInfo(string id)
         {
             this.id = id;
@@ -66,6 +70,9 @@ namespace ConnectSdk.Windows.Core
         /// </summary>
         public JsonObject RawData { get; set; }
 
+        /// <summary>
+        /// Url of the app icon
+        /// </summary>
         public string Url
         {
             get
@@ -78,6 +85,11 @@ namespace ConnectSdk.Windows.Core
             set { url = value; OnPropertyChanged(); }
         }
 
+        /// <summary>
+        /// Sets ulr parameters
+        /// </summary>
+        /// <param name="ipParam"></param>
+        /// <param name="portParam"></param>
         public void SetUrl(string ipParam, string portParam)
         {
             ip = ipParam;

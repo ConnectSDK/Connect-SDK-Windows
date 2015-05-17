@@ -70,12 +70,19 @@ namespace ConnectSdk.Windows.Device
         /// <returns>ConnectableDevice object if a matching uuit was found, otherwise will return null</returns>
         ConnectableDevice GetDevice(string uuidParam);
 
+        ///// <summary>
+        ///// Gets a ServiceConfig object for a provided UUID.  This is used by DiscoveryManager to retain crucial service information between sessions (pairing code, etc).
+        ///// </summary>
+        ///// <param name="uuidParam">Unique ID for the service</param>
+        ///// <returns>ServiceConfig object if matching UUID was found, otherwise will return null</returns>
+        //ServiceConfig GetServiceConfig(string uuidParam);
+
         /// <summary>
-        /// Gets a ServiceConfig object for a provided UUID.  This is used by DiscoveryManager to retain crucial service information between sessions (pairing code, etc).
+        /// Gets a ServcieConfig object for a provided UUID.  This is used by DiscoveryManager to retain crucial service information between sessions (pairing code, etc)
         /// </summary>
-        /// <param name="uuidParam">Unique ID for the service</param>
-        /// <returns>ServiceConfig object if matching UUID was found, otherwise will return null</returns>
-        ServiceConfig GetServiceConfig(string uuidParam);
+        /// <param name="serviceDescription">erviceDescription Description for the service</param>
+        /// <returns>ServiceConfig object if matching description was found, otherwise will return null</returns>
+        ServiceConfig GetServiceConfig(ServiceDescription serviceDescription);
 
         /// <summary>
         ///  Clears out the ConnectableDeviceStore, removing all records.

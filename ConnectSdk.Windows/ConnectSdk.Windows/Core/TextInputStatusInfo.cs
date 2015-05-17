@@ -35,6 +35,10 @@ namespace ConnectSdk.Windows.Core
         public bool AutoCapitalization { get; set; }
         public bool HiddenText { get; set; }
         public bool FocusChanged { get; set; }
+
+        /// <summary>
+        /// Gets or sets the raw data from the first screen device about the text input status. 
+        /// </summary>
         public JsonObject RawData { get; set; }
 
         public TextInputStatusInfo()
@@ -48,7 +52,10 @@ namespace ConnectSdk.Windows.Core
             ContentType = null;
         }
 
-        /** Gets the type of keyboard that should be displayed to the user. */
+        /// <summary>
+        /// Gets the type of keyboard that should be displayed to the user.
+        /// </summary>
+        /// <returns></returns>
         public TextInputType GetTextInputType()
         {
             var textInputType = TextInputType.Default;

@@ -1075,7 +1075,7 @@ namespace ConnectSdk.Windows.Service
 
             try
             {
-                payload.Add("channelNumber", JsonValue.CreateStringValue(channelInfo.ChannelNumber));
+                payload.Add("channelNumber", JsonValue.CreateStringValue(channelInfo.Number));
             }
             catch (Exception)
             {
@@ -1098,18 +1098,7 @@ namespace ConnectSdk.Windows.Service
                 loadEventArg =>
                 {
                     var jsonObj = (JsonObject)(((LoadEventArgs)loadEventArg).Load.GetPayload());
-
-                    var channel = new ChannelInfo
-                    {
-                        ChannelId = jsonObj.GetNamedString("id", String.Empty),
-                        ChannelNumber = jsonObj.GetNamedString("number", String.Empty),
-                        MajorNumber = (int) jsonObj.GetNamedNumber("majorNumber", 0),
-                        MinorNumber = (int) jsonObj.GetNamedNumber("minorNumber", 0),
-                        RawData = jsonObj,
-                        SourceIndex = (sbyte) jsonObj.GetNamedNumber("sourceIndex", 0),
-                        PhysicalNumber = (sbyte) jsonObj.GetNamedNumber("physicalNumber", 0)
-                    };
-
+                    var channel = ParseRawChannelData(jsonObj);
                     Util.PostSuccess(listener, channel);
                 },
                 serviceCommandError => Util.PostError(listener, serviceCommandError)
@@ -1121,6 +1110,71 @@ namespace ConnectSdk.Windows.Service
             request.Send();
 
             return request;
+        }
+
+        private ChannelInfo ParseRawChannelData(JsonObject channelRawData)
+        {
+            string channelName = null;
+            string channelId = null;
+
+            var channelInfo = new ChannelInfo();
+            channelInfo.RawData = channelRawData;
+
+            try
+            {
+                if (!channelRawData.ContainsKey("channelName"))
+                    channelName = channelRawData.GetNamedString("channelName","");
+
+                if (!channelRawData.ContainsKey("channelId"))
+                    channelId = channelRawData.GetNamedString("channelId", "");
+
+                string channelNumber = channelRawData.GetNamedString("channelNumber", "");
+
+                int majorNumber;
+                if (!channelRawData.ContainsKey("majorNumber"))
+                    majorNumber = (int)channelRawData.GetNamedNumber("majorNumber");
+                else
+                    majorNumber = ParseMajorNumber(channelNumber);
+
+                int minorNumber;
+                if (!channelRawData.ContainsKey("minorNumber"))
+                    minorNumber = (int)channelRawData.GetNamedNumber("minorNumber");
+                else
+                    minorNumber = ParseMinorNumber(channelNumber);
+
+                channelInfo.Name = channelName;
+                channelInfo.Id = channelId;
+                channelInfo.Number = channelNumber;
+                channelInfo.MajorNumber = majorNumber;
+                channelInfo.MinorNumber = minorNumber;
+
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+
+            return channelInfo;
+        }
+
+        private int ParseMinorNumber(string channelNumber)
+        {
+            if (channelNumber != null)
+            {
+                var tokens = channelNumber.Split('-');
+                return int.Parse(tokens[tokens.Length - 1]);
+            }
+            return 0;
+        }
+
+        private int ParseMajorNumber(string channelNumber)
+        {
+            if (channelNumber != null)
+            {
+                var tokens = channelNumber.Split('-');
+                return int.Parse(tokens[0]);
+            }
+            return 0;
         }
 
         public IServiceSubscription SubscribeCurrentChannel(ResponseListener listener)
@@ -1147,20 +1201,8 @@ namespace ConnectSdk.Windows.Service
                     for (var i = 0; i < channels.Count; i++)
                     {
                         var chObj = channels[i].GetObject();
-
                         if (chObj == null) continue;
-                        var channelInfo = new ChannelInfo
-                        {
-                            ChannelId = chObj.GetNamedString("id", String.Empty),
-                            ChannelNumber = chObj.GetNamedString("channelNumber", String.Empty),
-                            MajorNumber = (int)chObj.GetNamedNumber("majorNumber", 0),
-                            MinorNumber = (int)chObj.GetNamedNumber("minorNumber", 0),
-                            ChannelName = chObj.GetNamedString("channelName", ""),
-                            RawData = chObj,
-                            SourceIndex = (sbyte)chObj.GetNamedNumber("sourceIndex", 0),
-                            PhysicalNumber = (sbyte)chObj.GetNamedNumber("physicalNumber", 0)
-                        };
-
+                        var channelInfo = ParseRawChannelData(chObj);
                         channelList.Add(channelInfo);
                     }
                     Util.PostSuccess(listener, channelList);
@@ -1202,16 +1244,7 @@ namespace ConnectSdk.Windows.Service
                 {
                     var jsonObj = (JsonObject) (((LoadEventArgs) loadEventArg).Load.GetPayload());
                     var jsonChannel = jsonObj.GetNamedObject("channel");
-                    var channelInfo = new ChannelInfo
-                    {
-                        ChannelId = jsonChannel.GetNamedString("id", String.Empty),
-                        ChannelNumber = jsonChannel.GetNamedString("number", String.Empty),
-                        MajorNumber = (int) jsonChannel.GetNamedNumber("majorNumber", 0),
-                        MinorNumber = (int) jsonChannel.GetNamedNumber("minorNumber", 0),
-                        RawData = jsonChannel,
-                        SourceIndex = (sbyte) jsonChannel.GetNamedNumber("sourceIndex", 0),
-                        PhysicalNumber = (sbyte) jsonChannel.GetNamedNumber("physicalNumber", 0)
-                    };
+                    var channelInfo = ParseRawChannelData(jsonObj);
                     var programList = jsonObj.GetNamedArray("programList");
                     Util.PostSuccess(listener, new ProgramList(channelInfo, programList));
                 },

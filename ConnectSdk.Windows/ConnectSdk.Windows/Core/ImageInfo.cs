@@ -23,6 +23,9 @@ using System;
 
 namespace ConnectSdk.Windows.Core
 {
+    /// <summary>
+    /// Normalized reference object for information about an image file. This object can be used to represent a media file (ex. icon, poster)
+    /// </summary>
     public class ImageInfo
     {
         public string Url { get; set; }

@@ -91,9 +91,9 @@ namespace ConnectSdk.Windows.Device.Netcast
                     ? channelRawData.GetNamedString("channelNumber") 
                     : string.Format("{0}-{1}", majorNumber, minorNumber);
 
-                channelInfo.ChannelName = channelName;
-                channelInfo.ChannelId = channelId;
-                channelInfo.ChannelNumber = channelNumber;
+                channelInfo.Name = channelName;
+                channelInfo.Id = channelId;
+                channelInfo.Number = channelNumber;
                 channelInfo.MajorNumber = majorNumber;
                 channelInfo.MinorNumber = minorNumber;
 

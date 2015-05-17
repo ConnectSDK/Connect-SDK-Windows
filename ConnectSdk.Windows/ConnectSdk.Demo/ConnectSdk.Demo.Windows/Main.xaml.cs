@@ -21,7 +21,7 @@ namespace ConnectSdk.Demo
     /// <summary>
     /// A basic page that provides characteristics common to most applications.
     /// </summary>
-    public sealed partial class Main : Page
+    public sealed partial class Main
     {
         private readonly Model model;
 
@@ -95,27 +95,43 @@ namespace ConnectSdk.Demo
         
         public void CallCaptureImage(RoutedEventArgs eva)
         {
-            try
+            if (model.SelectedDevice.GetServiceByName(NetcastTvService.Id) != null)
             {
-                var button = eva.OriginalSource as Button;
-                if (button != null)
+                try
                 {
-                    var stackPanel = button.Parent as StackPanel;
-                    if (stackPanel != null)
+                    var button = eva.OriginalSource as Button;
+                    if (button != null)
                     {
-                        var img = stackPanel.Children[1] as Image;
-                        var serviceDescription = model.SelectedDevice.GetServiceByName("Netcast TV").ServiceDescription;
-                        var baseurl = string.Format("http://{0}:{1}", serviceDescription.IpAddress, serviceDescription.Port);
-                        var url = baseurl + "/udap/api/data?target=screen_image&s=" + DateTime.Now.Ticks;
+                        var stackPanel = button.Parent as StackPanel;
+                        if (stackPanel != null)
+                        {
+                            var img = stackPanel.Children[1] as Image;
+                            var serviceDescription =
+                                model.SelectedDevice.GetServiceByName("Netcast TV").ServiceDescription;
+                            var baseurl = string.Format("http://{0}:{1}", serviceDescription.IpAddress,
+                                serviceDescription.Port);
+                            var url = baseurl + "/udap/api/data?target=screen_image&s=" + DateTime.Now.Ticks;
 
-                        if (img != null) img.Source = new BitmapImage(new Uri(url));
+                            if (img != null) img.Source = new BitmapImage(new Uri(url));
+                        }
                     }
                 }
+                catch (Exception)
+                {
+                    var msg =
+                        new MessageDialog(
+                            "Something went wrong; We could not show the image. Press 'Close' to continue");
+                    msg.ShowAsync();
+                }
             }
-            catch (Exception)
+            else
             {
-
+                var msg =
+                    new MessageDialog(
+                        "This functionality is only supported on NetCast TV's. Press 'Close' to continue");
+                                msg.ShowAsync();
             }
+
         }
 
         private void OpenWebApp_Click(object sender, RoutedEventArgs e)
@@ -248,12 +264,15 @@ namespace ConnectSdk.Demo
                             : webostvService1.ServiceDescription.Port.ToString();
 
                         var apps = loadEventArgs.Load.GetPayload() as List<AppInfo>;
-                        for (int i = 0; i < apps.Count; i++)
+                        if (apps != null)
                         {
-                            apps[i].SetUrl(model.SelectedDevice.IpAddress, port);
-                            model.Apps.Add(apps[i]);
+                            for (var i = 0; i < apps.Count; i++)
+                            {
+                                apps[i].SetUrl(model.SelectedDevice.IpAddress, port);
+                                model.Apps.Add(apps[i]);
+                            }
+                            Dispatcher.RunAsync(CoreDispatcherPriority.High, () => { model.OnPropertyChanged("Apps"); });
                         }
-                        Dispatcher.RunAsync(CoreDispatcherPriority.High, () => { model.OnPropertyChanged("Apps"); });
                     }
                 },
                 serviceCommandError =>
@@ -370,7 +389,8 @@ namespace ConnectSdk.Demo
             }
             else
             {
-                webostvService.PlayMedia("http://www.connectsdk.com/files/8913/9657/0225/test_video.mp4", "video/mp4", "Sintel Trailer", "Blender Open Movie Project", "http://www.connectsdk.com/files/7313/9657/0225/test_video_icon.jpg", false, null);
+                if (webostvService != null)
+                    webostvService.PlayMedia("http://www.connectsdk.com/files/8913/9657/0225/test_video.mp4", "video/mp4", "Sintel Trailer", "Blender Open Movie Project", "http://www.connectsdk.com/files/7313/9657/0225/test_video_icon.jpg", false, null);
             }
 
 
@@ -419,10 +439,11 @@ namespace ConnectSdk.Demo
             }
             else
             {
-                webostvService.DisplayImage(
-                    "http://www.connectsdk.com/files/9613/9656/8539/test_image.jpg", "image/jpeg",
-                    "Sintel Character Design", "Blender Open Movie Project",
-                    "http://www.connectsdk.com/files/2013/9656/8845/test_image_icon.jpg", null);
+                if (webostvService != null)
+                    webostvService.DisplayImage(
+                        "http://www.connectsdk.com/files/9613/9656/8539/test_image.jpg", "image/jpeg",
+                        "Sintel Character Design", "Blender Open Movie Project",
+                        "http://www.connectsdk.com/files/2013/9656/8845/test_image_icon.jpg", null);
             }
 
 

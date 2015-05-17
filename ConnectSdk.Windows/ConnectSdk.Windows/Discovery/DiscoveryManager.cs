@@ -488,7 +488,7 @@ namespace ConnectSdk.Windows.Discovery
             ServiceConfig serviceConfig = null;
 
             if (connectableDeviceStore != null)
-                serviceConfig = connectableDeviceStore.GetServiceConfig(desc.Uuid);
+                serviceConfig = connectableDeviceStore.GetServiceConfig(desc);
 
             if (serviceConfig == null)
                 serviceConfig = new ServiceConfig(desc);

@@ -99,6 +99,8 @@ namespace ConnectSdk.Windows.Device
 
         public ConnectableDevice(JsonObject json)
         {
+            services = new ConcurrentDictionary<String, DeviceService>();
+
             Id = json.GetNamedString(KeyId);
             LastKnownIpAddress = json.GetNamedString(KeyLastIp);
             FriendlyName = json.GetNamedString(KeyFriendly);
@@ -107,22 +109,6 @@ namespace ConnectSdk.Windows.Device
             LastSeenOnWifi = json.GetNamedString(KeyLastSeen);
             LastConnected = json.GetNamedNumber(KeyLastConnected);
             LastDetection = json.GetNamedNumber(KeyLastDetected);
-
-            //var jsonServices = json.GetNamedObject(KEY_SERVICES);
-            //if (jsonServices != null)
-            //{
-            //    foreach (var key in jsonServices.Keys)
-            //    {
-            //        var jsonService = jsonServices.GetNamedObject(key);
-
-            //        if (jsonService != null)
-            //        {
-            //            var newService = DeviceService.GetService(jsonService);
-            //            if (newService != null)
-            //                AddService(newService);
-            //        }
-            //    }
-            //}
         }
 
         public static ConnectableDevice CreateFromConfigstring(string ipAddress, string friendlyName, string modelName,
@@ -302,7 +288,7 @@ namespace ConnectSdk.Windows.Device
         /// <returns></returns>
         public bool IsConnected()
         {
-            return services.Values.All(service => service.IsConnected());
+            return services.Values.All(service => service.IsConnected() || service.IsConnectable());
         }
 
         /// <summary>

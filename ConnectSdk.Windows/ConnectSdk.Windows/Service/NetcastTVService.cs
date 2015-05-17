@@ -915,14 +915,11 @@ namespace ConnectSdk.Windows.Service
                         {
                             channels.Add(new ChannelInfo
                             {
-                                ChannelId = obj.dataList.data[i].displayMajor.ToString(),
-                                ChannelNumber = obj.dataList.data[i].displayMajor.ToString(),
-                                ChannelName = obj.dataList.data[i].chname.ToString(),
+                                Id = obj.dataList.data[i].displayMajor.ToString(),
+                                Number = obj.dataList.data[i].displayMajor.ToString(),
+                                Name = obj.dataList.data[i].chname.ToString(),
                                 MajorNumber = obj.dataList.data[i].displayMajor,
                                 MinorNumber = obj.dataList.data[i].displayMinor,
-                                SourceIndex = obj.dataList.data[i].sourceIndex,
-                                PhysicalNumber = obj.dataList.data[i].physicalNum
-
                             });
                         }
                         Util.PostSuccess(listener, channels);
@@ -977,16 +974,10 @@ namespace ConnectSdk.Windows.Service
                                 var majorNumber = ch.MajorNumber;
                                 var minorNumber = ch.MinorNumber;
 
-
-                                var sourceIndex = ch.SourceIndex;
-                                var physicalNum = ch.PhysicalNumber;
-
                                 if (major != majorNumber || minor != minorNumber) continue;
                                 ps.Add("name", "HandleChannelChange");
                                 ps.Add("major", major.ToString());
                                 ps.Add("minor", minor.ToString());
-                                ps.Add("sourceIndex", sourceIndex.ToString());
-                                ps.Add("physicalNum", physicalNum.ToString());
 
                                 break;
                             }

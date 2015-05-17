@@ -28,11 +28,31 @@ namespace ConnectSdk.Windows.Core
     /// </summary>
     public class ProgramInfo 
     {
+        /// <summary>
+        /// Gets or sets the ID of the program on the first screen device. Format is different depending on the platform.
+        /// </summary>
         public string Id { get; set; }
+
+        /// <summary>
+        /// Gets or sets the user-friendly name of the program (ex. Sesame Street, Cosmos, Game of Thrones, etc).
+        /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// Gets or sets the reference to the ChannelInfo object that this program is associated with
+        /// </summary>
         public ChannelInfo ChannelInfo { get; set; }
+
+        /// <summary>
+        /// Gets or sets the raw data from the first screen device about the program. In most cases, this is an Dictionary.
+        /// </summary>
         public object RawData { get; set; }
 
+        /// <summary>
+        /// Compares two ProgramInfo objects.
+        /// </summary>
+        /// <param name="other">ProgramInfo object to compare</param>
+        /// <returns></returns>
         protected bool Equals(ProgramInfo other)
         {
             return string.Equals(Id, other.Id) && string.Equals(Name, other.Name) && Equals(ChannelInfo, other.ChannelInfo) && Equals(RawData, other.RawData);
