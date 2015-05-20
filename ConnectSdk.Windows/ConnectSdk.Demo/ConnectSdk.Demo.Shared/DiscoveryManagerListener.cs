@@ -61,7 +61,7 @@ namespace ConnectSdk.Demo.Demo
 
         public void OnDeviceDisconnected(ConnectableDevice device)
         {
-            throw new NotImplementedException();
+            
         }
 
         public void OnPairingRequired(ConnectableDevice device, DeviceService service, PairingType pairingType)

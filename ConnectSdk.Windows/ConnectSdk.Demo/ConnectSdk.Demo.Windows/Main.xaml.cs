@@ -183,6 +183,7 @@ namespace ConnectSdk.Demo
             );
 
             webostvService.CloseWebApp(launchSession.LaunchSession, responseListener);
+            launchSession = null;
         }
 
         private void SendMessage_Click(object sender, RoutedEventArgs e)

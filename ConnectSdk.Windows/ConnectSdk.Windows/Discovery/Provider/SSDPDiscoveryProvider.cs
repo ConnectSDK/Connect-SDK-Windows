@@ -18,7 +18,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- #endregion
+#endregion
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -34,14 +34,10 @@ namespace ConnectSdk.Windows.Discovery.Provider
 {
     public class SsdpDiscoveryProvider : IDiscoveryProvider
     {
-        // ReSharper disable InconsistentNaming
-        private const int RESCAN_INTERVAL = 10000;
-        //todo: set this to 3 for production
-        private const int RESCAN_ATTEMPTS = 1;
-        private const int SSDP_TIMEOUT = RESCAN_INTERVAL * RESCAN_ATTEMPTS;
-        // ReSharper restore InconsistentNaming
+        private const int RescanInterval = 10000;
+        private const int RescanAttempts = 3;
+        private const int SsdpTimeout = RescanInterval * RescanAttempts;
 
-        //private readonly Dictionary<string, ServiceDescription> services;
         private readonly List<IDiscoveryProviderListener> serviceListeners;
 
         private readonly ConcurrentDictionary<string, ServiceDescription> foundServices = new ConcurrentDictionary<string, ServiceDescription>();
@@ -68,13 +64,6 @@ namespace ConnectSdk.Windows.Discovery.Provider
             ssdpSocket = new SsdpSocket();
 
             ssdpSocket.MessageReceivedChanged += SsdpSocketOnMessageReceivedChanged;
-            ssdpSocket.NotifyReceivedChanged += SsdpSocketOnNotifyReceivedChanged;
-        }
-
-        private void SsdpSocketOnNotifyReceivedChanged(object sender, string message)
-        {
-            HandleDatagramPacket(new ParsedDatagram(message));
-            //Logger.Current.AddMessage("SSDPDiscoveryProvider received message: " + message);
         }
 
         private void SsdpSocketOnMessageReceivedChanged(object sender, string message)
@@ -82,8 +71,6 @@ namespace ConnectSdk.Windows.Discovery.Provider
             HandleDatagramPacket(new ParsedDatagram(message));
             //Logger.Current.AddMessage("SSDPDiscoveryProvider received message: " + message);
         }
-
-
 
         public void Start()
         {
@@ -93,24 +80,24 @@ namespace ConnectSdk.Windows.Discovery.Provider
 
             OpenSocket();
 
-            for (var i = 0; i < RESCAN_ATTEMPTS; i++)
+            for (var i = 0; i < RescanAttempts; i++)
             {
                 var task = new Task(SendSearch);
                 task.Start();
-                task.Wait(RESCAN_INTERVAL);
+                task.Wait(RescanInterval);
             }
 
         }
 
         public void SendSearch()
         {
-            var killPoint = DateTime.Now.Ticks/TimeSpan.TicksPerSecond - SSDP_TIMEOUT;
+            var killPoint = DateTime.Now.Ticks / TimeSpan.TicksPerSecond - SsdpTimeout;
 
             var killKeys =
                 (from key in foundServices.Keys
-                    let service = foundServices[key]
-                    where service.LastDetection < killPoint
-                    select key).ToList();
+                 let service = foundServices[key]
+                 where service.LastDetection < killPoint
+                 select key).ToList();
 
             foreach (var key in killKeys)
             {
@@ -165,7 +152,7 @@ namespace ConnectSdk.Windows.Discovery.Provider
             }
         }
 
-        public void AddDeviceFilter(DiscoveryFilter  filter)
+        public void AddDeviceFilter(DiscoveryFilter filter)
         {
             if (filter.ServiceFilter == null)
             {
@@ -225,7 +212,7 @@ namespace ConnectSdk.Windows.Discovery.Provider
                 return;
 
             var m = uuidReg.Match(usnKey);
-            
+
             if (!m.Success)
                 return;
 
@@ -258,11 +245,11 @@ namespace ConnectSdk.Windows.Discovery.Provider
                 {
                     foundService = new ServiceDescription { Uuid = uuid, ServiceFilter = serviceFilter };
 
-                    Logger.Current.AddMessage("SSDPDiscoveryProvider reported new service found: id: "  + foundService.Uuid);
+                    Logger.Current.AddMessage("SSDPDiscoveryProvider reported new service found: id: " + foundService.Uuid);
                     var u = new Uri(location);
                     foundService.IpAddress = u.DnsSafeHost;//pd.dp.IpAddress.getHostAddress();
                     foundService.Port = 3000;
-                    
+
                     if (!discoveredServices.ContainsKey(uuid))
                         discoveredServices.TryAdd(uuid, foundService);
 
@@ -279,18 +266,14 @@ namespace ConnectSdk.Windows.Discovery.Provider
 
         public void GetLocationData(string location, string uuid, string serviceFilter)
         {
-             SsdpDevice device = null;
+            SsdpDevice device = null;
             try
             {
                 device = new SsdpDevice(location, serviceFilter);
             }
-            catch (Exception e)
+            catch
             {
             }
-
-
-            //var device = Core.Upnp.Device.CreateInstanceFromXml(location, serviceFilter);
-
             if (device != null)
             {
                 if (true)
@@ -395,15 +378,15 @@ namespace ConnectSdk.Windows.Discovery.Provider
 
         public List<String> ServiceIdsForFilter(String filter)
         {
-            return 
-                (from serviceFilter in serviceFilters 
-                 let ssdpFilter = serviceFilter.ServiceFilter 
-                 where ssdpFilter.Equals(filter) 
-                 select serviceFilter.ServiceId 
-                 into 
-                    serviceId 
-                    where serviceId != null 
-                    select serviceId
+            return
+                (from serviceFilter in serviceFilters
+                 let ssdpFilter = serviceFilter.ServiceFilter
+                 where ssdpFilter.Equals(filter)
+                 select serviceFilter.ServiceId
+                     into
+                        serviceId
+                     where serviceId != null
+                     select serviceId
                  ).ToList();
         }
 
@@ -412,13 +395,13 @@ namespace ConnectSdk.Windows.Discovery.Provider
             return serviceFilters.Select(serviceFilter => serviceFilter.ServiceFilter).Any(ssdpFilter => ssdpFilter.Equals(filter));
         }
 
-/*
-        private bool ContainsServicesWithFilter(SsdpDevice device, String filter)
-        {
-            //  TODO  Implement this method.  Not sure why needs to happen since there are now required services.
-            return true;
-        }
-*/
+        /*
+                private bool ContainsServicesWithFilter(SsdpDevice device, String filter)
+                {
+                    //  TODO  Implement this method.  Not sure why needs to happen since there are now required services.
+                    return true;
+                }
+        */
 
         public void AddListener(IDiscoveryProviderListener listener)
         {

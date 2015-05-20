@@ -22,6 +22,18 @@ namespace ConnectSdk.Windows.Test
         [TestMethod]
         public async Task DiscoverTest()
         {
+            await Discover();
+        }
+
+
+        [TestMethod]
+        public async Task PairTest()
+        {
+            await Discover();
+        }
+
+        private static async Task Discover()
+        {
             var listener = new DiscoveryManagerListener(model);
 
             listener.Paired += (sender, o) =>
@@ -33,7 +45,7 @@ namespace ConnectSdk.Windows.Test
             discoveryManager.AddListener(listener);
             discoveryManager.PairingLevel = DiscoveryManager.PairingLevelEnum.On;
             discoveryManager.Start();
-            
+
             await AssertAsync();
         }
 

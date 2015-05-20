@@ -16,7 +16,7 @@ namespace ConnectSdk.Windows.Test
 
         public void OnDeviceAdded(DiscoveryManager manager, ConnectableDevice device)
         {
-            foreach (var deviceService in device.GetServices())
+            foreach (var deviceService in device.Services)
             {
                 model.DiscoverredDeviceServices.Add(new DeviceServiceViewModel() { Device = device, Service = deviceService });
             }
@@ -24,7 +24,7 @@ namespace ConnectSdk.Windows.Test
 
         public void OnDeviceUpdated(DiscoveryManager manager, ConnectableDevice device)
         {
-            foreach (var deviceService in device.GetServices())
+            foreach (var deviceService in device.Services)
             {
                 var f = (from t in model.DiscoverredDeviceServices
                     where t.Service.ServiceConfig.ServiceUuid == deviceService.ServiceConfig.ServiceUuid

@@ -22,36 +22,31 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Xml;
 using ConnectSdk.Windows.Core;
-using ConnectSdk.Windows.Core.Upnp;
 using ConnectSdk.Windows.Wrappers;
 
 namespace ConnectSdk.Windows.Discovery.Provider.ssdp
 {
     public class SsdpDevice
     {
+        public static string TagDeviceType = "deviceType";
+        public static string TagFriendlyName = "friendlyName";
+        public static string TagManufacturer = "manufacturer";
+        public static string TagManufacturerUrl = "manufacturerURL";
+        public static string TagModelDescription = "modelDescription";
+        public static string TagModelName = "modelName";
+        public static string TagModelNumber = "modelNumber";
+        public static string TagModelUrl = "modelURL";
+        public static string TagSerialNumber = "serialNumber";
+        public static string TagUdn = "UDN";
+        public static string TagUpc = "UPC";
+        public static string TagIconList = "iconList";
+        public static string TagServiceList = "serviceList";
 
-        // ReSharper disable InconsistentNaming
-        public static string TAG_DEVICE_TYPE = "deviceType";
-        public static string TAG_FRIENDLY_NAME = "friendlyName";
-        public static string TAG_MANUFACTURER = "manufacturer";
-        public static string TAG_MANUFACTURER_URL = "manufacturerURL";
-        public static string TAG_MODEL_DESCRIPTION = "modelDescription";
-        public static string TAG_MODEL_NAME = "modelName";
-        public static string TAG_MODEL_NUMBER = "modelNumber";
-        public static string TAG_MODEL_URL = "modelURL";
-        public static string TAG_SERIAL_NUMBER = "serialNumber";
-        public static string TAG_UDN = "UDN";
-        public static string TAG_UPC = "UPC";
-        public static string TAG_ICON_LIST = "iconList";
-        public static string TAG_SERVICE_LIST = "serviceList";
-
-        public static string TAG_SEC_CAPABILITY = "sec:Capability";
-        public static string TAG_PORT = "port";
-        public static string TAG_LOCATION = "location";
-        // ReSharper restore InconsistentNaming
+        public static string TagSecCapability = "sec:Capability";
+        public static string TagPort = "port";
+        public static string TagLocation = "location";
 
         /// <summary>
         /// Required. UPnP device type.
@@ -163,28 +158,28 @@ namespace ConnectSdk.Windows.Discovery.Provider.ssdp
             while (!xmlReader.EOF)
             {
                 var hasRead = false;
-                if (xmlReader.Name == TAG_DEVICE_TYPE)
+                if (xmlReader.Name == TagDeviceType)
                     DeviceType = xmlReader.ReadElementContentAsString(out hasRead);
-                if (xmlReader.Name == TAG_FRIENDLY_NAME)
+                if (xmlReader.Name == TagFriendlyName)
                     FriendlyName = xmlReader.ReadElementContentAsString(out hasRead);
-                if (xmlReader.Name == TAG_MODEL_NUMBER)
+                if (xmlReader.Name == TagModelNumber)
                     ModelNumber = xmlReader.ReadElementContentAsString(out hasRead);
-                if (xmlReader.Name == TAG_MANUFACTURER)
+                if (xmlReader.Name == TagManufacturer)
                     Manufacturer = xmlReader.ReadElementContentAsString(out hasRead);
-                if (xmlReader.Name == TAG_MANUFACTURER_URL)
+                if (xmlReader.Name == TagManufacturerUrl)
                     ManufacturerUrl = xmlReader.ReadElementContentAsString(out hasRead);
-                if (xmlReader.Name == TAG_MODEL_DESCRIPTION)
+                if (xmlReader.Name == TagModelDescription)
                     ModelDescription = xmlReader.ReadElementContentAsString(out hasRead);
 
-                if (xmlReader.Name == TAG_MODEL_NAME)
+                if (xmlReader.Name == TagModelName)
                     ModelName = xmlReader.ReadElementContentAsString(out hasRead);
-                if (xmlReader.Name == TAG_MODEL_URL)
+                if (xmlReader.Name == TagModelUrl)
                     ModelUrl = xmlReader.ReadElementContentAsString(out hasRead);
-                if (xmlReader.Name == TAG_SERIAL_NUMBER)
+                if (xmlReader.Name == TagSerialNumber)
                     SerialNumber = xmlReader.ReadElementContentAsString(out hasRead);
-                if (xmlReader.Name == TAG_UDN)
+                if (xmlReader.Name == TagUdn)
                     Udn = xmlReader.ReadElementContentAsString(out hasRead);
-                if (xmlReader.Name == TAG_UPC)
+                if (xmlReader.Name == TagUpc)
                     Upc = xmlReader.ReadElementContentAsString(out hasRead);
 
                 if (xmlReader.Name == "icon" && xmlReader.NodeType == XmlNodeType.Element)
@@ -214,15 +209,15 @@ namespace ConnectSdk.Windows.Discovery.Provider.ssdp
 
                 }
 
-                if (xmlReader.Name == Service.TAG_SERVICE_TYPE)
+                if (xmlReader.Name == Service.TagServiceType)
                     ServiceList[ServiceList.Count - 1].ServiceType = xmlReader.ReadElementContentAsString(out hasRead);
-                if (xmlReader.Name == Service.TAG_SERVICE_ID)
+                if (xmlReader.Name == Service.TagServiceId)
                     ServiceList[ServiceList.Count - 1].ServiceId = xmlReader.ReadElementContentAsString(out hasRead);
-                if (xmlReader.Name == Service.TAG_SCPD_URL)
+                if (xmlReader.Name == Service.TagScpdUrl)
                     ServiceList[ServiceList.Count - 1].ScpdUrl = xmlReader.ReadElementContentAsString(out hasRead);
-                if (xmlReader.Name == Service.TAG_CONTROL_URL)
+                if (xmlReader.Name == Service.TagControlUrl)
                     ServiceList[ServiceList.Count - 1].ControlUrl = xmlReader.ReadElementContentAsString(out hasRead);
-                if (xmlReader.Name == Service.TAG_EVENTSUB_URL)
+                if (xmlReader.Name == Service.TagEventsubUrl)
                     ServiceList[ServiceList.Count - 1].EventSubUrl = xmlReader.ReadElementContentAsString(out hasRead);
 
                 if (!hasRead) xmlReader.Read();

@@ -28,12 +28,18 @@ namespace ConnectSdk.Windows.Discovery.Provider.ssdp
     {
         private String name;
 
+        /// <summary>
+        /// Gets or sets the name of the action
+        /// </summary>
         public string Name
         {
             get { return name; }
             set { name = value; }
         }
 
+        /// <summary>
+        /// Gets or sets the arguments of the action
+        /// </summary>
         public List<Argument> ArgumentList { get; set; }
 
         public Action(String name)

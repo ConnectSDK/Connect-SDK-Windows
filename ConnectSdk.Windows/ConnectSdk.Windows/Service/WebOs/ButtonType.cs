@@ -23,11 +23,11 @@ namespace ConnectSdk.Windows.Service.WebOs
 {
     public enum ButtonType
     {
-        Home,
-        Back,
-        Up,
-        Down,
-        Left,
-        Right,
+        HOME,
+        BACK,
+        UP,
+        DOWN,
+        LEFT,
+        RIGHT,
     }
 }

@@ -25,14 +25,12 @@ namespace ConnectSdk.Windows.Discovery.Provider.ssdp
 {
     public class Service
     {
-        // ReSharper disable InconsistentNaming
-        public static string TAG = "service";
-        public static string TAG_SERVICE_TYPE = "serviceType";
-        public static string TAG_SERVICE_ID = "serviceId";
-        public static string TAG_SCPD_URL = "SCPDURL";
-        public static string TAG_CONTROL_URL = "controlURL";
-        public static string TAG_EVENTSUB_URL = "eventSubURL";
-        // ReSharper restore InconsistentNaming
+        public static string Tag = "service";
+        public static string TagServiceType = "serviceType";
+        public static string TagServiceId = "serviceId";
+        public static string TagScpdUrl = "SCPDURL";
+        public static string TagControlUrl = "controlURL";
+        public static string TagEventsubUrl = "eventSubURL";
 
         public string BaseUrl;
 

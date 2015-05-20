@@ -33,11 +33,20 @@ namespace ConnectSdk.Windows.Discovery.Provider.ssdp
 {
     public class SsdpSocket
     {
+        /// <summary>
+        /// Event called when a message is received by the socket
+        /// </summary>
         public event EventHandler<string> MessageReceivedChanged;
-        public event EventHandler<string> NotifyReceivedChanged;
+
+        /// <summary>
+        /// Handler for the events
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public delegate void EventHandler(object sender, EventArgs e);
 
         private DatagramSocketWrapper socket;
+
 
         public bool IsConnected { get; private set; }
 
@@ -91,12 +100,6 @@ namespace ConnectSdk.Windows.Discovery.Provider.ssdp
         {
             if (MessageReceivedChanged != null)
                 MessageReceivedChanged(this, e.Message);
-        }
-
-        protected virtual void OnNotifyReceived(MessageReceivedArgs e)
-        {
-            if (NotifyReceivedChanged != null)
-                NotifyReceivedChanged(this, e.Message);
         }
 
         public void Close()

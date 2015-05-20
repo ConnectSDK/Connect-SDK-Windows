@@ -1839,7 +1839,7 @@ namespace ConnectSdk.Windows.Service
 
         public void Back(ResponseListener listener)
         {
-            SendSpecialKey("Back", listener);
+            SendSpecialKey("BACK", listener);
         }
 
         public void Home(ResponseListener listener)

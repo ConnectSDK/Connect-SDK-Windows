@@ -106,6 +106,7 @@ namespace ConnectSdk.Windows.Service.WebOs
             {
                 OnClose(0, args.ToString());
                 HandleConnectionLost(false, null);
+                messageWebSocket = new MessageWebSocket();
             };
         }
 
@@ -120,7 +121,10 @@ namespace ConnectSdk.Windows.Service.WebOs
         {
             try
             {
-                await messageWebSocket.ConnectAsync(destinationUri);
+                if (messageWebSocket.Information.LocalAddress == null)
+                {
+                    await messageWebSocket.ConnectAsync(destinationUri);
+                }
                 SendRegister();
             }
             catch (Exception ex)

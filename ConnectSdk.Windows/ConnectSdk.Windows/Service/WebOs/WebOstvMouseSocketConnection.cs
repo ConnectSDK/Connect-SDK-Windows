@@ -41,15 +41,6 @@ namespace ConnectSdk.Windows.Service.WebOs
             this.socketPath = socketPath.StartsWith("wss:") ? socketPath.Replace("wss:", "ws:").Replace(":3001/", ":3000/") : socketPath;
 
             CreateSocket();
-            //try
-            //{
-            //    var uri = new Uri(this.socketPath);
-            //    ConnectPointer(uri);
-            //}
-            //catch (Exception e)
-            //{
-            //    throw e;
-            //}
         }
 
         private void CreateSocket()
@@ -83,7 +74,10 @@ namespace ConnectSdk.Windows.Service.WebOs
         {
             try
             {
-                await ws.ConnectAsync(new Uri(socketPath));
+                if (ws.Information.LocalAddress == null)
+                {
+                    await ws.ConnectAsync(new Uri(socketPath));
+                }
                 isConnected = true;
             }
             catch (Exception ex)
@@ -128,22 +122,22 @@ namespace ConnectSdk.Windows.Service.WebOs
             String keyName;
             switch (type)
             {
-                case ButtonType.Home:
+                case ButtonType.HOME:
                     keyName = "HOME";
                     break;
-                case ButtonType.Back:
+                case ButtonType.BACK:
                     keyName = "BACK";
                     break;
-                case ButtonType.Up:
+                case ButtonType.UP:
                     keyName = "UP";
                     break;
-                case ButtonType.Down:
+                case ButtonType.DOWN:
                     keyName = "DOWN";
                     break;
-                case ButtonType.Left:
+                case ButtonType.LEFT:
                     keyName = "LEFT";
                     break;
-                case ButtonType.Right:
+                case ButtonType.RIGHT:
                     keyName = "RIGHT";
                     break;
 
@@ -159,7 +153,7 @@ namespace ConnectSdk.Windows.Service.WebOs
         {
             if (keyName != null)
             {
-                if (keyName.Equals("HOME")
+                if (keyName.ToUpper().Equals("HOME")
                     || keyName.Equals("BACK")
                     || keyName.Equals("UP")
                     || keyName.Equals("DOWN")
