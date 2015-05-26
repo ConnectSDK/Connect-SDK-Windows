@@ -26,6 +26,7 @@ namespace ConnectSdk.Demo.Demo
         private IExternalInputControl externalInputControl;
         private IKeyControl keyControl;
         private IWebAppLauncher webAppLauncher;
+        private IPlayListControl playListControl;
         private WebOsWebAppSession launchSession;
 
         private void SetControls()
@@ -43,6 +44,7 @@ namespace ConnectSdk.Demo.Demo
                 externalInputControl = null;
                 powerControl = null;
                 keyControl = null;
+                playListControl = null;
                 webAppLauncher = null;
             }
             else
@@ -58,6 +60,7 @@ namespace ConnectSdk.Demo.Demo
                 externalInputControl = selectedDevice.GetControl<IExternalInputControl>();
                 powerControl = selectedDevice.GetControl<IPowerControl>();
                 keyControl = selectedDevice.GetControl<IKeyControl>();
+                playListControl = selectedDevice.GetControl<IPlayListControl>();
                 webAppLauncher = selectedDevice.GetControl<IWebAppLauncher>();
             }
         }
@@ -72,18 +75,18 @@ namespace ConnectSdk.Demo.Demo
 
             var listener = new ResponseListener
                 (
-                    loadEventArg =>
-                    {
-                        var v = loadEventArg as LoadEventArgs;
-                    },
-                    serviceCommandError =>
-                    {
-                        var msg =
-                            new MessageDialog(
-                                "Something went wrong; The application could not be started. Press 'Close' to continue");
-                        msg.ShowAsync();
-                    }
-                    );
+                loadEventArg =>
+                {
+                    var v = loadEventArg as LoadEventArgs;
+                },
+                serviceCommandError =>
+                {
+                    var msg =
+                        new MessageDialog(
+                            "Something went wrong; The application could not be started. Press 'Close' to continue");
+                    msg.ShowAsync();
+                }
+                );
 
             mediaPlayer.DisplayImage(imagePath, mimeType, title, description, icon, listener);
         }
@@ -98,18 +101,18 @@ namespace ConnectSdk.Demo.Demo
 
             var listener = new ResponseListener
                 (
-                    loadEventArg =>
-                    {
-                        var v = loadEventArg as LoadEventArgs;
-                    },
-                    serviceCommandError =>
-                    {
-                        var msg =
-                            new MessageDialog(
-                                "Something went wrong; The application could not be started. Press 'Close' to continue");
-                        msg.ShowAsync();
-                    }
-                    );
+                loadEventArg =>
+                {
+                    var v = loadEventArg as LoadEventArgs;
+                },
+                serviceCommandError =>
+                {
+                    var msg =
+                        new MessageDialog(
+                            "Something went wrong; The application could not be started. Press 'Close' to continue");
+                    msg.ShowAsync();
+                }
+                );
 
             mediaPlayer.PlayMedia(videoPath, mimeType, title, description, icon, false, listener);
         }
@@ -124,18 +127,18 @@ namespace ConnectSdk.Demo.Demo
 
             var listener = new ResponseListener
                 (
-                    loadEventArg =>
-                    {
-                        var v = loadEventArg as LoadEventArgs;
-                    },
-                    serviceCommandError =>
-                    {
-                        var msg =
-                            new MessageDialog(
-                                "Something went wrong; The application could not be started. Press 'Close' to continue");
-                        msg.ShowAsync();
-                    }
-                    );
+                loadEventArg =>
+                {
+                    var v = loadEventArg as LoadEventArgs;
+                },
+                serviceCommandError =>
+                {
+                    var msg =
+                        new MessageDialog(
+                            "Something went wrong; The application could not be started. Press 'Close' to continue");
+                    msg.ShowAsync();
+                }
+                );
 
             mediaPlayer.PlayMedia(mediaUrl, mimeType, title, description, icon, false, listener);
         }
@@ -143,7 +146,7 @@ namespace ConnectSdk.Demo.Demo
 
         private void LaunchMediaPlayerCommandExecute(object obj)
         {
-            var webostvService = (WebOstvService)selectedDevice.GetServiceByName(WebOstvService.Id);
+            var webostvService = (WebOstvService) selectedDevice.GetServiceByName(WebOstvService.Id);
             const string webappname = "MediaPlayer";
             var listener = new ResponseListener
                 (
@@ -203,6 +206,67 @@ namespace ConnectSdk.Demo.Demo
         {
             if (mediaControl != null)
                 mediaControl.Stop(null);
+        }
+
+        private void PlayListCommandExecute(object obj)
+        {
+            const string mediaUrl =
+                "http://ec2-54-201-108-205.us-west-2.compute.amazonaws.com/samples/media/example-m3u-playlist.m3u";
+            const string mimeType = "application/x-mpegurl";
+            const string title = "Playlist";
+            const string description = "Playlist description";
+            const string icon = "http://ec2-54-201-108-205.us-west-2.compute.amazonaws.com/samples/media/audioIcon.jpg";
+
+            var listener = new ResponseListener
+                (
+                loadEventArg =>
+                {
+                    var v = loadEventArg as LoadEventArgs;
+                    SetEnabledMedia(true);
+                },
+                serviceCommandError =>
+                {
+                    var msg =
+                        new MessageDialog(
+                            "Error playing audio");
+                    msg.ShowAsync();
+                    SetEnabledMedia(false);
+                }
+                );
+
+            mediaPlayer.PlayMedia(mediaUrl, mimeType, title, description, icon, false, listener);
+        }
+
+        private void PreviousCommandExecute(object obj)
+        {
+            if (playListControl != null)
+                playListControl.Previous(null);
+        }
+
+        private void NextCommandExecute(object obj)
+        {
+            if (playListControl != null)
+                playListControl.Next(null);
+        }
+
+        public void SetEnabledMedia(bool enabled)
+        {
+            playCommand.Enabled = selectedDevice.HasCapability(MediaControl.Play) && enabled;
+            pauseCommand.Enabled = selectedDevice.HasCapability(MediaControl.Pause) && enabled;
+            stopCommand.Enabled = selectedDevice.HasCapability(MediaControl.Stop) && enabled;
+            rewindCommand.Enabled = selectedDevice.HasCapability(MediaControl.Rewind) && enabled;
+            fastForwardCommand.Enabled = selectedDevice.HasCapability(MediaControl.FastForward) && enabled;
+            closeCommand.Enabled = selectedDevice.HasCapability(MediaPlayer.Close) && enabled;
+            previousCommand.Enabled = selectedDevice.HasCapability(PlaylistControl.Previous) && enabled;
+            nextCommand.Enabled = selectedDevice.HasCapability(PlaylistControl.Next) && enabled;
+            jumpCommand.Enabled = selectedDevice.HasCapability(PlaylistControl.JumpToTrack) && enabled;
+
+        }
+
+        private void JumpCommandExecute(object obj)
+        {
+            if (playListControl != null)
+                playListControl.JumpToTrack((long)obj, null);
         }
     }
 }

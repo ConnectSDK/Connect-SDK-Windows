@@ -18,6 +18,10 @@ namespace ConnectSdk.Demo.Demo
 
 
         private Command launchMediaPlayerCommand;
+        private Command playListCommand;
+        private Command previousCommand;
+        private Command nextCommand;
+        private Command jumpCommand;
 
         public Command ShowFotoCommand
         {
@@ -41,42 +45,63 @@ namespace ConnectSdk.Demo.Demo
 
         public Command PlayCommand
         {
-            get { return playCommand ?? (playCommand = new Command(PlayCommandExecute) { Enabled = true }); }
+            get { return playCommand ?? (playCommand = new Command(PlayCommandExecute) { Enabled = false }); }
             set { playCommand = value; }
         }
 
         public Command PauseCommand
         {
-            get { return pauseCommand ?? (pauseCommand = new Command(PauseCommandExecute) { Enabled = true }); }
+            get { return pauseCommand ?? (pauseCommand = new Command(PauseCommandExecute) { Enabled = false }); }
             set { pauseCommand = value; }
         }
 
         public Command StopCommand
         {
-            get { return stopCommand ?? (stopCommand = new Command(StopCommandExecute) { Enabled = true }); }
+            get { return stopCommand ?? (stopCommand = new Command(StopCommandExecute) { Enabled = false }); }
             set { stopCommand = value; }
         }
 
         public Command RewindCommand
         {
-            get { return rewindCommand ?? (rewindCommand = new Command(RewindCommandExecute) { Enabled = true }); }
+            get { return rewindCommand ?? (rewindCommand = new Command(RewindCommandExecute) { Enabled = false }); }
             set { rewindCommand = value; }
         }
 
         public Command FastForwardCommand
         {
-            get { return fastForwardCommand ?? (fastForwardCommand = new Command(FastForwardCommandExecute) { Enabled = true }); }
+            get { return fastForwardCommand ?? (fastForwardCommand = new Command(FastForwardCommandExecute) { Enabled = false }); }
             set { fastForwardCommand = value; }
         }
 
         public Command CloseCommand
         {
-            get { return closeCommand ?? (closeCommand = new Command(CloseCommandExecute) { Enabled = true }); }
+            get { return closeCommand ?? (closeCommand = new Command(CloseCommandExecute) { Enabled = false }); }
             set { closeCommand = value; }
         }
 
+        public Command PlayListCommand
+        {
+            get { return playListCommand ?? (playListCommand = new Command(PlayListCommandExecute) { Enabled = true }); }
+            set { playListCommand = value; }
+        }
 
+        public Command PreviousCommand
+        {
+            get { return previousCommand ?? (previousCommand = new Command(PreviousCommandExecute) { Enabled = false }); }
+            set { previousCommand = value; }
+        }
 
+        public Command NextCommand
+        {
+            get { return nextCommand ?? (nextCommand = new Command(NextCommandExecute) { Enabled = false }); }
+            set { nextCommand = value; }
+        }
+
+        public Command JumpCommand
+        {
+            get { return jumpCommand ?? (jumpCommand = new Command(JumpCommandExecute) { Enabled = false }); }
+            set { jumpCommand = value; }
+        }
 
 
 
