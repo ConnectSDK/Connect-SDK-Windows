@@ -20,6 +20,7 @@
  */
  #endregion
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Windows.Data.Json;
 using ConnectSdk.Windows.Core;
@@ -33,11 +34,11 @@ namespace ConnectSdk.Windows.Service.Sessions
     public class WebOsWebAppSession : WebAppSession
     {
         private const String NamespaceKey = "connectsdk.";
-        private readonly Dictionary<String, ServiceCommand> mActiveCommands;
-        private readonly WebOstvServiceSocketClientListener mSocketListener;
+        private readonly ConcurrentDictionary<String, ServiceCommand> mActiveCommands;
+        private readonly WebOsWebAppSession.WebOstvServiceSocketClientListener mSocketListener;
 
         public UrlServiceSubscription AppToAppSubscription;
-        public bool Connected;
+        private bool connected;
         public ResponseListener MConnectionListener;
         public WebOstvServiceSocketClient Socket;
         private String mFullAppId;
@@ -46,11 +47,23 @@ namespace ConnectSdk.Windows.Service.Sessions
         protected new WebOstvService Service;
         private int uid;
 
+        public bool Connected
+        {
+            get
+            {
+                return connected;
+            }
+            set
+            {
+                connected = value;
+            }
+        }
+
         public WebOsWebAppSession(LaunchSession launchSession, DeviceService service) :
             base(launchSession, service)
         {
             uid = 0;
-            mActiveCommands = new Dictionary<String, ServiceCommand>();
+            mActiveCommands = new ConcurrentDictionary<String, ServiceCommand>();
             Connected = false;
 
             Service = (WebOstvService) service;
@@ -67,10 +80,10 @@ namespace ConnectSdk.Windows.Service.Sessions
             return Connected;
         }
 
-        public void SetConnected(bool connected)
-        {
-            Connected = connected;
-        }
+        //public void SetConnected(bool connected)
+        //{
+        //    Connected = connected;
+        //}
 
         public void HandleMediaEvent(JsonObject payload)
         {
@@ -143,8 +156,8 @@ namespace ConnectSdk.Windows.Service.Sessions
             {
                 Util.PostSuccess(command.ResponseListenerValue, payload);
             }
-
-            mActiveCommands.Remove(requestId);
+            ServiceCommand cmd;
+            mActiveCommands.TryRemove(requestId, out cmd);
         }
 
         public void HandleMessage(Object message)
@@ -168,9 +181,12 @@ namespace ConnectSdk.Windows.Service.Sessions
 
         public new void Connect(ResponseListener connectionListener)
         {
-            // reuse the socket from the service if present. Fixes bug for displayImage
-            if (Service.Socket != null && Socket == null)
-                Socket = Service.Socket;
+            //// reuse the socket from the service if present. Fixes bug for displayImage
+            //if (Service.Socket != null && Socket == null)
+            //{
+            //    Socket = Service.Socket;
+
+            //}
             Connect(false, connectionListener);
         }
 
@@ -214,8 +230,8 @@ namespace ConnectSdk.Windows.Service.Sessions
                         {
                             DisconnectFromWebApp();
 
-                            if (MConnectionListener != null)
-                                MConnectionListener.OnError(serviceCommandError);
+                            if (connectionListener != null)
+                                connectionListener.OnError(serviceCommandError);
                         }
                     );
 
@@ -246,11 +262,20 @@ namespace ConnectSdk.Windows.Service.Sessions
             }
             else
             {
-                Socket = new WebOstvServiceSocketClient(Service, WebOstvServiceSocketClient.GetUri(Service))
+                var uri = WebOstvServiceSocketClient.GetUri(Service);
+                if (WebOstvServiceSocketClient.SocketCache.ContainsKey(uri.ToString()))
                 {
-                    Listener = mSocketListener
-                };
-                Socket.Connect();
+                    Socket = WebOstvServiceSocketClient.SocketCache[uri.ToString()];
+                }
+                else
+                {
+                    Socket = new WebOstvServiceSocketClient(Service, uri)
+                    {
+                        Listener = mSocketListener
+                    };
+                    Socket.Connect();
+                     WebOstvServiceSocketClient.SocketCache.Add(uri.ToString(), Socket);
+                }
             }
         }
 
@@ -269,6 +294,7 @@ namespace ConnectSdk.Windows.Service.Sessions
 
             Socket.Listener = null;
             Socket.Disconnect();
+            Connected = false;
             Socket = null;
         }
 
@@ -391,7 +417,7 @@ namespace ConnectSdk.Windows.Service.Sessions
 
             var command = new ServiceCommand(null, null, null, listener);
 
-            mActiveCommands.Add(requestId, command);
+            mActiveCommands.TryAdd(requestId, command);
 
             SendMessage(message, listener);
         }
@@ -443,7 +469,7 @@ namespace ConnectSdk.Windows.Service.Sessions
             );
 
             var command = new ServiceCommand(null, null, null, commandResponseListener);
-            mActiveCommands.Add(requestId, command);
+            mActiveCommands.TryAdd(requestId, command);
 
 
             var messageResponseListener = new ResponseListener
@@ -512,7 +538,7 @@ namespace ConnectSdk.Windows.Service.Sessions
 
             var command = new ServiceCommand(null, null, null, commandResponseListener);
 
-            mActiveCommands.Add(requestId, command);
+            mActiveCommands.TryAdd(requestId, command);
 
 
             var responseListener = new ResponseListener
@@ -579,7 +605,7 @@ namespace ConnectSdk.Windows.Service.Sessions
 
             var command = new ServiceCommand(null, null, null, commandResponseListener);
 
-            mActiveCommands.Add(requestId, command);
+            mActiveCommands.TryAdd(requestId, command);
 
             var responseListener = new ResponseListener
             (
@@ -688,7 +714,7 @@ namespace ConnectSdk.Windows.Service.Sessions
 
             var command = new ServiceCommand(Socket, null, null, responseListener);
 
-            mActiveCommands.Add(requestId, command);
+            mActiveCommands.TryAdd(requestId, command);
 
             var messageResponseListener = new ResponseListener
             (
@@ -742,7 +768,7 @@ namespace ConnectSdk.Windows.Service.Sessions
 
             var command = new ServiceCommand(Socket, null, null, responseListener);
 
-            mActiveCommands.Add(requestId, command);
+            mActiveCommands.TryAdd(requestId, command);
 
             var messageResponseListener = new ResponseListener
             (

@@ -37,7 +37,7 @@ namespace ConnectSdk.Demo
 
         private void ScrollPadOnManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs manipulationDeltaRoutedEventArgs)
         {
-            model.Move(manipulationDeltaRoutedEventArgs.Delta.Translation.X, manipulationDeltaRoutedEventArgs.Delta.Translation.Y);
+            //model.Move(manipulationDeltaRoutedEventArgs.Delta.Translation.X, manipulationDeltaRoutedEventArgs.Delta.Translation.Y);
         }
 
         private void ScrollPadOnTapped(object sender, TappedRoutedEventArgs e)
@@ -68,7 +68,7 @@ namespace ConnectSdk.Demo
                     var pos = arg.GetPosition(scrollPad);
                     if (scrollPad != null && (pos.X > 0 && pos.Y > 0 && pos.X < scrollPad.ActualWidth && pos.Y < scrollPad.ActualWidth))
                     {
-                        model.Tap();
+                        //model.Tap();
                     }
                 }
             }
@@ -85,7 +85,7 @@ namespace ConnectSdk.Demo
                         var pos = arg.GetPosition(scrollPad);
                         if (scrollPad != null && (pos.X > 0 && pos.Y > 0 && pos.X < scrollPad.ActualWidth && pos.Y < scrollPad.ActualWidth))
                         {
-                            model.Tap();
+                            //model.Tap();
                         }
                     }
                 }

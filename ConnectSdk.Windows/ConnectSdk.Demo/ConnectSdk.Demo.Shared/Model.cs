@@ -20,9 +20,12 @@ namespace ConnectSdk.Demo.Demo
             get { return selectedDevice; }
             set
             {
-                selectedDevice = value; 
+                selectedDevice = value;
+                SetControls();
             }
         }
+
+
 
         public string TextInput
         {

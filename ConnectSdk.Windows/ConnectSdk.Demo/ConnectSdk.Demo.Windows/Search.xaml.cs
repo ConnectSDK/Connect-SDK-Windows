@@ -38,7 +38,7 @@ namespace ConnectSdk.Demo
             listener.Paired += (sender, o) =>
             {
                 model.SelectedDevice = new Independent<ConnectableDevice>(o as ConnectableDevice);
-                Dispatcher.RunAsync(CoreDispatcherPriority.High, () => Frame.Navigate(typeof(Main)));
+                Dispatcher.RunAsync(CoreDispatcherPriority.High, () => Frame.Navigate(typeof(Sampler)));
             };
             DiscoveryManager.Init();
             var discoveryManager = DiscoveryManager.GetInstance();
@@ -88,7 +88,7 @@ namespace ConnectSdk.Demo
                     netCastService.RemovePairingKeyOnTv();
                     device.OnConnectionSuccess(netCastService);
                     model.SelectedDevice = device;
-                    Frame.Navigate(typeof(Main));
+                    Frame.Navigate(typeof(Sampler));
                 }
             }
             else

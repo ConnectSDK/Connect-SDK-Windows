@@ -56,7 +56,7 @@ namespace ConnectSdk.Windows.Service.WebOs
                     reader.UnicodeEncoding = global::Windows.Storage.Streams.UnicodeEncoding.Utf8;
 
                     read = reader.ReadString(reader.UnconsumedBufferLength);
-                    Debug.WriteLine("{0} : {1} : {2}", DateTime.Now, "received", read);
+                    //Debug.WriteLine("{0} : {1} : {2}", DateTime.Now, "received", read);
                 }
                 OnMessage(read);
             };

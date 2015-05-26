@@ -18,7 +18,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- #endregion
+#endregion
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -60,9 +60,11 @@ namespace ConnectSdk.Windows.Service.WebOs
 
         private readonly Uri destinationUri;
 
+        public static Dictionary<string, WebOstvServiceSocketClient> SocketCache = new Dictionary<string, WebOstvServiceSocketClient>();
+
         public WebOstvServiceSocketClient(WebOstvService service, Uri uri)
         {
-            
+
             destinationUri = uri;
             this.service = service;
             State = State.Initial;
@@ -93,8 +95,8 @@ namespace ConnectSdk.Windows.Service.WebOs
                 {
                     reader.UnicodeEncoding = UnicodeEncoding.Utf8;
                     read = reader.ReadString(reader.UnconsumedBufferLength);
-                    
-                    Debug.WriteLine("{0} : {1} : {2}", DateTime.Now, "received", read);
+
+                    //Debug.WriteLine("{0} : {1} : {2}", DateTime.Now, "received", read);
                 }
                 OnMessage(read);
                 if (!connected)
@@ -121,6 +123,7 @@ namespace ConnectSdk.Windows.Service.WebOs
         {
             try
             {
+                state = State.Connecting;
                 if (messageWebSocket.Information.LocalAddress == null)
                 {
                     await messageWebSocket.ConnectAsync(destinationUri);
@@ -158,7 +161,7 @@ namespace ConnectSdk.Windows.Service.WebOs
                 manifest.Add("manifestVersion", JsonValue.CreateNumberValue(1));
                 manifest.Add("permissions", ConvertStringListToJsonArray(permissions));
             }
-                // ReSharper disable once EmptyGeneralCatchClause
+            // ReSharper disable once EmptyGeneralCatchClause
             catch
             {
 
@@ -208,7 +211,7 @@ namespace ConnectSdk.Windows.Service.WebOs
                 HandleMessage(obj);
                 if (!connected) connected = true;
             }
-                // ReSharper disable once EmptyGeneralCatchClause
+            // ReSharper disable once EmptyGeneralCatchClause
             catch
             {
                 //throw e;
@@ -226,7 +229,7 @@ namespace ConnectSdk.Windows.Service.WebOs
                 return;
 
             var type = message.GetNamedString("type");
-            Object payload =  1;
+            Object payload = 1;
             try
             {
                 payload = message.GetNamedObject("payload");
@@ -244,13 +247,13 @@ namespace ConnectSdk.Windows.Service.WebOs
                 {
                     if (message.GetNamedValue("id").ValueType != JsonValueType.String)
                     {
-                        id = (int) message.GetNamedNumber("id");
+                        id = (int)message.GetNamedNumber("id");
                     }
                     else
                     {
                         var intstr = message.GetNamedString("id");
                         int.TryParse(intstr, out id);
-                    }                        
+                    }
                 }
 
                 try
@@ -290,10 +293,10 @@ namespace ConnectSdk.Windows.Service.WebOs
                             Util.PostError(request.ResponseListenerValue,
                                 new ServiceCommandError(-1, "JSON parse error"));
                         }
-                            // ReSharper disable once EmptyGeneralCatchClause
+                        // ReSharper disable once EmptyGeneralCatchClause
                         catch
                         {
-                            
+
                         }
                     }
 
@@ -313,7 +316,7 @@ namespace ConnectSdk.Windows.Service.WebOs
                 if (payload != null)
                 {
                     var clientKey = ((JsonObject)payload).GetNamedString("client-key");
-                    ((WebOsTvServiceConfig) service.ServiceConfig).ClientKey = clientKey;
+                    ((WebOsTvServiceConfig)service.ServiceConfig).ClientKey = clientKey;
 
                     HandleRegistered();
 
@@ -344,7 +347,7 @@ namespace ConnectSdk.Windows.Service.WebOs
                     Logger.Current.AddMessage("Error payload: " + payload);
 
                 if (!message.ContainsKey("id")) return;
-                    Logger.Current.AddMessage("Error desc: " + errorDesc);
+                Logger.Current.AddMessage("Error desc: " + errorDesc);
 
                 if (request == null) return;
                 Util.PostError(request.ResponseListenerValue,
@@ -397,7 +400,7 @@ namespace ConnectSdk.Windows.Service.WebOs
             //PackageManager packageManager = context.getPackageManager();
 
             // app Id
-            
+
             var packageName = Package.Current.Id.Name;
 
             //// SDK Version
@@ -408,12 +411,12 @@ namespace ConnectSdk.Windows.Service.WebOs
             //// Device Model
             var deviceModel = deviceInfo.FriendlyName;
 
-            
+
 
             //// OS Version
             var osVersion = deviceInfo.OperatingSystem;
 
-            
+
 
             //// resolution
             //WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
@@ -491,7 +494,7 @@ namespace ConnectSdk.Windows.Service.WebOs
 
             var dataId = nextRequestId++;
 
-            var command = new ServiceCommand(this, null, null, requestListener) {RequestId = dataId};
+            var command = new ServiceCommand(this, null, null, requestListener) { RequestId = dataId };
 
             var headers = new JsonObject();
             var payload = new JsonObject();
@@ -574,7 +577,7 @@ namespace ConnectSdk.Windows.Service.WebOs
             {
                 SendCommandImmediately(command);
             }
-                // ReSharper disable once EmptyGeneralCatchClause
+            // ReSharper disable once EmptyGeneralCatchClause
             catch
             {
 
@@ -593,7 +596,7 @@ namespace ConnectSdk.Windows.Service.WebOs
                 headers.Add("type", JsonValue.CreateStringValue("unsubscribe"));
                 headers.Add("id", JsonValue.CreateStringValue(requestId.ToString()));
             }
-                // ReSharper disable once RedundantCatchClause
+            // ReSharper disable once RedundantCatchClause
             catch
             {
                 throw;
@@ -606,7 +609,7 @@ namespace ConnectSdk.Windows.Service.WebOs
         protected void SendCommandImmediately(ServiceCommand command)
         {
             var headers = new JsonObject();
-            var payload = (JsonObject) command.Payload;
+            var payload = (JsonObject)command.Payload;
             var payloadType = "";
 
             try
@@ -628,7 +631,7 @@ namespace ConnectSdk.Windows.Service.WebOs
                     {
                         if (payload != null) headers.Add(key, payload.GetNamedObject(key));
                     }
-                        // ReSharper disable once EmptyGeneralCatchClause
+                    // ReSharper disable once EmptyGeneralCatchClause
                     catch
                     {
                         // ignore
@@ -651,7 +654,7 @@ namespace ConnectSdk.Windows.Service.WebOs
                         dr.StoreAsync();
                         Debug.WriteLine("{0} : {1} : {2}", DateTime.Now, "sent", message);
                     }
-                        // ReSharper disable once EmptyGeneralCatchClause
+                    // ReSharper disable once EmptyGeneralCatchClause
                     catch
                     {
 
@@ -693,10 +696,10 @@ namespace ConnectSdk.Windows.Service.WebOs
                     packet.Add("payload", payload);
                 }
             }
-                // ReSharper disable once EmptyGeneralCatchClause
+            // ReSharper disable once EmptyGeneralCatchClause
             catch
             {
-                
+
             }
 
             if (IsConnected())
@@ -712,10 +715,10 @@ namespace ConnectSdk.Windows.Service.WebOs
                     dr.WriteString(message);
                     dr.StoreAsync();
                 }
-                    // ReSharper disable once EmptyGeneralCatchClause
+                // ReSharper disable once EmptyGeneralCatchClause
                 catch
                 {
-
+                    HandleConnectionLost(false, null);
                 }
             }
             else

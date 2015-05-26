@@ -153,10 +153,19 @@ namespace ConnectSdk.Windows.Service
         {
             if (Socket == null)
             {
-                Socket = new WebOstvServiceSocketClient(this, WebOstvServiceSocketClient.GetUri(this))
+                var uri = WebOstvServiceSocketClient.GetUri(this);
+                if (WebOstvServiceSocketClient.SocketCache.ContainsKey(uri.ToString()))
                 {
-                    Listener = new WebOstvServiceSocketClientListener(this, Listener)
-                };
+                    Socket = WebOstvServiceSocketClient.SocketCache[uri.ToString()];
+                }
+                else
+                {
+                    Socket = new WebOstvServiceSocketClient(this, uri)
+                    {
+                        Listener = new WebOstvServiceSocketClientListener(this, Listener)
+                    };
+                    WebOstvServiceSocketClient.SocketCache.Add(uri.ToString(), socket);
+                }
             }
 
             if (!IsConnected())
@@ -175,6 +184,7 @@ namespace ConnectSdk.Windows.Service
             {
                 Socket.Listener = null;
                 Socket.Disconnect();
+                connected = false;
                 Socket = null;
             }
 
@@ -894,8 +904,10 @@ namespace ConnectSdk.Windows.Service
                                     webAppSession.DisplayImage(url, mimeType, title, description, iconSrc, listener);
                             }
                         },
-                        serviceCommandError => listener.OnError(serviceCommandError)
-                    );
+                        serviceCommandError =>
+                        {
+                            listener.OnError(serviceCommandError);
+                        });
 
                 var webappResponseListener = new ResponseListener
                     (
@@ -909,7 +921,10 @@ namespace ConnectSdk.Windows.Service
                                     webAppSession.DisplayImage(url, mimeType, title, description, iconSrc, listener);
                             }
                         },
-                        serviceCommandError => GetWebAppLauncher().LaunchWebApp(webAppId, webAppLaunchListener));
+                        serviceCommandError =>
+                        {
+                            GetWebAppLauncher().LaunchWebApp(webAppId, webAppLaunchListener);
+                        });
 
                 GetWebAppLauncher().JoinWebApp(webAppId, webappResponseListener);
             }
@@ -1945,6 +1960,8 @@ namespace ConnectSdk.Windows.Service
                         WebAppSessions.Add(webAppId,
                             webAppSession);
                     }
+                    //todo: check this
+                    // //     ,webAppSession.Connected = true;
 
                     launchSession.Service = this;
                     if (obj != null)
@@ -2016,9 +2033,14 @@ namespace ConnectSdk.Windows.Service
 
             var responseListener = new ResponseListener
             (
-                loadEventArg => Util.PostSuccess(listener, webAppSession),
-                serviceCommandError => Util.PostError(listener, serviceCommandError)
-            );
+                loadEventArg =>
+                {
+                    Util.PostSuccess(listener, webAppSession);
+                },
+                serviceCommandError =>
+                {
+                    Util.PostError(listener, serviceCommandError);
+                });
             webAppSession.Join(responseListener);
         }
 
@@ -2199,9 +2221,23 @@ namespace ConnectSdk.Windows.Service
                 }
             );
 
-            webAppSession.AppToAppSubscription = new UrlServiceSubscription(this, uri, payload, true, responseListener);
-            webAppSession.AppToAppSubscription.Subscribe();
+            //todo: this is a workaround! Normally the subscribed event should arrive sooner but now we suppose that the existing subscription was successfull
+            UrlServiceSubscription v;
+            if (subscriptions.ContainsKey(uri))
+            {
+                subscriptions.TryGetValue(uri, out v);
+                webAppSession.AppToAppSubscription = v;
+            }
+            else
+            {
+                v = new UrlServiceSubscription(this, uri, payload, true, responseListener);
+                subscriptions.TryAdd(uri, v);
+                webAppSession.AppToAppSubscription = v;
+                webAppSession.AppToAppSubscription.Subscribe();
+            }
         }
+
+        private ConcurrentDictionary<string, UrlServiceSubscription> subscriptions = new ConcurrentDictionary<string, UrlServiceSubscription>();
 
         private void NotifyPairingRequired()
         {
