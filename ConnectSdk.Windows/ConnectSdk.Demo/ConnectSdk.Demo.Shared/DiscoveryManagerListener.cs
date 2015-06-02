@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using Windows.Management.Deployment;
 using Windows.UI.Core;
 using ConnectSdk.Windows.Device;
 using ConnectSdk.Windows.Discovery;
@@ -17,10 +18,15 @@ namespace ConnectSdk.Demo.Demo
 
         public void OnDeviceAdded(DiscoveryManager manager, ConnectableDevice device)
         {
+
+
             App.MainDispatcher.RunAsync(CoreDispatcherPriority.High, () =>
             {
                 if (App.ApplicationModel.DiscoverredDevices.All(x => x.Id != device.Id))
-                    App.ApplicationModel.DiscoverredDevices.Add(device);
+                {
+                    App.ApplicationModel.AddDevice(device);
+                }
+                //    App.ApplicationModel.DiscoverredDevices.Add(device);
             });
         }
 

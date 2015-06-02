@@ -5,13 +5,14 @@
     xmlns:local="using:ConnectSdk.Demo"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:demo="using:ConnectSdk.Demo.Demo"
     mc:Ignorable="d">
 
     <Page.Resources>
         <!-- TODO: Delete this line if the key AppName is declared in App.xaml -->
         <x:String x:Key="AppName">Connect SDK - WinRT Demo</x:String>
         <x:String x:Key="ScreenName">Search</x:String>
-        <local:VisibilityConverter x:Key="VisibilityConverter"></local:VisibilityConverter>
+        <demo:VisibilityConverter x:Key="VisibilityConverter"></demo:VisibilityConverter>
 
         <Style x:Key="ListBoxStyle1" TargetType="ListBox">
             <Setter Property="Foreground" Value="{StaticResource ListBoxForegroundThemeBrush}"/>

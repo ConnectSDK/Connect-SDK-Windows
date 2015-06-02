@@ -14,6 +14,7 @@ namespace ConnectSdk.Demo.Demo
     {
         private ConnectableDevice selectedDevice;
         private string textInput;
+        private IndependentList<ConnectableDevice> discoverredDevices;
 
         public ConnectableDevice SelectedDevice
         {
@@ -38,7 +39,14 @@ namespace ConnectSdk.Demo.Demo
             }
         }
 
-        public ObservableCollection<ConnectableDevice> DiscoverredDevices { get; set; }
+        public IndependentList<ConnectableDevice> DiscoverredDevices
+        {
+            get { return discoverredDevices; }
+            set
+            {
+                discoverredDevices = value;
+            }
+        }
 
         public IndependentList<AppInfo> Apps { get; set; }
 
@@ -46,7 +54,7 @@ namespace ConnectSdk.Demo.Demo
 
         public Model()
         {
-            DiscoverredDevices = new ObservableCollection<ConnectableDevice>();
+            DiscoverredDevices = new IndependentList<ConnectableDevice>();
             Apps = new IndependentList<AppInfo>();
             Channels = new IndependentList<ChannelInfo>();
             selectedDevice = new ConnectableDevice();
@@ -59,6 +67,11 @@ namespace ConnectSdk.Demo.Demo
         {
             var handler = PropertyChanged;
             if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public void AddDevice(ConnectableDevice device)
+        {
+            discoverredDevices.Add(device);
         }
     }
 }

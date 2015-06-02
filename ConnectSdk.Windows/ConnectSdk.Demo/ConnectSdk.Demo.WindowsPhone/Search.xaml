@@ -2,9 +2,10 @@
     x:Class="ConnectSdk.Demo.Search"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:ConnectSdk.Demo"
+    xmlns:local="using:ConnectSdk.Demo.Demo"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:demo="using:ConnectSdk.Demo.Demo"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -12,7 +13,7 @@
         <!-- TODO: Delete this line if the key AppName is declared in App.xaml -->
         <x:String x:Key="AppName">Connect SDK - WinRT Demo</x:String>
         <x:String x:Key="ScreenName">Search</x:String>
-        <local:VisibilityConverter x:Key="VisibilityConverter"></local:VisibilityConverter>
+        <demo:VisibilityConverter x:Key="VisibilityConverter"></demo:VisibilityConverter>
 
         <Style x:Key="ListBoxStyle1" TargetType="ListBox">
             <Setter Property="Foreground" Value="{StaticResource ListBoxForegroundThemeBrush}"/>
@@ -90,17 +91,17 @@
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Grid >
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="400"></ColumnDefinition>
-                            <ColumnDefinition Width="*"></ColumnDefinition>
-                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition></RowDefinition>
+                            <RowDefinition></RowDefinition>
+                        </Grid.RowDefinitions>
                         <StackPanel>
-                            <TextBlock Text="{Binding Path=FriendlyName}" TextWrapping="Wrap" FontSize="26" Grid.Row="0" Style="{StaticResource TitleTextBlockStyle}" Foreground="White" />
-                            <TextBlock Text="{Binding Path=ModelName}" TextWrapping="Wrap" Foreground="Silver" Style="{StaticResource SubtitleTextBlockStyle}" Grid.Row="1"/>
-                            <TextBlock Text="{Binding Path=IpAddress}" TextWrapping="Wrap" Foreground="Silver" Margin="0,0,0,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                            <TextBlock Text="{Binding Path=FriendlyName}" TextWrapping="Wrap" FontSize="26" Style="{StaticResource TitleTextBlockStyle}" Foreground="White" />
+                            <TextBlock Text="{Binding Path=ModelName}" TextWrapping="Wrap" Foreground="Silver" Style="{StaticResource SubheaderTextBlockStyle}"/>
+                            <TextBlock Text="{Binding Path=IpAddress}" TextWrapping="Wrap" Foreground="Silver" Margin="0,0,0,0" Style="{StaticResource SubheaderTextBlockStyle}"/>
                         </StackPanel>
-                        <StackPanel Grid.Row="0" Grid.Column="1" Margin="20,0,0,0">
-                            <TextBlock Text="Enter the key shown on the TV"  Visibility="{Binding Path=Services, Converter={StaticResource VisibilityConverter}, ConverterParameter=PairingKeyLabel}" Style="{StaticResource SubtitleTextBlockStyle}" Foreground="White" Margin="0,0,0,10"></TextBlock>
+                        <StackPanel Grid.Row="1" Margin="20,0,0,0">
+                            <TextBlock Text="Enter the key shown on the TV"  Visibility="{Binding Path=Services, Converter={StaticResource VisibilityConverter}, ConverterParameter=PairingKeyLabel}" Style="{StaticResource SubheaderTextBlockStyle}" Foreground="White" Margin="0,0,0,10"></TextBlock>
                             <TextBox x:Name="PairingKeyTextBox" InputScope="Number" Visibility="{Binding Path=Services, Converter={StaticResource VisibilityConverter}, ConverterParameter=PairingKeyTextBox}"></TextBox>
                             <Button x:Name="ShowKeyButton" Content="Show pairing key" Click="ShowKeyButton_OnClick" HorizontalAlignment="Left" FontSize="15" Visibility="{Binding Path=Services, Converter={StaticResource VisibilityConverter}, ConverterParameter=ShowKeyButton}" Margin="-2,0,0,0"/>
                             <Button x:Name="PairOkButton" Content="Send Key" Click="PairOkButton_OnClick"  HorizontalAlignment="Left" FontSize="15" Visibility="{Binding Path=Services, Converter={StaticResource VisibilityConverter}, ConverterParameter=ConnectButton}" Margin="-2,0,0,0"/>

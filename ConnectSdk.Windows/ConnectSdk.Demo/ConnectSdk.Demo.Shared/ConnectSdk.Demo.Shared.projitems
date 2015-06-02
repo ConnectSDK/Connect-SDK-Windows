@@ -30,5 +30,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)ModelCommandsImplementation - Copy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ModelCommandsImplementation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ScrollDirection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VisibilityConverter.cs" />
   </ItemGroup>
 </Project>
