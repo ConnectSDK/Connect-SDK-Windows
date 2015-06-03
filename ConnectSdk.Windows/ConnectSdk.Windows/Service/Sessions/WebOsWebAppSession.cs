@@ -266,6 +266,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                 if (WebOstvServiceSocketClient.SocketCache.ContainsKey(uri.ToString()))
                 {
                     Socket = WebOstvServiceSocketClient.SocketCache[uri.ToString()];
+                    MConnectionListener.OnSuccess(null);
                 }
                 else
                 {
