@@ -23,7 +23,7 @@ using Windows.Foundation;
 
 namespace ConnectSdk.Windows.Service.Capability
 {
-    public interface IMouseControl
+    public interface IMouseControl : ICapabilityMethod
     {
         IMouseControl GetMouseControl();
         CapabilityPriorityLevel GetMouseControlCapabilityLevel();

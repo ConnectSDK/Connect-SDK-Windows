@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using ConnectSdk.Windows.Core;
 using ConnectSdk.Windows.Wrappers;
@@ -151,7 +152,7 @@ namespace ConnectSdk.Windows.Discovery.Provider.ssdp
 
             var content = response.Content.ReadAsStreamAsync().Result;
             var description = new StreamReader(content).ReadToEnd();
-
+            LocationXml = description;
             var reader = Util.GenerateStreamFromstring(description);
             var xmlReader = XmlReader.Create(reader);
 
@@ -248,7 +249,12 @@ namespace ConnectSdk.Windows.Discovery.Provider.ssdp
             //        s.close();
             //}
 
-            //headers = urlConnection.getHeaderFields();
+            if (response.Headers.Count() >0)
+                Headers = new Dictionary<string, List<string>>();
+            foreach (var httpResponseHeader in response.Headers)
+            {
+                Headers.Add(httpResponseHeader.Key, httpResponseHeader.Value.ToList());
+            }
         }
 
 

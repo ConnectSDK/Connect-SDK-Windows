@@ -24,7 +24,7 @@ using ConnectSdk.Windows.Service.Command;
 
 namespace ConnectSdk.Windows.Service.Capability
 {
-    public interface ITextInputControl
+    public interface ITextInputControl : ICapabilityMethod
     {
         ITextInputControl GetTextInputControl();
         CapabilityPriorityLevel GetTextInputControlCapabilityLevel();

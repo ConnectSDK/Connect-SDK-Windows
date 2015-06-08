@@ -24,7 +24,7 @@ using ConnectSdk.Windows.Service.Command;
 
 namespace ConnectSdk.Windows.Service.Capability
 {
-    public interface IMediaControl
+    public interface IMediaControl : ICapabilityMethod
     {
         IMediaControl GetMediaControl();
         CapabilityPriorityLevel GetMediaControlCapabilityLevel();

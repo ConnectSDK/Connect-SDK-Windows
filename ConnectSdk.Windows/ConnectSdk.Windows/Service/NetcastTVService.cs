@@ -18,7 +18,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- #endregion
+#endregion
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -198,6 +198,43 @@ namespace ConnectSdk.Windows.Service
         public new static DiscoveryFilter DiscoveryFilter()
         {
             return new DiscoveryFilter(Id, "urn:schemas-upnp-org:device:MediaRenderer:1");
+        }
+
+        public override CapabilityPriorityLevel GetPriorityLevel(CapabilityMethods clazz)
+        {
+            if (clazz is MediaPlayer)
+                return GetMediaPlayerCapabilityLevel();
+            if (clazz is MediaControl)
+                return GetMediaControlCapabilityLevel();
+            if (clazz is Launcher)
+                return GetLauncherCapabilityLevel();
+            if (clazz is TvControl)
+                return GetTvControlCapabilityLevel();
+            if (clazz is VolumeControl)
+                return GetVolumeControlCapabilityLevel();
+            if (clazz is ExternalInputControl)
+                return GetExternalInputControlPriorityLevel();
+            if (clazz is MouseControl)
+                return GetMouseControlCapabilityLevel();
+            if (clazz is TextInputControl)
+                return GetTextInputControlCapabilityLevel();
+            if (clazz is PowerControl)
+                return GetPowerControlCapabilityLevel();
+            if (clazz is KeyControl)
+                return GetKeyControlCapabilityLevel();
+
+
+            return CapabilityPriorityLevel.NotSupported;
+
+        }
+
+
+        public override void SetServiceDescription(ServiceDescription serviceDescription)
+        {
+            base.SetServiceDescription(serviceDescription);
+
+            if (serviceDescription.Port != 8080)
+                serviceDescription.Port = 8080;
         }
 
         public override void Connect()
@@ -1460,7 +1497,7 @@ namespace ConnectSdk.Windows.Service
                     isMouseConnected = false;
                 }
             );
-          
+
             SetMouseCursorVisible(true, responseListener);
         }
 
@@ -1552,7 +1589,7 @@ namespace ConnectSdk.Windows.Service
 
         public void Scroll(double dx, double dy)
         {
-            if (isMouseConnected) ConnectMouse(); 
+            if (isMouseConnected) ConnectMouse();
 
             var responseListener = new ResponseListener();
 
@@ -1822,7 +1859,7 @@ namespace ConnectSdk.Windows.Service
                     request.Method = HttpMethod.Post;
                     request.Content =
                         new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes(payload.ToString())));
-                    request.Content.Headers.ContentType = new MediaTypeHeaderValue("text/xml") {CharSet = "utf-8"};
+                    request.Content.Headers.ContentType = new MediaTypeHeaderValue("text/xml") { CharSet = "utf-8" };
                 }
 
                 var res = httpClient.SendAsync(request).Result;

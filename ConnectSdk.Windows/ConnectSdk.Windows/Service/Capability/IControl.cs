@@ -21,7 +21,7 @@
  #endregion
 namespace ConnectSdk.Windows.Service.Capability
 {
-    public interface IControl
+    public interface IControl : ICapabilityMethod
     {
     }
 }

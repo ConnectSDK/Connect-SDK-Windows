@@ -26,7 +26,7 @@ using ConnectSdk.Windows.Service.Sessions;
 
 namespace ConnectSdk.Windows.Service.Capability
 {
-    public interface IWebAppLauncher
+    public interface IWebAppLauncher : ICapabilityMethod
     {
         IWebAppLauncher GetWebAppLauncher();
         CapabilityPriorityLevel GetWebAppLauncherCapabilityLevel();

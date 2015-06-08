@@ -23,7 +23,7 @@ using ConnectSdk.Windows.Service.Capability.Listeners;
 
 namespace ConnectSdk.Windows.Service.Capability
 {
-    public interface IPlayListControl
+    public interface IPlayListControl : ICapabilityMethod
     {
         IPlayListControl GetPlaylistControl();
         CapabilityPriorityLevel GetPlaylistControlCapabilityLevel();

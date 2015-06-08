@@ -24,7 +24,7 @@ using ConnectSdk.Windows.Service.Command;
 
 namespace ConnectSdk.Windows.Service.Capability
 {
-    public interface IVolumeControl
+    public interface IVolumeControl : ICapabilityMethod
     {
         IVolumeControl GetVolumeControl();
         CapabilityPriorityLevel GetVolumeControlCapabilityLevel();

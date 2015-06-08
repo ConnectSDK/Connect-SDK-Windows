@@ -23,6 +23,7 @@ namespace ConnectSdk.Windows.Service.Capability
 {
     public enum CapabilityPriorityLevel
     {
+        NotSupported = 0,
         VeryLow = 1,
         Low = 25,
         Normal = 50,

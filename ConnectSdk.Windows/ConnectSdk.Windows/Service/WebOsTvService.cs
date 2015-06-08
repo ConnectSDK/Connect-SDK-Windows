@@ -116,21 +116,54 @@ namespace ConnectSdk.Windows.Service
         {
             base.SetServiceDescription(serviceDescription);
 
-            if (ServiceDescription.Version != null || ServiceDescription.ResponseHeaders == null) return;
+            if (ServiceDescription.Version == null && ServiceDescription.ResponseHeaders != null) 
+            {
+                var serverInfo = serviceDescription.ResponseHeaders["Server"][0];
+                var systemOs = serverInfo.Split(' ')[0];
+                var versionComponents = systemOs.Split('/');
+                var systemVersion = versionComponents[versionComponents.Length - 1];
 
-            var serverInfo = serviceDescription.ResponseHeaders["Server"][0];
-            var systemOs = serverInfo.Split(' ')[0];
-            var versionComponents = systemOs.Split('/');
-            var systemVersion = versionComponents[versionComponents.Length - 1];
+                ServiceDescription.Version = systemVersion;
 
-            ServiceDescription.Version = systemVersion;
-
-            UpdateCapabilities();
+                UpdateCapabilities();
+            }
         }
 
         public new static DiscoveryFilter DiscoveryFilter()
         {
             return new DiscoveryFilter(Id, "urn:lge-com:service:webos-second-screen:1");
+        }
+
+        public override CapabilityPriorityLevel GetPriorityLevel(CapabilityMethods clazz)
+        {
+            if (clazz is MediaPlayer)
+                return GetMediaPlayerCapabilityLevel();
+            if (clazz is MediaControl)
+                return GetMediaControlCapabilityLevel();
+            if (clazz is Launcher)
+                return GetLauncherCapabilityLevel();
+            if (clazz is TvControl)
+                return GetTvControlCapabilityLevel();
+            if (clazz is VolumeControl)
+                return GetVolumeControlCapabilityLevel();
+            if (clazz is ExternalInputControl)
+                return GetExternalInputControlPriorityLevel();
+            if (clazz is MouseControl)
+                return GetMouseControlCapabilityLevel();
+            if (clazz is TextInputControl)
+                return GetTextInputControlCapabilityLevel();
+            if (clazz is PowerControl)
+                return GetPowerControlCapabilityLevel();
+            if (clazz is KeyControl)
+                return GetKeyControlCapabilityLevel();
+            if (clazz is ToastControl)
+                return GetToastControlCapabilityLevel();
+            if (clazz is WebAppLauncher)
+                return GetWebAppLauncherCapabilityLevel();
+
+
+            return CapabilityPriorityLevel.NotSupported;
+
         }
 
         public override void SendCommand(ServiceCommand command)

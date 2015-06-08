@@ -8,6 +8,7 @@ using ConnectSdk.Windows.Service.Capability.Listeners;
 using ConnectSdk.Windows.Service.Command;
 using ConnectSdk.Windows.Service.NetCast;
 using ConnectSdk.Windows.Service.Sessions;
+using Microsoft.VisualBasic.CompilerServices;
 
 namespace ConnectSdk.Demo.Demo
 {
@@ -28,6 +29,10 @@ namespace ConnectSdk.Demo.Demo
         private IWebAppLauncher webAppLauncher;
         private IPlayListControl playListControl;
         private WebOsWebAppSession launchSession;
+        private bool isPlaying;
+        private bool isPlayingImage;
+        private ResponseListener playStateListener;
+        private ResponseListener durationListener;
 
         private void SetControls()
         {
@@ -49,20 +54,122 @@ namespace ConnectSdk.Demo.Demo
             }
             else
             {
-                launcher = selectedDevice.GetControl<ILauncher>();
-                mediaPlayer = selectedDevice.GetControl<IMediaPlayer>();
-                mediaControl = selectedDevice.GetControl<IMediaControl>();
-                tvControl = selectedDevice.GetControl<ITvControl>();
-                volumeControl = selectedDevice.GetControl<IVolumeControl>();
-                toastControl = selectedDevice.GetControl<IToastControl>();
-                textInputControl = selectedDevice.GetControl<ITextInputControl>();
-                mouseControl = selectedDevice.GetControl<IMouseControl>();
-                externalInputControl = selectedDevice.GetControl<IExternalInputControl>();
-                powerControl = selectedDevice.GetControl<IPowerControl>();
-                keyControl = selectedDevice.GetControl<IKeyControl>();
-                playListControl = selectedDevice.GetControl<IPlayListControl>();
-                webAppLauncher = selectedDevice.GetControl<IWebAppLauncher>();
+                launcher = selectedDevice.GetCapability<ILauncher>();
+                mediaPlayer = selectedDevice.GetCapability<IMediaPlayer>();
+                mediaControl = selectedDevice.GetCapability<IMediaControl>();
+                tvControl = selectedDevice.GetCapability<ITvControl>();
+                volumeControl = selectedDevice.GetCapability<IVolumeControl>();
+                toastControl = selectedDevice.GetCapability<IToastControl>();
+                textInputControl = selectedDevice.GetCapability<ITextInputControl>();
+                mouseControl = selectedDevice.GetCapability<IMouseControl>();
+                externalInputControl = selectedDevice.GetCapability<IExternalInputControl>();
+                powerControl = selectedDevice.GetCapability<IPowerControl>();
+                keyControl = selectedDevice.GetCapability<IKeyControl>();
+                playListControl = selectedDevice.GetCapability<IPlayListControl>();
+                webAppLauncher = selectedDevice.GetCapability<IWebAppLauncher>();
             }
+
+            if (!isPlaying || !isPlayingImage)
+                DisableMedia();
+            if (isPlaying) EnableMedia();
+
+            playStateListener = new ResponseListener
+                (
+                loadEventArg =>
+                {
+                    var v = loadEventArg as LoadEventArgs;
+                    if (v.Load.GetPayload() != null)
+                    {
+                        var ps = v.Load.GetPayload() is PlayStateStatus ? (PlayStateStatus)v.Load.GetPayload() : PlayStateStatus.Unknown;
+                        if (ps != null)
+                        {
+                            switch (ps)
+                            {
+                                case PlayStateStatus.Playing:
+                                    //startUpdating();
+
+                                    if (mediaControl != null && selectedDevice.HasCapability(MediaControl.Duration))
+                                    {
+                                        mediaControl.GetDuration(durationListener);
+                                    }
+                                    break;
+                                case PlayStateStatus.Finished:
+                                //positionTextView.setText("--:--");
+                                //durationTextView.setText("--:--");
+                                //mSeekBar.setProgress(0);
+
+                                default:
+                                    //stopUpdating();
+                                    break;
+                            }
+                        }
+                    }
+                },
+                serviceCommandError =>
+                {
+
+                }
+                );
+
+            durationListener = new ResponseListener
+                (
+                loadEventArg =>
+                {
+                    var v = loadEventArg as LoadEventArgs;
+                    if (v.Load.GetPayload() != null)
+                    {
+                        var d = v.Load.GetPayload() is long ? (long)v.Load.GetPayload() : 0;
+                        totalTimeDuration = d;
+                        //mSeekBar.setMax(duration.intValue());
+                        //durationTextView.setText(formatTime(duration.intValue()));
+                    }
+                },
+                serviceCommandError =>
+                {
+
+                }
+                );
+
+        }
+
+        public void DisableMedia()
+        {
+            if (closeCommand != null)
+                closeCommand.Enabled = false;
+            StopMedia();
+        }
+
+        public void StopMedia()
+        {
+            if (playCommand != null)
+            {
+                playCommand.Enabled = false;
+                pauseCommand.Enabled = false;
+                stopCommand.Enabled = false;
+                rewindCommand.Enabled = false;
+                fastForwardCommand.Enabled = false;
+                //previousButton.Enabled = false;
+                //nextButton.setEnabled(false);
+                //jumpButton.setEnabled(false);
+
+                //mSeekBar.setEnabled(false);
+                //mSeekBar.setOnSeekBarChangeListener(null);
+                //mSeekBar.setProgress(0);
+
+                //positionTextView.setText("--:--:--");
+                //durationTextView.setText("--:--:--");
+
+                totalTimeDuration = -1;
+            }
+        }
+
+        private void EnableMedia()
+        {
+            playCommand.Enabled = selectedDevice.HasCapability(MediaControl.Play);
+            pauseCommand.Enabled = selectedDevice.HasCapability(MediaControl.Pause);
+            stopCommand.Enabled = selectedDevice.HasCapability(MediaControl.Stop);
+            rewindCommand.Enabled = selectedDevice.HasCapability(MediaControl.Rewind);
+            fastForwardCommand.Enabled = selectedDevice.HasCapability(MediaControl.FastForward);
         }
 
         private void ShowFotoCommandExecute(object obj)
@@ -78,6 +185,7 @@ namespace ConnectSdk.Demo.Demo
                 loadEventArg =>
                 {
                     var v = loadEventArg as LoadEventArgs;
+                    isPlayingImage = true;
                 },
                 serviceCommandError =>
                 {
@@ -85,6 +193,8 @@ namespace ConnectSdk.Demo.Demo
                         new MessageDialog(
                             "Something went wrong; The application could not be started. Press 'Close' to continue");
                     msg.ShowAsync();
+                    DisableMedia();
+                    isPlaying = isPlayingImage = false;
                 }
                 );
 
@@ -104,6 +214,18 @@ namespace ConnectSdk.Demo.Demo
                 loadEventArg =>
                 {
                     var v = loadEventArg as LoadEventArgs;
+                    //todo: add implementation here
+                    if (v != null)
+                    {
+                        EnableMedia();
+
+                        if (selectedDevice.HasCapability(MediaControl.PlayStateSubscribe))
+                        {
+                            mediaControl.SubscribePlayState(playStateListener);
+                        }
+                        EnableMedia();
+                        isPlaying = true;
+                    }
                 },
                 serviceCommandError =>
                 {
@@ -111,6 +233,8 @@ namespace ConnectSdk.Demo.Demo
                         new MessageDialog(
                             "Something went wrong; The application could not be started. Press 'Close' to continue");
                     msg.ShowAsync();
+                    DisableMedia();
+                    isPlaying = isPlayingImage = false;
                 }
                 );
 
@@ -130,6 +254,8 @@ namespace ConnectSdk.Demo.Demo
                 loadEventArg =>
                 {
                     var v = loadEventArg as LoadEventArgs;
+                    EnableMedia();
+                    isPlaying = true;
                 },
                 serviceCommandError =>
                 {
@@ -137,6 +263,8 @@ namespace ConnectSdk.Demo.Demo
                         new MessageDialog(
                             "Something went wrong; The application could not be started. Press 'Close' to continue");
                     msg.ShowAsync();
+                    DisableMedia();
+                    isPlaying = isPlayingImage = false;
                 }
                 );
 

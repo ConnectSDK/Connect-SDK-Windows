@@ -384,9 +384,9 @@ namespace ConnectSdk.Windows.Device
             return foundKeyControl[0];
         }
 
-        public T GetApiController<T>(T controllerClass, string priorityMethod) where T : CapabilityMethods
+        public T GetApiController<T>(string priorityMethod) where T : class, ICapabilityMethod
         {
-            T foundController = null;
+            DeviceService foundController = null;
             foreach (var service in services.Values)
             {
                 if (service.GetApi<T>() == null)
@@ -396,22 +396,25 @@ namespace ConnectSdk.Windows.Device
 
                 if (foundController == null)
                 {
-                    foundController = controller;
+                    foundController = controller as DeviceService;
                 }
                 else
                 {
                     var method = typeof(T).GetRuntimeMethods().FirstOrDefault(x => x.Name.Equals(priorityMethod));
-                    var controllerProirity =
-                        (CapabilityPriorityLevel)method.Invoke(controller, null);
-                    var foundControllerProirity =
-                        (CapabilityPriorityLevel)method.Invoke(foundController, null);
-                    if (controllerProirity > foundControllerProirity)
+                    if (method != null)
                     {
-                        foundController = controller;
+                        var controllerProirity =
+                            (CapabilityPriorityLevel) method.Invoke(controller, null);
+                        var foundControllerProirity =
+                            (CapabilityPriorityLevel) method.Invoke(foundController, null);
+                        if (controllerProirity > foundControllerProirity)
+                        {
+                            foundController = controller as DeviceService;
+                        }
                     }
                 }
             }
-            return foundController;
+            return foundController as T;
         }
 
         /// <summary>
@@ -419,24 +422,24 @@ namespace ConnectSdk.Windows.Device
         /// </summary>
         /// <param name="clazz"></param>
         /// <returns></returns>
-        public T GetCapability<T>(T clazz) where T : CapabilityMethods
+        public T GetCapability<T>() where T : class, ICapabilityMethod
         {
             var method = "";
-            if (clazz is Launcher) method = "getLauncherCapabilityLevel";
-            if (clazz is MediaPlayer) method = "getMediaPlayerCapabilityLevel";
-            if (clazz is MediaControl) method = "getMediaControlCapabilityLevel";
-            if (clazz is PlaylistControl) method = "getPlaylistControlCapabilityLevel";
-            if (clazz is VolumeControl) method = "getVolumeControlCapabilityLevel";
-            if (clazz is WebAppLauncher) method = "getWebAppLauncherCapabilityLevel";
-            if (clazz is TvControl) method = "getTVControlCapabilityLevel";
-            if (clazz is ToastControl) method = "getToastControlCapabilityLevel";
-            if (clazz is TextInputControl) method = "getTextInputControlCapabilityLevel";
-            if (clazz is MouseControl) method = "getMouseControlCapabilityLevel";
+            if (typeof(T) == typeof(ILauncher)) method = "GetLauncherCapabilityLevel";
+            if (typeof(T) ==  typeof(IMediaPlayer)) method = "GetMediaPlayerCapabilityLevel";
+            if (typeof(T) == typeof(IMediaControl)) method = "GetMediaControlCapabilityLevel";
+            if (typeof(T) == typeof(IPlayListControl)) method = "GetPlaylistControlCapabilityLevel";
+            if (typeof(T) == typeof(IVolumeControl)) method = "GetVolumeControlCapabilityLevel";
+            if (typeof(T) == typeof(IWebAppLauncher)) method = "GetWebAppLauncherCapabilityLevel";
+            if (typeof(T) == typeof(ITvControl)) method = "GetTvControlCapabilityLevel";
+            if (typeof(T) == typeof(IToastControl)) method = "GetToastControlCapabilityLevel";
+            if (typeof(T) == typeof(ITextInputControl)) method = "GetTextInputControlCapabilityLevel";
+            if (typeof(T) == typeof(IMouseControl)) method = "GetMouseControlCapabilityLevel";
 
-            if (clazz is ExternalInputControl) method = "getExternalInputControlPriorityLevel";
-            if (clazz is PowerControl) method = "getPowerControlCapabilityLevel";
-            if (clazz is KeyControl) method = "getKeyControlCapabilityLevel";
-            return GetApiController(clazz, method);
+            if (typeof(T) == typeof(IExternalInputControl)) method = "GetExternalInputControlPriorityLevel";
+            if (typeof(T) == typeof(IPowerControl)) method = "GetPowerControlCapabilityLevel";
+            if (typeof(T) == typeof(IKeyControl)) method = "GetKeyControlCapabilityLevel";
+            return GetApiController<T>(method);
         }
 
         public string GetConnectedServiceNames()

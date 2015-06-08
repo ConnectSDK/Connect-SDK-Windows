@@ -27,7 +27,7 @@ using ConnectSdk.Windows.Service.Sessions;
 
 namespace ConnectSdk.Windows.Service.Capability
 {
-    public interface ILauncher
+    public interface ILauncher : ICapabilityMethod
     {
         ILauncher GetLauncher();
         CapabilityPriorityLevel GetLauncherCapabilityLevel();

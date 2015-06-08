@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using Windows.Data.Json;
 using ConnectSdk.Windows.Annotations;
@@ -69,7 +70,7 @@ namespace ConnectSdk.Windows.Service
         public DlnaService(ServiceDescription serviceDescription, ServiceConfig serviceConfig)
             : base(serviceDescription, serviceConfig)
         {
-            
+            UpdateControlUrl(serviceDescription);
         }
 
         public DlnaService(ServiceDescription serviceDescription, ServiceConfig serviceConfig, string controlUrl)
@@ -83,6 +84,19 @@ namespace ConnectSdk.Windows.Service
             return new DiscoveryFilter(ID, "urn:schemas-upnp-org:device:MediaRenderer:1");
         }
 
+        public override CapabilityPriorityLevel GetPriorityLevel(CapabilityMethods clazz)
+        {
+            if (clazz is MediaPlayer)
+                return GetMediaPlayerCapabilityLevel();
+            if (clazz is MediaControl)
+                return GetMediaControlCapabilityLevel();
+            if (clazz is VolumeControl)
+                return GetVolumeControlCapabilityLevel();
+            if (clazz is PlaylistControl)
+                return GetPlaylistControlCapabilityLevel();
+            return CapabilityPriorityLevel.NotSupported;
+
+        }
 
         //public void Stop(ResponseListener listener)
         //{
@@ -830,7 +844,14 @@ namespace ConnectSdk.Windows.Service
         }
 
 
-        public override void SetServiceDescription(ServiceDescription serviceDescriptionParam) 
+        public override void SetServiceDescription(ServiceDescription serviceDescriptionParam)
+        {
+            base.SetServiceDescription(serviceDescriptionParam);
+
+            UpdateControlUrl(serviceDescriptionParam);
+        }
+
+        private void UpdateControlUrl(ServiceDescription serviceDescriptionParam)
         {
             var serviceList = serviceDescriptionParam.ServiceList;
 
@@ -929,13 +950,15 @@ namespace ConnectSdk.Windows.Service
 
            // var request = HttpMessage.GetDlnaHttpPost(controlUrl, command.Target);
 
-            var request = new HttpRequestMessage(HttpMethod.Post, controlUrl);
-            request.Headers.Add("Content-Type", "text/xml; charset=utf-8");
+            var request = new HttpRequestMessage(HttpMethod.Post, targetURL);
+            
+            //request.Headers.Add("Content-Type", "text/xml; charset=utf-8");
             request.Headers.Add("SOAPAction", String.Format("\"{0}#{1}\"", serviceURN, method));
             try
             {
                 request.Content =
                     new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes(payload)));
+                request.Content.Headers.ContentType = new MediaTypeHeaderValue("text/xml") { CharSet = "utf-8" };
             }
             catch (Exception e)
             {

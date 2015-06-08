@@ -59,6 +59,7 @@
     <Compile Include="Core\TextInputStatusInfo.cs" />
     <Compile Include="Core\TextInputType.cs" />
     <Compile Include="Core\Upnp\Device.cs" />
+    <Compile Include="Service\Capability\ICapabilityMethod.cs" />
     <Compile Include="Service\NetCast\NetcastVirtualKeycodes.cs" />
     <Compile Include="Wrappers\HttpClientWrapper.cs" />
     <Compile Include="Wrappers\DatagramSocketWrapper.cs" />

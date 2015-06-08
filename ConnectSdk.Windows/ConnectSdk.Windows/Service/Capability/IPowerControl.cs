@@ -23,7 +23,7 @@ using ConnectSdk.Windows.Service.Capability.Listeners;
 
 namespace ConnectSdk.Windows.Service.Capability
 {
-    public interface IPowerControl
+    public interface IPowerControl : ICapabilityMethod
     {
         IPowerControl GetPowerControl();
         CapabilityPriorityLevel GetPowerControlCapabilityLevel();

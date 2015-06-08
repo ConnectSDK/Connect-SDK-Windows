@@ -13,7 +13,7 @@ namespace ConnectSdk.Demo.Demo
 {
     public partial class Model
     {
-        private int totalTimeDuration;
+        private long totalTimeDuration;
 
 
         //private bool muted;

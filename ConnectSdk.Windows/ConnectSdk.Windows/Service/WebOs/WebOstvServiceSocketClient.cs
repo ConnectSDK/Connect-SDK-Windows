@@ -220,6 +220,9 @@ namespace ConnectSdk.Windows.Service.WebOs
 
         protected void HandleMessage(JsonObject message)
         {
+            try
+            {
+
             var shouldProcess = true;
 
             if (Listener != null)
@@ -392,6 +395,13 @@ namespace ConnectSdk.Windows.Service.WebOs
                 State = State.Registering;
                 SendRegister();
             }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
         }
 
         private void HelloTv()

@@ -24,7 +24,7 @@ using ConnectSdk.Windows.Service.Sessions;
 
 namespace ConnectSdk.Windows.Service.Capability
 {
-    public interface IMediaPlayer
+    public interface IMediaPlayer : ICapabilityMethod
     {
         IMediaPlayer GetMediaPlayer();
         CapabilityPriorityLevel GetMediaPlayerCapabilityLevel();

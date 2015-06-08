@@ -180,12 +180,17 @@ namespace ConnectSdk.Windows.Service
             return Activator.CreateInstance(clazz, new object[] { serviceDescription, serviceConfig }) as DeviceService;
         }
 
-        public T GetApi<T>() where T: class
+        public T GetApi<T>() where T: class, ICapabilityMethod
         {
             // if this class is of the type given return it, otherwise null
             // ReSharper disable once SuspiciousTypeConversion.Global
-            var tt = this as T;
-            return tt;
+            //var tt = (T)this;
+            return this as T;
+        }
+
+        public virtual CapabilityPriorityLevel GetPriorityLevel(CapabilityMethods clazz)
+        {
+            return CapabilityPriorityLevel.NotSupported;
         }
 
         public static DiscoveryFilter DiscoveryFilter()
@@ -440,6 +445,8 @@ namespace ConnectSdk.Windows.Service
 
         protected void SetCapabilities(List<String> newCapabilities)
         {
+            if (capabilities == null)
+                capabilities = new List<string>();
             var oldCapabilities = capabilities;
 
             capabilities = newCapabilities;

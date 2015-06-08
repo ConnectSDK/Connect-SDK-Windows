@@ -25,7 +25,7 @@ using ConnectSdk.Windows.Service.Capability.Listeners;
 
 namespace ConnectSdk.Windows.Service.Capability
 {
-    public interface IToastControl
+    public interface IToastControl : ICapabilityMethod
     {
         IToastControl GetToastControl();
         CapabilityPriorityLevel GetToastControlCapabilityLevel();

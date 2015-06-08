@@ -25,7 +25,7 @@ using ConnectSdk.Windows.Service.Command;
 
 namespace ConnectSdk.Windows.Service.Capability
 {
-    public interface ITvControl
+    public interface ITvControl : ICapabilityMethod
     {
         ITvControl GetTvControl();
         CapabilityPriorityLevel GetTvControlCapabilityLevel();

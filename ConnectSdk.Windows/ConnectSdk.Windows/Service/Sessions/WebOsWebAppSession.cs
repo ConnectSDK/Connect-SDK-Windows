@@ -146,7 +146,7 @@ namespace ConnectSdk.Windows.Service.Sessions
             if (command == null)
                 return;
 
-            var mError = payload.GetNamedString("error");
+            var mError = payload.GetNamedString("error","");
 
             if (mError.Length != 0)
             {
@@ -262,10 +262,19 @@ namespace ConnectSdk.Windows.Service.Sessions
             }
             else
             {
+                //var uri = WebOstvServiceSocketClient.GetUri(Service);
+                //Socket = new WebOstvServiceSocketClient(Service, uri);
+                //Socket.Listener = mSocketListener;
+                //Socket.Connect();
+
                 var uri = WebOstvServiceSocketClient.GetUri(Service);
                 if (WebOstvServiceSocketClient.SocketCache.ContainsKey(uri.ToString()))
                 {
                     Socket = WebOstvServiceSocketClient.SocketCache[uri.ToString()];
+                    if (mSocketListener != null)
+                    {
+                        Socket.Listener = mSocketListener;
+                    }
                     MConnectionListener.OnSuccess(null);
                 }
                 else
@@ -275,7 +284,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                         Listener = mSocketListener
                     };
                     Socket.Connect();
-                     WebOstvServiceSocketClient.SocketCache.Add(uri.ToString(), Socket);
+                    WebOstvServiceSocketClient.SocketCache.Add(uri.ToString(), Socket);
                 }
             }
         }
@@ -842,6 +851,9 @@ namespace ConnectSdk.Windows.Service.Sessions
 
             public bool OnReceiveMessage(JsonObject payload)
             {
+                try
+                {
+
                 var type = payload.GetNamedString("type");
 
                 if (!"p2p".Equals(type)) return true;
@@ -864,7 +876,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                     {
                         //String payloadKey = contentType.Split("connectsdk.",)[1];
 
-                        var payloadKey = contentType.Split('.')[3];
+                        var payloadKey = contentType.Split('.')[1];
                         if (string.IsNullOrEmpty(payloadKey))
                             return false;
 
@@ -882,6 +894,12 @@ namespace ConnectSdk.Windows.Service.Sessions
                     {
                         webOsWebAppSession.HandleMessage(messageJson);
                     }
+                }
+                }
+                catch (Exception)
+                {
+
+                    throw;
                 }
 
                 return false;
