@@ -15,6 +15,12 @@ namespace ConnectSdk.Demo.Demo
         private ConnectableDevice selectedDevice;
         private string textInput;
         private IndependentList<ConnectableDevice> discoverredDevices;
+        private string duration;
+        private string position;
+        private long totalDuration;
+        private long currentPosition;
+        private double volume;
+        private bool canChangeVolume;
 
         public ConnectableDevice SelectedDevice
         {
@@ -51,6 +57,42 @@ namespace ConnectSdk.Demo.Demo
         public IndependentList<AppInfo> Apps { get; set; }
 
         public IndependentList<ChannelInfo> Channels { get; set; }
+
+        public string Duration
+        {
+            get { return duration; }
+            set { duration = value; OnPropertyChanged();}
+        }
+
+        public string Position
+        {
+            get { return position; }
+            set { position = value; OnPropertyChanged(); }
+        }
+
+        public long TotalDuration
+        {
+            get { return totalDuration; }
+            set { totalDuration = value; OnPropertyChanged(); }
+        }
+
+        public long CurrentPosition
+        {
+            get { return currentPosition; }
+            set { currentPosition = value; OnPropertyChanged(); }
+        }
+
+        public double Volume
+        {
+            get { return volume; }
+            set { volume = value; OnPropertyChanged(); }
+        }
+
+        public bool CanChangeVolume
+        {
+            get { return canChangeVolume; }
+            set { canChangeVolume = value; OnPropertyChanged(); }
+        }
 
         public Model()
         {

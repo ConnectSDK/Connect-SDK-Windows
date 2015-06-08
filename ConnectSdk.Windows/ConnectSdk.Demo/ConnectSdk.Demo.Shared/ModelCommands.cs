@@ -81,7 +81,7 @@ namespace ConnectSdk.Demo.Demo
 
         public Command PlayListCommand
         {
-            get { return playListCommand ?? (playListCommand = new Command(PlayListCommandExecute) { Enabled = true }); }
+            get { return playListCommand ?? (playListCommand = new Command(PlayListCommandExecute) { Enabled = selectedDevice.HasCapability(MediaPlayer.PlayPlaylist) }); }
             set { playListCommand = value; }
         }
 
@@ -113,5 +113,7 @@ namespace ConnectSdk.Demo.Demo
             get { return launchMediaPlayerCommand ?? (launchMediaPlayerCommand = new Command(LaunchMediaPlayerCommandExecute) { Enabled = selectedDevice.HasCapability(Launcher.Application) }); }
             set { launchMediaPlayerCommand = value; }
         }
+
+
     }
 }

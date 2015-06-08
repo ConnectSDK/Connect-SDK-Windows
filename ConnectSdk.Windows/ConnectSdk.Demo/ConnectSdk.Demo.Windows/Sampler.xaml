@@ -66,6 +66,20 @@
                                 <Button FontSize="20" Content="Previous" Command="{Binding PreviousCommand}" Width="120"></Button>
                                 <Button FontSize="20" Content="Next" Command="{Binding NextCommand}" Width="120"></Button>
                             </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Width="120" Text="{Binding Path=Position}" HorizontalAlignment="Left" Padding="3"></TextBlock>
+                                <TextBlock Width="120" TextAlignment="Center" Padding="3">Position</TextBlock>
+                                <TextBlock Width="120" Text="{Binding Path=Duration}" HorizontalAlignment="Right" TextAlignment="Right" Padding="3"></TextBlock>
+                            </StackPanel>
+                            <StackPanel Orientation="Vertical">
+                                <Slider Minimum="0" Maximum="{Binding Path=TotalDuration}" Value="{Binding Path=CurrentPosition}" Width="360" ValueChanged="RangeBase_OnValueChanged" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Width="360" TextAlignment="Center" Padding="3">Volume</TextBlock>
+                            </StackPanel>
+                            <StackPanel Orientation="Vertical">
+                                <Slider Minimum="0" Maximum="100" Value="{Binding Path=Volume}" Width="360" IsEnabled="{Binding Path=CanChangeVolume}" ValueChanged="VolumeRangeBase_OnValueChanged"/>
+                            </StackPanel>
                         </StackPanel>
                     </DataTemplate>
                 </HubSection>

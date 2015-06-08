@@ -1,5 +1,7 @@
 ﻿using System;
+using Windows.UI.Core;
 using Windows.UI.Popups;
+using Windows.UI.Xaml;
 using ConnectSdk.Windows.Device;
 using ConnectSdk.Windows.Device.Netcast;
 using ConnectSdk.Windows.Service;
@@ -33,6 +35,9 @@ namespace ConnectSdk.Demo.Demo
         private bool isPlayingImage;
         private ResponseListener playStateListener;
         private ResponseListener durationListener;
+        private ResponseListener positionListener;
+        private DispatcherTimer dispatcherTimer;
+        private ResponseListener volumeListener;
 
         private void SetControls()
         {
@@ -67,6 +72,22 @@ namespace ConnectSdk.Demo.Demo
                 keyControl = selectedDevice.GetCapability<IKeyControl>();
                 playListControl = selectedDevice.GetCapability<IPlayListControl>();
                 webAppLauncher = selectedDevice.GetCapability<IWebAppLauncher>();
+
+
+                if (selectedDevice.HasCapability(VolumeControl.VolumeSet))
+                {
+                    CanChangeVolume = true;
+                }
+                if (selectedDevice.HasCapability(VolumeControl.VolumeGet))
+                {
+                    volumeControl.GetVolume(volumeListener);
+                }
+                if (selectedDevice.HasCapability(VolumeControl.VolumeSubscribe))
+                {
+                    volumeControl.SubscribeVolume(volumeListener);
+                }
+
+
             }
 
             if (!isPlaying || !isPlayingImage)
@@ -86,7 +107,7 @@ namespace ConnectSdk.Demo.Demo
                             switch (ps)
                             {
                                 case PlayStateStatus.Playing:
-                                    //startUpdating();
+                                    StartUpdating();
 
                                     if (mediaControl != null && selectedDevice.HasCapability(MediaControl.Duration))
                                     {
@@ -94,12 +115,17 @@ namespace ConnectSdk.Demo.Demo
                                     }
                                     break;
                                 case PlayStateStatus.Finished:
-                                //positionTextView.setText("--:--");
-                                //durationTextView.setText("--:--");
+                                    App.MainDispatcher.RunAsync(CoreDispatcherPriority.High, () =>
+                                    {
+                                        this.Duration = "--:--:--";
+                                        this.Position = "--:--:--";
+                                    });
+
+                                    break;
                                 //mSeekBar.setProgress(0);
 
                                 default:
-                                    //stopUpdating();
+                                    StopUpdating();
                                     break;
                             }
                         }
@@ -118,10 +144,35 @@ namespace ConnectSdk.Demo.Demo
                     var v = loadEventArg as LoadEventArgs;
                     if (v.Load.GetPayload() != null)
                     {
-                        var d = v.Load.GetPayload() is long ? (long)v.Load.GetPayload() : 0;
-                        totalTimeDuration = d;
-                        //mSeekBar.setMax(duration.intValue());
-                        //durationTextView.setText(formatTime(duration.intValue()));
+                        var d = v.Load.GetPayload() is double ? (double)v.Load.GetPayload() : 0;
+                        var t = TimeSpan.FromMilliseconds(d);
+                        App.MainDispatcher.RunAsync(CoreDispatcherPriority.High, () =>
+                        {
+                            Duration = string.Format("{0}:{1}:{2}", t.Minutes.ToString("D2"), t.Seconds.ToString("D2"), t.Milliseconds.ToString("D3"));
+                            TotalDuration = (long)d;
+                        });
+                    }
+                },
+                serviceCommandError =>
+                {
+
+                }
+                );
+            
+            positionListener = new ResponseListener
+                (
+                loadEventArg =>
+                {
+                    var v = loadEventArg as LoadEventArgs;
+                    if (v.Load.GetPayload() != null)
+                    {
+                        var d = v.Load.GetPayload() is double ? (double)v.Load.GetPayload() : 0;
+                        var t = TimeSpan.FromMilliseconds(d);
+                        App.MainDispatcher.RunAsync(CoreDispatcherPriority.High, () =>
+                        {
+                            Position = string.Format("{0}:{1}:{2}", t.Minutes.ToString("D2"), t.Seconds.ToString("D2"), t.Milliseconds.ToString("D3"));
+                            CurrentPosition = (long) d;
+                        });
                     }
                 },
                 serviceCommandError =>
@@ -130,6 +181,63 @@ namespace ConnectSdk.Demo.Demo
                 }
                 );
 
+            volumeListener = new ResponseListener
+                (
+                loadEventArg =>
+                {
+                    var v = loadEventArg as LoadEventArgs;
+                    if (v.Load.GetPayload() != null)
+                    {
+                        var d = v.Load.GetPayload() is float ? (float)v.Load.GetPayload() : 0;
+                        App.MainDispatcher.RunAsync(CoreDispatcherPriority.High, () =>
+                        {
+                            Volume = d * 100;
+                        });
+                    }
+                },
+                serviceCommandError =>
+                {
+
+                }
+                );
+
+
+        }
+
+        private void StartUpdating()
+        {
+            App.MainDispatcher.RunAsync(CoreDispatcherPriority.High, () =>
+            {
+                dispatcherTimer = new DispatcherTimer();
+                dispatcherTimer.Tick += delegate
+                {
+                    if (mediaControl != null && selectedDevice != null &&
+                        selectedDevice.HasCapability(MediaControl.Position))
+                        mediaControl.GetPosition(positionListener);
+
+                    if (mediaControl != null && selectedDevice != null
+                        && selectedDevice.HasCapability(MediaControl.Duration)
+                        && selectedDevice.HasCapability(MediaControl.PlayStateSubscribe)
+                        && totalTimeDuration <= 0)
+                    {
+                        mediaControl.GetDuration(durationListener);
+                    }
+                };
+                dispatcherTimer.Interval = new TimeSpan(0, 0, 1);
+                dispatcherTimer.Start();
+            });
+        }
+
+        private void StopUpdating()
+        {
+            App.MainDispatcher.RunAsync(CoreDispatcherPriority.High, () =>
+            {
+                if (dispatcherTimer != null)
+                {
+                    dispatcherTimer.Stop();
+                    dispatcherTimer = null;
+                }
+            });
         }
 
         public void DisableMedia()
@@ -148,16 +256,17 @@ namespace ConnectSdk.Demo.Demo
                 stopCommand.Enabled = false;
                 rewindCommand.Enabled = false;
                 fastForwardCommand.Enabled = false;
-                //previousButton.Enabled = false;
-                //nextButton.setEnabled(false);
+                previousCommand.Enabled = false;
+                nextCommand.Enabled = false;
+                closeCommand.Enabled = false;
                 //jumpButton.setEnabled(false);
 
                 //mSeekBar.setEnabled(false);
                 //mSeekBar.setOnSeekBarChangeListener(null);
                 //mSeekBar.setProgress(0);
 
-                //positionTextView.setText("--:--:--");
-                //durationTextView.setText("--:--:--");
+                this.Duration = "--:--:--";
+                this.Position = "--:--:--";
 
                 totalTimeDuration = -1;
             }
@@ -170,6 +279,21 @@ namespace ConnectSdk.Demo.Demo
             stopCommand.Enabled = selectedDevice.HasCapability(MediaControl.Stop);
             rewindCommand.Enabled = selectedDevice.HasCapability(MediaControl.Rewind);
             fastForwardCommand.Enabled = selectedDevice.HasCapability(MediaControl.FastForward);
+            previousCommand.Enabled = selectedDevice.HasCapability(MediaControl.Previous);
+            nextCommand.Enabled = selectedDevice.HasCapability(MediaControl.Next);
+            closeCommand.Enabled = selectedDevice.HasCapability(MediaPlayer.Close);
+
+            if (selectedDevice.HasCapability(MediaControl.PlayStateSubscribe) && !isPlaying)
+            {
+                mediaControl.SubscribePlayState(playStateListener);
+            }
+            else
+            {
+                if (mediaControl != null)
+                {
+                    mediaControl.GetDuration(durationListener);
+                }
+            }
         }
 
         private void ShowFotoCommandExecute(object obj)
@@ -186,6 +310,8 @@ namespace ConnectSdk.Demo.Demo
                 {
                     var v = loadEventArg as LoadEventArgs;
                     isPlayingImage = true;
+                    StopUpdating();
+                    DisableMedia();
                 },
                 serviceCommandError =>
                 {
@@ -193,6 +319,7 @@ namespace ConnectSdk.Demo.Demo
                         new MessageDialog(
                             "Something went wrong; The application could not be started. Press 'Close' to continue");
                     msg.ShowAsync();
+                    StopUpdating();
                     DisableMedia();
                     isPlaying = isPlayingImage = false;
                 }
@@ -214,15 +341,11 @@ namespace ConnectSdk.Demo.Demo
                 loadEventArg =>
                 {
                     var v = loadEventArg as LoadEventArgs;
-                    //todo: add implementation here
+                    var mlo = v.Load.GetPayload() as MediaLaunchObject;
                     if (v != null)
                     {
-                        EnableMedia();
-
-                        if (selectedDevice.HasCapability(MediaControl.PlayStateSubscribe))
-                        {
-                            mediaControl.SubscribePlayState(playStateListener);
-                        }
+                        mediaControl = mlo.MediaControl;
+                        StopUpdating();
                         EnableMedia();
                         isPlaying = true;
                     }
@@ -233,6 +356,7 @@ namespace ConnectSdk.Demo.Demo
                         new MessageDialog(
                             "Something went wrong; The application could not be started. Press 'Close' to continue");
                     msg.ShowAsync();
+                    StopUpdating();
                     DisableMedia();
                     isPlaying = isPlayingImage = false;
                 }
@@ -254,8 +378,14 @@ namespace ConnectSdk.Demo.Demo
                 loadEventArg =>
                 {
                     var v = loadEventArg as LoadEventArgs;
-                    EnableMedia();
-                    isPlaying = true;
+                    var mlo = v.Load.GetPayload() as MediaLaunchObject;
+                    if (mlo != null)
+                    {
+                        mediaControl = mlo.MediaControl;
+                        StopUpdating();
+                        EnableMedia();
+                        isPlaying = true;
+                    }
                 },
                 serviceCommandError =>
                 {
@@ -263,6 +393,7 @@ namespace ConnectSdk.Demo.Demo
                         new MessageDialog(
                             "Something went wrong; The application could not be started. Press 'Close' to continue");
                     msg.ShowAsync();
+                    StopUpdating();
                     DisableMedia();
                     isPlaying = isPlayingImage = false;
                 }
@@ -350,7 +481,14 @@ namespace ConnectSdk.Demo.Demo
                 loadEventArg =>
                 {
                     var v = loadEventArg as LoadEventArgs;
-                    SetEnabledMedia(true);
+                    var mlo = v.Load.GetPayload() as MediaLaunchObject;
+                    if (mlo != null)
+                    {
+                        mediaControl = mlo.MediaControl;
+                        playListControl = mlo.PlaylistControl; 
+                        EnableMedia();
+                    }
+                    
                 },
                 serviceCommandError =>
                 {
@@ -395,6 +533,11 @@ namespace ConnectSdk.Demo.Demo
         {
             if (playListControl != null)
                 playListControl.JumpToTrack((long)obj, null);
+        }
+
+        public void SetVolume(double newValue)
+        {
+            volumeControl.SetVolume((float)newValue, null);
         }
     }
 }

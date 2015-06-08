@@ -241,7 +241,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                 listener.OnError(ServiceCommandError.NotSupported());
         }
 
-        public void GetDuration(ResponseListener listener)
+        public virtual void GetDuration(ResponseListener listener)
         {
             IMediaControl mediaControl = null;
 
@@ -254,7 +254,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                 listener.OnError(ServiceCommandError.NotSupported());
         }
 
-        public void GetPosition(ResponseListener listener)
+        public virtual void GetPosition(ResponseListener listener)
         {
             IMediaControl mediaControl = null;
 
@@ -267,7 +267,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                 listener.OnError(ServiceCommandError.NotSupported());
         }
 
-        public void GetPlayState(ResponseListener listener)
+        public virtual void GetPlayState(ResponseListener listener)
         {
             IMediaControl mediaControl = null;
 
@@ -280,7 +280,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                 listener.OnError(ServiceCommandError.NotSupported());
         }
 
-        public IServiceSubscription SubscribePlayState(ResponseListener listener)
+        public virtual IServiceSubscription SubscribePlayState(ResponseListener listener)
         {
             IMediaControl mediaControl = null;
 

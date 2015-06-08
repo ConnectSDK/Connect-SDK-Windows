@@ -69,7 +69,7 @@ namespace ConnectSdk.Windows.Service.Command
 
         public List<ResponseListener> GetListeners()
         {
-            throw new System.NotImplementedException();
+            return listeners;
         }
 
         public ResponseListener AddListener(ResponseListener listener)

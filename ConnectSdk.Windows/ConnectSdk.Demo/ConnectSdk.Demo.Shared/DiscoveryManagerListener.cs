@@ -77,7 +77,7 @@ namespace ConnectSdk.Demo.Demo
 
         public void OnCapabilityUpdated(ConnectableDevice device, List<string> added, List<string> removed)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         public void OnConnectionFailed(ConnectableDevice device, ServiceCommandError error)

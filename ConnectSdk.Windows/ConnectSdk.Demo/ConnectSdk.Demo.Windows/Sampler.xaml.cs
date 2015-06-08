@@ -45,5 +45,17 @@ namespace ConnectSdk.Demo
             DataContext = model;
         }
 
+        private void RangeBase_OnValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+        {
+            
+        }
+
+        private void VolumeRangeBase_OnValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+        {
+            if (e.NewValue != model.Volume)
+            {
+                model.SetVolume(e.NewValue/100);
+            }
+        }
     }
 }

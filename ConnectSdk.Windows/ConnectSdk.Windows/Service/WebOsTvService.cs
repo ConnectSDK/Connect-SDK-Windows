@@ -314,7 +314,7 @@ namespace ConnectSdk.Windows.Service
                 {
                     try
                     {
-                        var jsonObj = (JsonObject)loadEventArg;
+                        var jsonObj = (JsonObject)((loadEventArg  as LoadEventArgs).Load.GetPayload());
                         var iVolume = (int)jsonObj.GetNamedNumber("volume");
                         var fVolume = (float)(iVolume / 100.0);
 

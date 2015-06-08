@@ -432,7 +432,7 @@ namespace ConnectSdk.Windows.Service.Sessions
             SendMessage(message, listener);
         }
 
-        public new void GetPosition(ResponseListener listener)
+        public override void GetPosition(ResponseListener listener)
         {
             var requestIdNumber = GetNextId();
             var requestId = String.Format("req{0}", requestIdNumber);
@@ -461,7 +461,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                 {
                     try
                     {
-                        var position = ((JsonObject)loadEventArg).GetNamedNumber("position");
+                        var position = ((loadEventArg as LoadEventArgs).Load.GetPayload() as JsonObject).GetNamedNumber("position");
 
                         if (listener != null)
                             listener.OnSuccess(position * 1000);
@@ -498,7 +498,7 @@ namespace ConnectSdk.Windows.Service.Sessions
             SendMessage(message, messageResponseListener);
         }
 
-        public new void GetDuration(ResponseListener listener)
+        public override void GetDuration(ResponseListener listener)
         {
             var requestIdNumber = GetNextId();
             var requestId = String.Format("req{0}", requestIdNumber);
@@ -527,7 +527,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                 {
                     try
                     {
-                        var position = ((JsonObject)loadEventArg).GetNamedNumber("duration");
+                        var position = ((JsonObject)((loadEventArg as LoadEventArgs).Load.GetPayload())).GetNamedNumber("duration");
 
                         if (listener != null)
                             listener.OnSuccess(position * 1000);
@@ -567,7 +567,7 @@ namespace ConnectSdk.Windows.Service.Sessions
             SendMessage(message, responseListener);
         }
 
-        public new void GetPlayState(ResponseListener listener)
+        public override void GetPlayState(ResponseListener listener)
         {
             var requestIdNumber = GetNextId();
             var requestId = String.Format("req{0}", requestIdNumber);
@@ -633,7 +633,7 @@ namespace ConnectSdk.Windows.Service.Sessions
             SendMessage(message, responseListener);
         }
 
-        public new IServiceSubscription SubscribePlayState(ResponseListener listener)
+        public override IServiceSubscription SubscribePlayState(ResponseListener listener)
         {
             if (mPlayStateSubscription == null)
                 mPlayStateSubscription = new UrlServiceSubscription(null, null, null, null);
