@@ -370,8 +370,6 @@ namespace ConnectSdk.Windows.Service
                         control.CloseInputPicker(launchSession, lst);
                     break;
                 case LaunchSessionType.WebApp:
-                    // TODO: check this, there is no implementation of IWebAppLauncher yet
-                    // ReSharper disable once SuspiciousTypeConversion.Global
                     var appLauncher = service as IWebAppLauncher;
                     if (appLauncher != null)
                         appLauncher.CloseWebApp(launchSession, lst);

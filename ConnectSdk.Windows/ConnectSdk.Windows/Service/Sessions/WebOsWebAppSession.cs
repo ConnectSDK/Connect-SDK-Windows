@@ -179,7 +179,7 @@ namespace ConnectSdk.Windows.Service.Sessions
             return playStateString.Equals("finished") ? PlayStateStatus.Finished : PlayStateStatus.Unknown;
         }
 
-        public new void Connect(ResponseListener connectionListener)
+        public override void Connect(ResponseListener connectionListener)
         {
             //// reuse the socket from the service if present. Fixes bug for displayImage
             //if (Service.Socket != null && Socket == null)
@@ -190,7 +190,7 @@ namespace ConnectSdk.Windows.Service.Sessions
             Connect(false, connectionListener);
         }
 
-        public new void Join(ResponseListener connectionListener)
+        public override void Join(ResponseListener connectionListener)
         {
             Connect(true, connectionListener);
         }
@@ -275,7 +275,13 @@ namespace ConnectSdk.Windows.Service.Sessions
                     {
                         Socket.Listener = mSocketListener;
                     }
-                    MConnectionListener.OnSuccess(null);
+                    if (Socket.IsConnected())
+                        MConnectionListener.OnSuccess(null);
+                    else
+                    {
+                        Socket.Connect();
+                    }
+                    //MConnectionListener.OnSuccess(null);
                 }
                 else
                 {
@@ -289,7 +295,7 @@ namespace ConnectSdk.Windows.Service.Sessions
             }
         }
 
-        public new void DisconnectFromWebApp()
+        public override void DisconnectFromWebApp()
         {
             Connected = false;
             MConnectionListener = null;
@@ -297,6 +303,7 @@ namespace ConnectSdk.Windows.Service.Sessions
             if (AppToAppSubscription != null)
             {
                 AppToAppSubscription.RemoveListeners();
+                AppToAppSubscription.Unsubscribe();
                 AppToAppSubscription = null;
             }
 
@@ -304,11 +311,10 @@ namespace ConnectSdk.Windows.Service.Sessions
 
             Socket.Listener = null;
             Socket.Disconnect();
-            Connected = false;
             Socket = null;
         }
 
-        public new void SendMessage(String message, ResponseListener listener)
+        public override void SendMessage(String message, ResponseListener listener)
         {
             if (string.IsNullOrEmpty(message))
             {
@@ -321,7 +327,7 @@ namespace ConnectSdk.Windows.Service.Sessions
             SendP2PMessage(message, listener);
         }
 
-        public new void SendMessage(JsonObject message, ResponseListener listener)
+        public override void SendMessage(JsonObject message, ResponseListener listener)
         {
             if (message == null || message.Count == 0)
             {
@@ -375,7 +381,7 @@ namespace ConnectSdk.Windows.Service.Sessions
             }
         }
 
-        public new void Close(ResponseListener listener)
+        public override void Close(ResponseListener listener)
         {
             mActiveCommands.Clear();
 
@@ -394,7 +400,7 @@ namespace ConnectSdk.Windows.Service.Sessions
             Service.GetWebAppLauncher().CloseWebApp(LaunchSession, listener);
         }
 
-        public new void Seek(long position, ResponseListener listener)
+        public override void Seek(long position, ResponseListener listener)
         {
             if (position < 0)
             {
@@ -658,12 +664,12 @@ namespace ConnectSdk.Windows.Service.Sessions
 
 
         #region Media Control
-        public new IMediaControl GetMediaControl()
+        public override IMediaControl GetMediaControl()
         {
             return this;
         }
 
-        public new CapabilityPriorityLevel GetMediaControlCapabilityLevel()
+        public override CapabilityPriorityLevel GetMediaControlCapabilityLevel()
         {
             return CapabilityPriorityLevel.High;
         } 
@@ -673,17 +679,17 @@ namespace ConnectSdk.Windows.Service.Sessions
          * Media Player *
          ****************/
 
-        public new IMediaPlayer GetMediaPlayer()
+        public override IMediaPlayer GetMediaPlayer()
         {
             return this;
         }
 
-        public new CapabilityPriorityLevel GetMediaPlayerCapabilityLevel()
+        public override CapabilityPriorityLevel GetMediaPlayerCapabilityLevel()
         {
             return CapabilityPriorityLevel.High;
         }
 
-        public new void DisplayImage(String url, String mimeType, String title, String description, String iconSrc,
+        public override void DisplayImage(String url, String mimeType, String title, String description, String iconSrc,
             ResponseListener listener)
         {
             var requestIdNumber = GetNextId();
@@ -740,7 +746,7 @@ namespace ConnectSdk.Windows.Service.Sessions
             SendP2PMessage(message, messageResponseListener);
         }
 
-        public new void PlayMedia(String url, String mimeType, String title, String description, String iconSrc,
+        public override void PlayMedia(String url, String mimeType, String title, String description, String iconSrc,
             bool shouldLoop, ResponseListener listener)
         {
             var requestIdNumber = GetNextId();

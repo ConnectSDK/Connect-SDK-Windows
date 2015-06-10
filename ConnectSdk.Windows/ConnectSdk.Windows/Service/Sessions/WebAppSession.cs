@@ -50,17 +50,17 @@ namespace ConnectSdk.Windows.Service.Sessions
             return null;
         }
 
-        public void Connect(ResponseListener connectionListener)
+        public virtual void Connect(ResponseListener connectionListener)
         {
             Util.PostError(connectionListener, ServiceCommandError.NotSupported());
         }
 
-        public void Join(ResponseListener connectionListener)
+        public virtual void Join(ResponseListener connectionListener)
         {
             Util.PostError(connectionListener, ServiceCommandError.NotSupported());
         }
 
-        public void DisconnectFromWebApp()
+        public virtual void DisconnectFromWebApp()
         {
         }
 
@@ -94,19 +94,19 @@ namespace ConnectSdk.Windows.Service.Sessions
             Util.PostError(listener, ServiceCommandError.NotSupported());
         }
 
-        public void Close(ResponseListener listener)
+        public virtual void Close(ResponseListener listener)
         {
             if (listener != null)
                 listener.OnError(ServiceCommandError.NotSupported());
         }
 
-        public void SendMessage(String message, ResponseListener listener)
+        public virtual void SendMessage(String message, ResponseListener listener)
         {
             if (listener != null)
                 listener.OnError(ServiceCommandError.NotSupported());
         }
 
-        public void SendMessage(JsonObject message, ResponseListener listener)
+        public virtual void SendMessage(JsonObject message, ResponseListener listener)
         {
             if (listener != null)
             {
@@ -114,12 +114,12 @@ namespace ConnectSdk.Windows.Service.Sessions
             }
         }
 
-        public IMediaControl GetMediaControl()
+        public virtual IMediaControl GetMediaControl()
         {
             return null;
         }
 
-        public CapabilityPriorityLevel GetMediaControlCapabilityLevel()
+        public virtual CapabilityPriorityLevel GetMediaControlCapabilityLevel()
         {
             return CapabilityPriorityLevel.VeryLow;
         }
@@ -228,7 +228,7 @@ namespace ConnectSdk.Windows.Service.Sessions
                 listener.OnError(ServiceCommandError.NotSupported());
         }
 
-        public void Seek(long position, ResponseListener listener)
+        public virtual void Seek(long position, ResponseListener listener)
         {
             IMediaControl mediaControl = null;
 
@@ -301,7 +301,7 @@ namespace ConnectSdk.Windows.Service.Sessions
             Util.PostError(listener, ServiceCommandError.NotSupported());
         }
 
-        public void DisplayImage(String url, String mimeType, String title, String description, String iconSrc,
+        public virtual void DisplayImage(String url, String mimeType, String title, String description, String iconSrc,
             ResponseListener listener)
         {
             Util.PostError(listener, ServiceCommandError.NotSupported());
@@ -312,7 +312,7 @@ namespace ConnectSdk.Windows.Service.Sessions
             Util.PostError(listener, ServiceCommandError.NotSupported());
         }
 
-        public void PlayMedia(String url, String mimeType, String title, String description, String iconSrc,
+        public virtual void PlayMedia(String url, String mimeType, String title, String description, String iconSrc,
             bool shouldLoop, ResponseListener listener)
         {
             Util.PostError(listener, ServiceCommandError.NotSupported());
@@ -323,12 +323,12 @@ namespace ConnectSdk.Windows.Service.Sessions
             Util.PostError(listener, ServiceCommandError.NotSupported());
         }
 
-        public IMediaPlayer GetMediaPlayer()
+        public virtual IMediaPlayer GetMediaPlayer()
         {
             return null;
         }
 
-        public CapabilityPriorityLevel GetMediaPlayerCapabilityLevel()
+        public virtual CapabilityPriorityLevel GetMediaPlayerCapabilityLevel()
         {
             return CapabilityPriorityLevel.VeryLow;
         }

@@ -172,6 +172,13 @@ namespace ConnectSdk.Windows.Service
                 Socket.SendCommand(command);
         }
 
+
+        public override void Unsubscribe(UrlServiceSubscription subscription)
+        {
+            if (socket != null)
+                socket.Unsubscribe(subscription);
+        }
+
         public override bool IsConnected()
         {
             if (DiscoveryManager.GetInstance().PairingLevel == DiscoveryManager.PairingLevelEnum.On)
@@ -486,14 +493,17 @@ namespace ConnectSdk.Windows.Service
         public void CloseApp(LaunchSession launchSession, ResponseListener listener)
         {
             const string uri = "ssap://system.launcher/close";
+
             var appId = launchSession.AppId;
             var sessionId = launchSession.SessionId;
             var payload = new JsonObject();
 
+
             try
             {
                 payload.Add("id", JsonValue.CreateStringValue(appId));
-                payload.Add("sessionId", JsonValue.CreateStringValue(sessionId));
+                if (sessionId != null)
+                    payload.Add("sessionId", JsonValue.CreateStringValue(sessionId));
             }
             catch
             {
@@ -932,7 +942,7 @@ namespace ConnectSdk.Windows.Service
                             var loadEventArgs = loadEventArg as LoadEventArgs;
                             if (loadEventArgs != null)
                             {
-                                var webAppSession = (loadEventArgs.Load.GetPayload()) as WebOsWebAppSession;
+                                var webAppSession = (loadEventArgs.Load.GetPayload()) as WebAppSession;
                                 if (webAppSession != null)
                                     webAppSession.DisplayImage(url, mimeType, title, description, iconSrc, listener);
                             }
@@ -949,7 +959,7 @@ namespace ConnectSdk.Windows.Service
                             var loadEventArgs = loadEventArg as LoadEventArgs;
                             if (loadEventArgs != null)
                             {
-                                var webAppSession = (loadEventArgs.Load.GetPayload()) as WebOsWebAppSession;
+                                var webAppSession = (loadEventArgs.Load.GetPayload()) as WebAppSession;
                                 if (webAppSession != null)
                                     webAppSession.DisplayImage(url, mimeType, title, description, iconSrc, listener);
                             }
@@ -2094,7 +2104,9 @@ namespace ConnectSdk.Windows.Service
                 return;
             }
 
+
             var webAppSession = WebAppSessions[launchSession.AppId];
+            //launchSession.AppId = webAppSession.GetFullAppId();
 
             if (webAppSession != null && webAppSession.IsConnected())
             {
@@ -2120,14 +2132,14 @@ namespace ConnectSdk.Windows.Service
                     {
                         webAppSession.DisconnectFromWebApp();
 
-                        if (Listener != null)
+                        if (listener != null)
                             listener.OnSuccess(loadEventArg);
                     },
                     serviceCommandError =>
                     {
                         webAppSession.DisconnectFromWebApp();
 
-                        if (Listener != null)
+                        if (listener != null)
                             listener.OnError(serviceCommandError);
                     }
                 );
@@ -2136,8 +2148,8 @@ namespace ConnectSdk.Windows.Service
             }
             else
             {
-                if (webAppSession != null)
-                    webAppSession.DisconnectFromWebApp();
+                //if (webAppSession != null)
+                //    webAppSession.DisconnectFromWebApp();
 
                 const string uri = "ssap://webapp/closeWebApp";
                 var payload = new JsonObject();
@@ -2224,7 +2236,7 @@ namespace ConnectSdk.Windows.Service
                         var fullAppId = jsonObj.GetNamedString("appId");
                         if (!string.IsNullOrEmpty(fullAppId))
                         {
-                            if (webAppSession.LaunchSession.SessionType == LaunchSessionType.WebApp)
+                            if (webAppSession.LaunchSession.SessionType == LaunchSessionType.WebApp && !AppToAppIdMappings.ContainsKey(fullAppId))
                                 AppToAppIdMappings.Add(fullAppId, appId);
                             webAppSession.SetFullAppId(fullAppId);
                         }
@@ -2254,20 +2266,23 @@ namespace ConnectSdk.Windows.Service
                 }
             );
 
-            //todo: this is a workaround! Normally the subscribed event should arrive sooner but now we suppose that the existing subscription was successfull
-            UrlServiceSubscription v;
-            if (subscriptions.ContainsKey(uri))
-            {
-                subscriptions.TryGetValue(uri, out v);
-                webAppSession.AppToAppSubscription = v;
-            }
-            else
-            {
-                v = new UrlServiceSubscription(this, uri, payload, true, responseListener);
-                subscriptions.TryAdd(uri, v);
-                webAppSession.AppToAppSubscription = v;
-                webAppSession.AppToAppSubscription.Subscribe();
-            }
+            webAppSession.AppToAppSubscription = new UrlServiceSubscription(this, uri, payload, true, responseListener);;
+            webAppSession.AppToAppSubscription.Subscribe();
+
+            ////todo: this is a workaround! Normally the subscribed event should arrive sooner but now we suppose that the existing subscription was successfull
+            //UrlServiceSubscription v;
+            //if (subscriptions.ContainsKey(uri))
+            //{
+            //    subscriptions.TryGetValue(uri, out v);
+            //    webAppSession.AppToAppSubscription = v;
+            //}
+            //else
+            //{
+            //    v = new UrlServiceSubscription(this, uri, payload, true, responseListener);
+            //    subscriptions.TryAdd(uri, v);
+            //    webAppSession.AppToAppSubscription = v;
+            //    webAppSession.AppToAppSubscription.Subscribe();
+            //}
         }
 
         private ConcurrentDictionary<string, UrlServiceSubscription> subscriptions = new ConcurrentDictionary<string, UrlServiceSubscription>();

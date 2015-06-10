@@ -69,16 +69,20 @@ namespace ConnectSdk.Windows.Service.WebOs
             this.service = service;
             State = State.Initial;
             CreateSocket();
-            State = State.Registered;
             SetDefaultManifest();
         }
+
+        
 
         public IWebOstvServiceSocketClientListener Listener { get; set; }
 
         public State State
         {
             get { return state; }
-            set { state = value; }
+            set
+            {
+                state = value;
+            }
         }
 
         private bool connected;
@@ -87,6 +91,7 @@ namespace ConnectSdk.Windows.Service.WebOs
         {
             messageWebSocket = new MessageWebSocket();
             messageWebSocket.Control.MessageType = SocketMessageType.Utf8;
+            
             messageWebSocket.MessageReceived += (sender, args) =>
             {
                 string read;
@@ -95,8 +100,6 @@ namespace ConnectSdk.Windows.Service.WebOs
                 {
                     reader.UnicodeEncoding = UnicodeEncoding.Utf8;
                     read = reader.ReadString(reader.UnconsumedBufferLength);
-
-                    //Debug.WriteLine("{0} : {1} : {2}", DateTime.Now, "received", read);
                 }
                 OnMessage(read);
                 if (!connected)
@@ -146,7 +149,7 @@ namespace ConnectSdk.Windows.Service.WebOs
         public void DisconnectWithError(ServiceCommandError error)
         {
             State = State.Initial;
-
+            
             if (Listener != null)
                 Listener.OnCloseWithError(error);
         }
@@ -303,9 +306,12 @@ namespace ConnectSdk.Windows.Service.WebOs
                         }
                     }
 
-                    if (!(request is UrlServiceSubscription) && message.ContainsKey("pairingType"))
+                    if (!(request is UrlServiceSubscription))
                     {
-                        Requests.Remove(id);
+                        if (!message.ContainsKey("pairingType"))
+                        {
+                            Requests.Remove(id);
+                        }
                     }
                 }
             }
@@ -564,10 +570,7 @@ namespace ConnectSdk.Windows.Service.WebOs
                 Listener.OnConnect();
         }
 
-        public void Unsubscribe(IServiceSubscription subscription)
-        {
-            throw new NotImplementedException();
-        }
+
 
         public void SendCommand(ServiceCommand command)
         {
@@ -585,7 +588,20 @@ namespace ConnectSdk.Windows.Service.WebOs
             Requests.Add(requestId, command);
             try
             {
-                SendCommandImmediately(command);
+                if (state == State.Registered)
+                {
+                    this.SendCommandImmediately(command);
+                }
+                else if (state == State.Connecting || state == State.Disconnecting)
+                {
+                    
+                    commandQueue.Enqueue(command);
+                }
+                else
+                {
+                    commandQueue.Enqueue(command);
+                    Connect();
+                }
             }
             // ReSharper disable once EmptyGeneralCatchClause
             catch
@@ -593,7 +609,7 @@ namespace ConnectSdk.Windows.Service.WebOs
 
             }
         }
-
+        
         public void Unsubscribe(UrlServiceSubscription subscription)
         {
             var requestId = subscription.RequestId;
@@ -615,6 +631,8 @@ namespace ConnectSdk.Windows.Service.WebOs
             SendMessage(headers, null);
             Requests.Remove(requestId);
         }
+
+        public void Unsubscribe(IServiceSubscription subscription) { }
 
         protected void SendCommandImmediately(ServiceCommand command)
         {
@@ -694,7 +712,7 @@ namespace ConnectSdk.Windows.Service.WebOs
 
         public bool IsConnected()
         {
-            return messageWebSocket != null;
+            return messageWebSocket != null && state != State.Initial;
         }
 
         public void SendMessage(JsonObject packet, JsonObject payload)

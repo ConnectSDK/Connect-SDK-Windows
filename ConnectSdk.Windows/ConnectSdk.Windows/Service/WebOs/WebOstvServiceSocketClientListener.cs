@@ -45,7 +45,7 @@ namespace ConnectSdk.Windows.Service.WebOs
         public void OnCloseWithError(ServiceCommandError error)
         {
             service.Disconnect();
-            if (listener != null)
+            if (listener != null && error != null)
                 listener.OnConnectionFailure(service, new Exception(error.GetCode().ToString()));
         }
 

@@ -30,7 +30,7 @@ namespace ConnectSdk.Demo.Demo
         private IKeyControl keyControl;
         private IWebAppLauncher webAppLauncher;
         private IPlayListControl playListControl;
-        private WebOsWebAppSession launchSession;
+        private LaunchSession launchSession;
         private bool isPlaying;
         private bool isPlayingImage;
         private ResponseListener playStateListener;
@@ -211,6 +211,7 @@ namespace ConnectSdk.Demo.Demo
                 dispatcherTimer = new DispatcherTimer();
                 dispatcherTimer.Tick += delegate
                 {
+                    if (dispatcherTimer == null) return;
                     if (mediaControl != null && selectedDevice != null &&
                         selectedDevice.HasCapability(MediaControl.Position))
                         mediaControl.GetPosition(positionListener);
@@ -309,9 +310,16 @@ namespace ConnectSdk.Demo.Demo
                 loadEventArg =>
                 {
                     var v = loadEventArg as LoadEventArgs;
-                    isPlayingImage = true;
-                    StopUpdating();
-                    DisableMedia();
+                    var mlo = v.Load.GetPayload() as MediaLaunchObject;
+                    if (mlo != null)
+                    {
+                        launchSession = mlo.LaunchSession;
+                        mediaControl = mlo.MediaControl;
+                        playListControl = mlo.PlaylistControl;
+                        StopUpdating();
+                        closeCommand.Enabled = true;
+                        isPlayingImage = true;
+                    }
                 },
                 serviceCommandError =>
                 {
@@ -319,6 +327,14 @@ namespace ConnectSdk.Demo.Demo
                         new MessageDialog(
                             "Something went wrong; The application could not be started. Press 'Close' to continue");
                     msg.ShowAsync();
+                    if (launchSession != null)
+                    {
+                        if (launchSession.Service is WebOstvService)
+                            (launchSession.Service as WebOstvService).CloseApp(launchSession, null);
+                        else
+                            launchSession.Close(null);
+                    }
+                    launchSession = null;
                     StopUpdating();
                     DisableMedia();
                     isPlaying = isPlayingImage = false;
@@ -342,9 +358,11 @@ namespace ConnectSdk.Demo.Demo
                 {
                     var v = loadEventArg as LoadEventArgs;
                     var mlo = v.Load.GetPayload() as MediaLaunchObject;
-                    if (v != null)
+                    if (mlo != null)
                     {
+                        launchSession = mlo.LaunchSession;
                         mediaControl = mlo.MediaControl;
+                        playListControl = mlo.PlaylistControl;
                         StopUpdating();
                         EnableMedia();
                         isPlaying = true;
@@ -356,6 +374,10 @@ namespace ConnectSdk.Demo.Demo
                         new MessageDialog(
                             "Something went wrong; The application could not be started. Press 'Close' to continue");
                     msg.ShowAsync();
+
+                    if (launchSession != null)
+                        launchSession.Close(null);
+                    launchSession = null;
                     StopUpdating();
                     DisableMedia();
                     isPlaying = isPlayingImage = false;
@@ -382,6 +404,8 @@ namespace ConnectSdk.Demo.Demo
                     if (mlo != null)
                     {
                         mediaControl = mlo.MediaControl;
+                        launchSession = mlo.LaunchSession;
+                        playListControl = mlo.PlaylistControl;
                         StopUpdating();
                         EnableMedia();
                         isPlaying = true;
@@ -393,6 +417,9 @@ namespace ConnectSdk.Demo.Demo
                         new MessageDialog(
                             "Something went wrong; The application could not be started. Press 'Close' to continue");
                     msg.ShowAsync();
+                    if (launchSession != null)
+                        launchSession.Close(null);
+                    launchSession = null;
                     StopUpdating();
                     DisableMedia();
                     isPlaying = isPlayingImage = false;
@@ -414,7 +441,7 @@ namespace ConnectSdk.Demo.Demo
                     var v = loadEventArg as LoadEventArgs;
                     if (v != null)
                     {
-                        launchSession = v.Load.GetPayload() as WebOsWebAppSession;
+                        var launchSession = v.Load.GetPayload() as WebOsWebAppSession;
                         if (launchSession != null) launchSession.Connect(null);
                     }
                 },
@@ -463,8 +490,25 @@ namespace ConnectSdk.Demo.Demo
 
         private void CloseCommandExecute(object obj)
         {
-            if (mediaControl != null)
-                mediaControl.Stop(null);
+            if (mediaPlayer != null)
+            {
+                DisableMedia();
+                StopUpdating();
+
+                if (launchSession != null)
+                {
+                    if (launchSession.Service is WebOstvService)
+                        (launchSession.Service as WebOstvService).CloseWebApp(launchSession, null);
+                    else
+                        launchSession.Close(null);
+                }
+
+                //if (launchSession != null)
+                //    launchSession.Close(null);
+                launchSession = null;
+
+
+            }
         }
 
         private void PlayListCommandExecute(object obj)
@@ -484,9 +528,12 @@ namespace ConnectSdk.Demo.Demo
                     var mlo = v.Load.GetPayload() as MediaLaunchObject;
                     if (mlo != null)
                     {
+                        launchSession = mlo.LaunchSession;
                         mediaControl = mlo.MediaControl;
-                        playListControl = mlo.PlaylistControl; 
+                        playListControl = mlo.PlaylistControl;
+                        StopUpdating();
                         EnableMedia();
+                        isPlaying = true;
                     }
                     
                 },
