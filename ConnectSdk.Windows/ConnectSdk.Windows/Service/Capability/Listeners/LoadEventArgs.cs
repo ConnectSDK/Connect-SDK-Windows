@@ -48,5 +48,13 @@ namespace ConnectSdk.Windows.Service.Capability.Listeners
 
             return null;
         }
+
+        public static bool GetValueBool(object source) 
+        {
+            var loadEventArgs = source as LoadEventArgs;
+            if (loadEventArgs != null) return (bool)loadEventArgs.Load.GetPayload() ;
+
+            return false;
+        }
     }
 }

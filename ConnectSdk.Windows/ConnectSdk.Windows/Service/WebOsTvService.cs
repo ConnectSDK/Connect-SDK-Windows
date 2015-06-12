@@ -2336,7 +2336,10 @@ namespace ConnectSdk.Windows.Service
                         listener.OnSuccess(loadEventArg);
                     }
                 },
-                serviceCommandError => Util.PostError(listener, serviceCommandError)
+                serviceCommandError =>
+                {
+                    Util.PostError(listener, serviceCommandError);
+                }
             );
 
             ServiceCommand request = new UrlServiceSubscription(this, uri, payload, true, responseListener);

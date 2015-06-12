@@ -1,17 +1,12 @@
 ﻿using System;
-using Windows.Data.Json;
 using Windows.UI.Core;
 using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using ConnectSdk.Windows.Device;
-using ConnectSdk.Windows.Device.Netcast;
 using ConnectSdk.Windows.Service;
 using ConnectSdk.Windows.Service.Capability;
 using ConnectSdk.Windows.Service.Capability.Listeners;
-using ConnectSdk.Windows.Service.Command;
-using ConnectSdk.Windows.Service.NetCast;
 using ConnectSdk.Windows.Service.Sessions;
-using Microsoft.VisualBasic.CompilerServices;
 
 namespace ConnectSdk.Demo.Demo
 {
@@ -40,9 +35,6 @@ namespace ConnectSdk.Demo.Demo
         private DispatcherTimer dispatcherTimer;
         private ResponseListener volumeListener;
         private long totalTimeDuration;
-        private static String WebOsId = "webOS TV";
-        private string webAppId;
-        private WebAppSessionListener webAppListener;
 
         public void SetControls()
         {
@@ -92,20 +84,10 @@ namespace ConnectSdk.Demo.Demo
                     volumeControl.SubscribeVolume(volumeListener);
                 }
 
-                //webapp
-
-                LaunchWebAppCommand.Enabled = selectedDevice.HasCapability(WebAppLauncher.Launch);
-                //JoinWebAppCommand.Enabled = selectedDevice.HasCapability(WebAppLauncher.Join);
-                //SendMessageCommand.Enabled = selectedDevice.HasCapability(WebAppLauncher.MessageSend);
-                //SendJsonCommand.Enabled = selectedDevice.HasCapability(WebAppLauncher.MessageSendJson);
-
-                WebAppResponseMessage = "";
-
-                if (selectedDevice.GetServiceByName(WebOsId) != null)
-                {
-                    webAppId = "WebAppTester";
-                }
+                
             }
+
+            SetWebAppControls();
 
             if (!isPlaying || !isPlayingImage)
                 DisableMedia();
@@ -116,35 +98,32 @@ namespace ConnectSdk.Demo.Demo
                 loadEventArg =>
                 {
                     var v = loadEventArg as LoadEventArgs;
-                    if (v.Load.GetPayload() != null)
+                    if (v != null && v.Load.GetPayload() != null)
                     {
                         var ps = v.Load.GetPayload() is PlayStateStatus ? (PlayStateStatus)v.Load.GetPayload() : PlayStateStatus.Unknown;
-                        if (ps != null)
+                        switch (ps)
                         {
-                            switch (ps)
-                            {
-                                case PlayStateStatus.Playing:
-                                    StartUpdating();
+                            case PlayStateStatus.Playing:
+                                StartUpdating();
 
-                                    if (mediaControl != null && selectedDevice.HasCapability(MediaControl.Duration))
-                                    {
-                                        mediaControl.GetDuration(durationListener);
-                                    }
-                                    break;
-                                case PlayStateStatus.Finished:
-                                    App.MainDispatcher.RunAsync(CoreDispatcherPriority.High, () =>
-                                    {
-                                        this.Duration = "--:--:--";
-                                        this.Position = "--:--:--";
-                                    });
+                                if (mediaControl != null && selectedDevice.HasCapability(MediaControl.Duration))
+                                {
+                                    mediaControl.GetDuration(durationListener);
+                                }
+                                break;
+                            case PlayStateStatus.Finished:
+                                App.MainDispatcher.RunAsync(CoreDispatcherPriority.High, () =>
+                                {
+                                    Duration = "--:--:--";
+                                    Position = "--:--:--";
+                                });
 
-                                    break;
+                                break;
                                 //mSeekBar.setProgress(0);
 
-                                default:
-                                    StopUpdating();
-                                    break;
-                            }
+                            default:
+                                StopUpdating();
+                                break;
                         }
                     }
                 },
@@ -159,7 +138,7 @@ namespace ConnectSdk.Demo.Demo
                 loadEventArg =>
                 {
                     var v = loadEventArg as LoadEventArgs;
-                    if (v.Load.GetPayload() != null)
+                    if (v != null && v.Load.GetPayload() != null)
                     {
                         var d = v.Load.GetPayload() is double ? (double)v.Load.GetPayload() : 0;
                         var t = TimeSpan.FromMilliseconds(d);
@@ -181,7 +160,7 @@ namespace ConnectSdk.Demo.Demo
                 loadEventArg =>
                 {
                     var v = loadEventArg as LoadEventArgs;
-                    if (v.Load.GetPayload() != null)
+                    if (v != null && v.Load.GetPayload() != null)
                     {
                         var d = v.Load.GetPayload() is double ? (double)v.Load.GetPayload() : 0;
                         var t = TimeSpan.FromMilliseconds(d);
@@ -203,7 +182,7 @@ namespace ConnectSdk.Demo.Demo
                 loadEventArg =>
                 {
                     var v = loadEventArg as LoadEventArgs;
-                    if (v.Load.GetPayload() != null)
+                    if (v != null && v.Load.GetPayload() != null)
                     {
                         var d = v.Load.GetPayload() is float ? (float)v.Load.GetPayload() : 0;
                         App.MainDispatcher.RunAsync(CoreDispatcherPriority.High, () =>
@@ -220,37 +199,6 @@ namespace ConnectSdk.Demo.Demo
 
                 }
                 );
-
-            webAppListener = new WebAppSessionListener
-                (
-                (session, message) =>
-                {
-                    var str = LoadEventArgs.GetValue<string>(message);
-                    var json = LoadEventArgs.GetValue<JsonObject>(message);
-                    App.MainDispatcher.RunAsync(CoreDispatcherPriority.High, () =>
-                    {
-                        if (str != null)
-                            WebAppResponseMessage += str + "\n";
-                        else if (json != null)
-                            WebAppResponseMessage += json.Stringify() + "\n";
-                    });
-                },
-                session =>
-                {
-                    //launchWebAppButton.setEnabled(true);
-                    //if (getTv() != null) joinWebAppButton.setEnabled(getTv().hasCapability(WebAppLauncher.Join));
-                    //sendMessageButton.setEnabled(false);
-                    //sendJSONButton.setEnabled(false);
-                    //leaveWebAppButton.setEnabled(false);
-                    //closeWebAppButton.setEnabled(false);
-
-                    //mWebAppSession.setWebAppSessionListener(null);
-                    //mWebAppSession = null;
-                    //isLaunched = false;
-                }
-                );
-
- 
         }
 
         private void StartUpdating()
@@ -313,14 +261,9 @@ namespace ConnectSdk.Demo.Demo
                 previousCommand.Enabled = false;
                 nextCommand.Enabled = false;
                 closeCommand.Enabled = false;
-                //jumpButton.setEnabled(false);
 
-                //mSeekBar.setEnabled(false);
-                //mSeekBar.setOnSeekBarChangeListener(null);
-                //mSeekBar.setProgress(0);
-
-                this.Duration = "--:--:--";
-                this.Position = "--:--:--";
+                Duration = "--:--:--";
+                Position = "--:--:--";
 
                 totalTimeDuration = -1;
             }
@@ -363,15 +306,18 @@ namespace ConnectSdk.Demo.Demo
                 loadEventArg =>
                 {
                     var v = loadEventArg as LoadEventArgs;
-                    var mlo = v.Load.GetPayload() as MediaLaunchObject;
-                    if (mlo != null)
+                    if (v != null)
                     {
-                        launchSession = mlo.LaunchSession;
-                        mediaControl = mlo.MediaControl;
-                        playListControl = mlo.PlaylistControl;
-                        StopUpdating();
-                        closeCommand.Enabled = true;
-                        isPlayingImage = true;
+                        var mlo = v.Load.GetPayload() as MediaLaunchObject;
+                        if (mlo != null)
+                        {
+                            launchSession = mlo.LaunchSession;
+                            mediaControl = mlo.MediaControl;
+                            playListControl = mlo.PlaylistControl;
+                            StopUpdating();
+                            closeCommand.Enabled = true;
+                            isPlayingImage = true;
+                        }
                     }
                 },
                 serviceCommandError =>
@@ -410,15 +356,18 @@ namespace ConnectSdk.Demo.Demo
                 loadEventArg =>
                 {
                     var v = loadEventArg as LoadEventArgs;
-                    var mlo = v.Load.GetPayload() as MediaLaunchObject;
-                    if (mlo != null)
+                    if (v != null)
                     {
-                        launchSession = mlo.LaunchSession;
-                        mediaControl = mlo.MediaControl;
-                        playListControl = mlo.PlaylistControl;
-                        StopUpdating();
-                        EnableMedia();
-                        isPlaying = true;
+                        var mlo = v.Load.GetPayload() as MediaLaunchObject;
+                        if (mlo != null)
+                        {
+                            launchSession = mlo.LaunchSession;
+                            mediaControl = mlo.MediaControl;
+                            playListControl = mlo.PlaylistControl;
+                            StopUpdating();
+                            EnableMedia();
+                            isPlaying = true;
+                        }
                     }
                 },
                 serviceCommandError =>
@@ -453,15 +402,18 @@ namespace ConnectSdk.Demo.Demo
                 loadEventArg =>
                 {
                     var v = loadEventArg as LoadEventArgs;
-                    var mlo = v.Load.GetPayload() as MediaLaunchObject;
-                    if (mlo != null)
+                    if (v != null)
                     {
-                        mediaControl = mlo.MediaControl;
-                        launchSession = mlo.LaunchSession;
-                        playListControl = mlo.PlaylistControl;
-                        StopUpdating();
-                        EnableMedia();
-                        isPlaying = true;
+                        var mlo = v.Load.GetPayload() as MediaLaunchObject;
+                        if (mlo != null)
+                        {
+                            mediaControl = mlo.MediaControl;
+                            launchSession = mlo.LaunchSession;
+                            playListControl = mlo.PlaylistControl;
+                            StopUpdating();
+                            EnableMedia();
+                            isPlaying = true;
+                        }
                     }
                 },
                 serviceCommandError =>
@@ -483,33 +435,33 @@ namespace ConnectSdk.Demo.Demo
         }
 
 
-        private void LaunchMediaPlayerCommandExecute(object obj)
-        {
-            var webostvService = (WebOstvService) selectedDevice.GetServiceByName(WebOstvService.Id);
-            const string webappname = "MediaPlayer";
-            var listener = new ResponseListener
-                (
-                loadEventArg =>
-                {
-                    var v = loadEventArg as LoadEventArgs;
-                    if (v != null)
-                    {
-                        var launchSession = v.Load.GetPayload() as WebOsWebAppSession;
-                        if (launchSession != null) launchSession.Connect(null);
-                    }
-                },
-                serviceCommandError =>
-                {
-                    var msg =
-                        new MessageDialog(
-                            "Something went wrong; The application could not be started. Press 'Close' to continue");
-                    msg.ShowAsync();
-                }
-                );
+        //private void LaunchMediaPlayerCommandExecute(object obj)
+        //{
+        //    var webostvService = (WebOstvService) selectedDevice.GetServiceByName(WebOstvService.Id);
+        //    const string webappname = "MediaPlayer";
+        //    var listener = new ResponseListener
+        //        (
+        //        loadEventArg =>
+        //        {
+        //            var v = loadEventArg as LoadEventArgs;
+        //            if (v != null)
+        //            {
+        //                var launchSession = v.Load.GetPayload() as WebOsWebAppSession;
+        //                if (launchSession != null) launchSession.Connect(null);
+        //            }
+        //        },
+        //        serviceCommandError =>
+        //        {
+        //            var msg =
+        //                new MessageDialog(
+        //                    "Something went wrong; The application could not be started. Press 'Close' to continue");
+        //            msg.ShowAsync();
+        //        }
+        //        );
 
-            webostvService.LaunchWebApp(webappname, listener);
+        //    webostvService.LaunchWebApp(webappname, listener);
 
-        }
+        //}
 
         private void PlayCommandExecute(object obj)
         {
@@ -578,17 +530,19 @@ namespace ConnectSdk.Demo.Demo
                 loadEventArg =>
                 {
                     var v = loadEventArg as LoadEventArgs;
-                    var mlo = v.Load.GetPayload() as MediaLaunchObject;
-                    if (mlo != null)
+                    if (v != null)
                     {
-                        launchSession = mlo.LaunchSession;
-                        mediaControl = mlo.MediaControl;
-                        playListControl = mlo.PlaylistControl;
-                        StopUpdating();
-                        EnableMedia();
-                        isPlaying = true;
+                        var mlo = v.Load.GetPayload() as MediaLaunchObject;
+                        if (mlo != null)
+                        {
+                            launchSession = mlo.LaunchSession;
+                            mediaControl = mlo.MediaControl;
+                            playListControl = mlo.PlaylistControl;
+                            StopUpdating();
+                            EnableMedia();
+                            isPlaying = true;
+                        }
                     }
-                    
                 },
                 serviceCommandError =>
                 {
@@ -640,54 +594,6 @@ namespace ConnectSdk.Demo.Demo
             volumeControl.SetVolume((float)newValue, null);
         }
 
-        private void LaunchWebAppCommandExecute(object obj)
-        {
-            var listener = new ResponseListener
-                (
-                loadEventArg =>
-                {
-                    var webappSession = LoadEventArgs.GetValue<WebAppSession>(loadEventArg);
 
-                    webappSession.WebAppSessionListener = webAppListener;
-                    var v = loadEventArg as LoadEventArgs;
-                    var mlo = v.Load.GetPayload() as MediaLaunchObject;
-                    if (mlo != null)
-                    {
-                        launchSession = mlo.LaunchSession;
-                        mediaControl = mlo.MediaControl;
-                        playListControl = mlo.PlaylistControl;
-                        StopUpdating();
-                        EnableMedia();
-                        isPlaying = true;
-                    }
-
-                },
-                serviceCommandError =>
-                {
-                    var msg =
-                        new MessageDialog(
-                            "Error playing audio");
-                    msg.ShowAsync();
-                    SetEnabledMedia(false);
-                }
-                );
-            webAppLauncher.LaunchWebApp(webAppId, listener);
-            //mediaPlayer.PlayMedia(mediaUrl, mimeType, title, description, icon, false, listener);
-        }
-
-        private void JoinWebAppCommandExecute(object obj)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void SendMessageCommandExecute(object obj)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void SendJsonCommandExecute(object obj)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

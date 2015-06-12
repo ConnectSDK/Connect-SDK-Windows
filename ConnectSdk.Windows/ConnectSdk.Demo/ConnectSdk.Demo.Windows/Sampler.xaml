@@ -94,6 +94,14 @@
                                 <Button FontSize="20" Content="Send message" Command="{Binding SendMessageCommand}" Width="180"></Button>
                                 <Button FontSize="20" Content="Send JSON" Command="{Binding SendJsonCommand}" Width="180"></Button>
                             </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Button FontSize="20" Content="Leave WebApp" Command="{Binding LeaveWebAppCommand}" Width="180"></Button>
+                                <Button FontSize="20" Content="Close WebApp" Command="{Binding CloseWebAppCommand}" Width="180"></Button>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Button FontSize="20" Content="Pin WebApp" Command="{Binding PinWebAppCommand}" Width="180"></Button>
+                                <Button FontSize="20" Content="Unpin WebApp" Command="{Binding UnPinWebAppCommand}" Width="180"></Button>
+                            </StackPanel>
                         </StackPanel>
                     </DataTemplate>
                 </HubSection>

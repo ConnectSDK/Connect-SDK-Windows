@@ -28,6 +28,10 @@ namespace ConnectSdk.Demo.Demo
         private Command joinWebAppCommand;
         private Command sendMessageCommand;
         private Command sendJsonCommand;
+        private Command leaveWebAppCommand;
+        private Command closeWebAppCommand;
+        private Command pinWebAppCommand;
+        private Command unPinWebAppCommand;
 
         public Command ShowFotoCommand
         {
@@ -139,6 +143,26 @@ namespace ConnectSdk.Demo.Demo
             set { sendJsonCommand = value; }
         }
 
+        public Command LeaveWebAppCommand
+        {
+            get { return leaveWebAppCommand ?? (leaveWebAppCommand = new Command(LeaveWebAppCommandExecute) { Enabled = false }); }
+            set { leaveWebAppCommand = value; }
+        }
+        public Command CloseWebAppCommand
+        {
+            get { return closeWebAppCommand ?? (closeWebAppCommand = new Command(CloseWebAppCommandExecute) { Enabled = false }); }
+            set { closeWebAppCommand = value; }
+        }
+        public Command PinWebAppCommand
+        {
+            get { return pinWebAppCommand ?? (pinWebAppCommand = new Command(PinWebAppCommandExecute) { Enabled = false }); }
+            set { pinWebAppCommand = value; }
+        }
 
+        public Command UnPinWebAppCommand
+        {
+            get { return unPinWebAppCommand ?? (unPinWebAppCommand = new Command(UnPinWebAppCommandExecute) { Enabled = false }); }
+            set { unPinWebAppCommand = value; }
+        }
     }
 }
