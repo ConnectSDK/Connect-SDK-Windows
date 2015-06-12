@@ -83,11 +83,18 @@
                         </StackPanel>
                     </DataTemplate>
                 </HubSection>
-                <HubSection Header="Web App">
+                <HubSection Header="Web App" Background="DimGray">
                     <DataTemplate>
-                        <Grid>
-                            <Button FontSize="20" Content="Launch Media Player" Command="{Binding LaunchMediaPlayerCommand}"></Button>
-                        </Grid>
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Button FontSize="20" Content="Launch" Command="{Binding LaunchWebAppCommand}" Width="180"></Button>
+                                <Button FontSize="20" Content="Join" Command="{Binding JoinWebAppCommand}" Width="180"></Button>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Button FontSize="20" Content="Send message" Command="{Binding SendMessageCommand}" Width="180"></Button>
+                                <Button FontSize="20" Content="Send JSON" Command="{Binding SendJsonCommand}" Width="180"></Button>
+                            </StackPanel>
+                        </StackPanel>
                     </DataTemplate>
                 </HubSection>
                 <HubSection Header="Control">

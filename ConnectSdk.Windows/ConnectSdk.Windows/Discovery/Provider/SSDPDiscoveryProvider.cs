@@ -345,16 +345,20 @@ namespace ConnectSdk.Windows.Discovery.Provider
         private void NotifyListenersOfNewService(ServiceDescription service)
         {
             var serviceIds = ServiceIdsForFilter(service.ServiceFilter);
+            ServiceDescription newService = null;
 
             foreach (var serviceId in serviceIds)
             {
-                var newService = service.Clone();
+                var _newService = service.Clone();
 
-                newService.ServiceId = serviceId;
+                _newService.ServiceId = serviceId;
+
+                //if (newService == null)
+                //    newService = _newService;
 
                 foreach (var listener in serviceListeners)
                 {
-                    listener.OnServiceAdded(this, newService);
+                    listener.OnServiceAdded(this, _newService);
                 }
             }
         }

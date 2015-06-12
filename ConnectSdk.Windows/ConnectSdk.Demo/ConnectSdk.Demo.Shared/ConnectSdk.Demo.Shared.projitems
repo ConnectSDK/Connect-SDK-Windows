@@ -25,9 +25,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Command.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DiscoveryManagerListener.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ModelCommands - Copy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ModelCommands.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ModelCommandsImplementation - Copy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ModelCommandsImplementation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ScrollDirection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VisibilityConverter.cs" />

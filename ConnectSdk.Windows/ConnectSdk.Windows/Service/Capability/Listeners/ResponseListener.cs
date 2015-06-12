@@ -21,14 +21,13 @@
  #endregion
 using System;
 using ConnectSdk.Windows.Service.Command;
+using ConnectSdk.Windows.Service.Sessions;
 
 namespace ConnectSdk.Windows.Service.Capability.Listeners
 {
     public class ResponseListener
     {
-        //public EventHandler<object> Success;
-        //public EventHandler<ServiceCommandError> Error;
-        
+       
         // funcs to be sent as parameters
         private readonly Action<object> onSuccessFunc;
         private readonly Action<ServiceCommandError> onErrorFunc;
@@ -48,19 +47,48 @@ namespace ConnectSdk.Windows.Service.Capability.Listeners
 
         public void OnSuccess(object obj)
         {
-            //if (Success != null)
-            //    Success(this, new LoadEventArgs(obj));
             if (onSuccessFunc != null)
                 onSuccessFunc(new LoadEventArgs(obj));
         }
 
         public void OnError(ServiceCommandError obj)
         {
-            //if (Error != null)
-            //    Error(this, obj);
             if (onErrorFunc != null)
                 onErrorFunc(obj);
         }
 
+    }
+
+    public class WebAppSessionListener : IWebAppSessionListener
+    {
+
+        // funcs to be sent as parameters
+        private readonly Action<object, object> onReceiveMessageFunc;
+        private readonly Action<object> onWebAppSessionDisconnect;
+
+        public WebAppSessionListener() { }
+
+        /// <summary>
+        /// Specific constructor with actions to be executed on events
+        /// </summary>
+        /// <param name="onReceiveMessageFunc">The action to be executed on receive message</param>
+        /// <param name="onWebAppSessionDisconnect">The action to be executed on disconnect</param>
+        public WebAppSessionListener(Action<object, object> onReceiveMessageFunc, Action<object> onWebAppSessionDisconnect)
+        {
+            this.onReceiveMessageFunc = onReceiveMessageFunc;
+            this.onWebAppSessionDisconnect = onWebAppSessionDisconnect;
+        }
+
+        public void OnReceiveMessage(WebAppSession webAppSession, object message)
+        {
+            if (onReceiveMessageFunc != null)
+                onReceiveMessageFunc(new LoadEventArgs(webAppSession), new LoadEventArgs(message));
+        }
+
+        public void OnWebAppSessionDisconnect(WebAppSession webAppSession)
+        {
+            if (onWebAppSessionDisconnect != null)
+                onWebAppSessionDisconnect(webAppSession);
+        }
     }
 }

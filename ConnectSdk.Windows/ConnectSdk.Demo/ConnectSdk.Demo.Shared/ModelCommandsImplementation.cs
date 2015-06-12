@@ -1,4 +1,5 @@
 ﻿using System;
+using Windows.Data.Json;
 using Windows.UI.Core;
 using Windows.UI.Popups;
 using Windows.UI.Xaml;
@@ -38,8 +39,12 @@ namespace ConnectSdk.Demo.Demo
         private ResponseListener positionListener;
         private DispatcherTimer dispatcherTimer;
         private ResponseListener volumeListener;
+        private long totalTimeDuration;
+        private static String WebOsId = "webOS TV";
+        private string webAppId;
+        private WebAppSessionListener webAppListener;
 
-        private void SetControls()
+        public void SetControls()
         {
             if (selectedDevice == null)
             {
@@ -87,7 +92,19 @@ namespace ConnectSdk.Demo.Demo
                     volumeControl.SubscribeVolume(volumeListener);
                 }
 
+                //webapp
 
+                LaunchWebAppCommand.Enabled = selectedDevice.HasCapability(WebAppLauncher.Launch);
+                //JoinWebAppCommand.Enabled = selectedDevice.HasCapability(WebAppLauncher.Join);
+                //SendMessageCommand.Enabled = selectedDevice.HasCapability(WebAppLauncher.MessageSend);
+                //SendJsonCommand.Enabled = selectedDevice.HasCapability(WebAppLauncher.MessageSendJson);
+
+                WebAppResponseMessage = "";
+
+                if (selectedDevice.GetServiceByName(WebOsId) != null)
+                {
+                    webAppId = "WebAppTester";
+                }
             }
 
             if (!isPlaying || !isPlayingImage)
@@ -191,7 +208,10 @@ namespace ConnectSdk.Demo.Demo
                         var d = v.Load.GetPayload() is float ? (float)v.Load.GetPayload() : 0;
                         App.MainDispatcher.RunAsync(CoreDispatcherPriority.High, () =>
                         {
-                            Volume = d * 100;
+                            if (d <= 1)
+                                Volume = d*100;
+                            else
+                                Volume = d;
                         });
                     }
                 },
@@ -201,7 +221,36 @@ namespace ConnectSdk.Demo.Demo
                 }
                 );
 
+            webAppListener = new WebAppSessionListener
+                (
+                (session, message) =>
+                {
+                    var str = LoadEventArgs.GetValue<string>(message);
+                    var json = LoadEventArgs.GetValue<JsonObject>(message);
+                    App.MainDispatcher.RunAsync(CoreDispatcherPriority.High, () =>
+                    {
+                        if (str != null)
+                            WebAppResponseMessage += str + "\n";
+                        else if (json != null)
+                            WebAppResponseMessage += json.Stringify() + "\n";
+                    });
+                },
+                session =>
+                {
+                    //launchWebAppButton.setEnabled(true);
+                    //if (getTv() != null) joinWebAppButton.setEnabled(getTv().hasCapability(WebAppLauncher.Join));
+                    //sendMessageButton.setEnabled(false);
+                    //sendJSONButton.setEnabled(false);
+                    //leaveWebAppButton.setEnabled(false);
+                    //closeWebAppButton.setEnabled(false);
 
+                    //mWebAppSession.setWebAppSessionListener(null);
+                    //mWebAppSession = null;
+                    //isLaunched = false;
+                }
+                );
+
+ 
         }
 
         private void StartUpdating()
@@ -215,6 +264,10 @@ namespace ConnectSdk.Demo.Demo
                     if (mediaControl != null && selectedDevice != null &&
                         selectedDevice.HasCapability(MediaControl.Position))
                         mediaControl.GetPosition(positionListener);
+
+                    if (volumeControl != null && selectedDevice != null &&
+                        selectedDevice.HasCapability(VolumeControl.VolumeGet))
+                        volumeControl.GetVolume(volumeListener);
 
                     if (mediaControl != null && selectedDevice != null
                         && selectedDevice.HasCapability(MediaControl.Duration)
@@ -346,11 +399,11 @@ namespace ConnectSdk.Demo.Demo
 
         private void PlayMediaCommandxecute(object obj)
         {
-            const string videoPath = "http://connectsdk.com/files/8913/9657/0225/test_video.mp4";
+            const string videoPath = "http://ec2-54-201-108-205.us-west-2.compute.amazonaws.com/samples/media/video.mp4";
             const string mimeType = "video/mp4";
             const string title = "Sintel Trailer";
             const string description = "Blender Open Movie Project";
-            const string icon = "http://www.connectsdk.com/files/7313/9657/0225/test_video_icon.jpg";
+            const string icon = "http://ec2-54-201-108-205.us-west-2.compute.amazonaws.com/samples/media/videoIcon.jpg";
 
             var listener = new ResponseListener
                 (
@@ -585,6 +638,56 @@ namespace ConnectSdk.Demo.Demo
         public void SetVolume(double newValue)
         {
             volumeControl.SetVolume((float)newValue, null);
+        }
+
+        private void LaunchWebAppCommandExecute(object obj)
+        {
+            var listener = new ResponseListener
+                (
+                loadEventArg =>
+                {
+                    var webappSession = LoadEventArgs.GetValue<WebAppSession>(loadEventArg);
+
+                    webappSession.WebAppSessionListener = webAppListener;
+                    var v = loadEventArg as LoadEventArgs;
+                    var mlo = v.Load.GetPayload() as MediaLaunchObject;
+                    if (mlo != null)
+                    {
+                        launchSession = mlo.LaunchSession;
+                        mediaControl = mlo.MediaControl;
+                        playListControl = mlo.PlaylistControl;
+                        StopUpdating();
+                        EnableMedia();
+                        isPlaying = true;
+                    }
+
+                },
+                serviceCommandError =>
+                {
+                    var msg =
+                        new MessageDialog(
+                            "Error playing audio");
+                    msg.ShowAsync();
+                    SetEnabledMedia(false);
+                }
+                );
+            webAppLauncher.LaunchWebApp(webAppId, listener);
+            //mediaPlayer.PlayMedia(mediaUrl, mimeType, title, description, icon, false, listener);
+        }
+
+        private void JoinWebAppCommandExecute(object obj)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void SendMessageCommandExecute(object obj)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void SendJsonCommandExecute(object obj)
+        {
+            throw new NotImplementedException();
         }
     }
 }

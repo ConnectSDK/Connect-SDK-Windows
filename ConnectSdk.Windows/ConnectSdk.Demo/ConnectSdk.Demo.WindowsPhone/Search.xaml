@@ -99,6 +99,7 @@
                             <TextBlock Text="{Binding Path=FriendlyName}" TextWrapping="Wrap" FontSize="26" Style="{StaticResource TitleTextBlockStyle}" Foreground="White" />
                             <TextBlock Text="{Binding Path=ModelName}" TextWrapping="Wrap" Foreground="Silver" Style="{StaticResource SubheaderTextBlockStyle}"/>
                             <TextBlock Text="{Binding Path=IpAddress}" TextWrapping="Wrap" Foreground="Silver" Margin="0,0,0,0" Style="{StaticResource SubheaderTextBlockStyle}"/>
+                            <TextBlock Text="{Binding Path=ServiceNames}" TextWrapping="Wrap" Foreground="Silver" Margin="0,0,0,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
                         </StackPanel>
                         <StackPanel Grid.Row="1" Margin="20,0,0,0">
                             <TextBlock Text="Enter the key shown on the TV"  Visibility="{Binding Path=Services, Converter={StaticResource VisibilityConverter}, ConverterParameter=PairingKeyLabel}" Style="{StaticResource SubheaderTextBlockStyle}" Foreground="White" Margin="0,0,0,10"></TextBlock>

@@ -38,6 +38,7 @@ namespace ConnectSdk.Demo.Demo
                 {
                     App.ApplicationModel.DiscoverredDevices.Remove(device);
                     App.ApplicationModel.DiscoverredDevices.Add(device);
+                    device.OnPropertyChanged("ServiceNames");
                 }
             });
 

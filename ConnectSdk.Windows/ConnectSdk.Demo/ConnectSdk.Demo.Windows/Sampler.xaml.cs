@@ -43,6 +43,8 @@ namespace ConnectSdk.Demo
             model = App.ApplicationModel;
             InitializeComponent();
             DataContext = model;
+
+            model.SetControls();
         }
 
         private void RangeBase_OnValueChanged(object sender, RangeBaseValueChangedEventArgs e)

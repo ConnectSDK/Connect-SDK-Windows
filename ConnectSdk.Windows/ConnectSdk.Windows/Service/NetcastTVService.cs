@@ -1195,15 +1195,24 @@ namespace ConnectSdk.Windows.Service
 
         public void SetVolume(float volume, ResponseListener listener)
         {
-            // Do nothing - not supported
-            Util.PostError(listener, ServiceCommandError.NotSupported());
+            if (dlnaService != null)
+            {
+                dlnaService.SetVolume(volume, listener);
+            }
+            else
+                Util.PostError(listener, ServiceCommandError.NotSupported());
         }
 
         public void GetVolume(ResponseListener listener)
         {
             var responseListener = new ResponseListener
             (
-                loadEventArg => Util.PostSuccess(listener, ((VolumeStatus)loadEventArg).Volume),
+                loadEventArg =>
+                {
+                    var v = (loadEventArg as LoadEventArgs).Load.GetPayload() as VolumeStatus;
+                    if (v != null) Util.PostSuccess(listener, v.Volume);
+                },
+                    
                 serviceCommandError => Util.PostError(listener, serviceCommandError)
             );
 
@@ -1396,7 +1405,7 @@ namespace ConnectSdk.Windows.Service
 
         public CapabilityPriorityLevel GetMediaControlCapabilityLevel()
         {
-            return CapabilityPriorityLevel.Normal;
+            return CapabilityPriorityLevel.High;
         }
 
         public void Play(ResponseListener listener)
@@ -1893,6 +1902,13 @@ namespace ConnectSdk.Windows.Service
 
         public IServiceSubscription SubscribePlayState(ResponseListener listener)
         {
+            if (dlnaService != null)
+            {
+                return dlnaService.SubscribePlayState(listener);
+            }
+            else Util.PostError(listener, ServiceCommandError.NotSupported());
+            return null;
+
             Util.PostError(listener, ServiceCommandError.NotSupported());
             return null;
         }

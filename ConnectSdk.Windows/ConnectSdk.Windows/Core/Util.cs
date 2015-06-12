@@ -111,7 +111,7 @@ namespace ConnectSdk.Windows.Core
             int start = response.IndexOf(startTag, StringComparison.Ordinal);
             int end = response.IndexOf(endTag, StringComparison.Ordinal);
 
-            string data = response.Substring(start + startTag.Length, end);
+            string data = response.Substring(start + startTag.Length, end - start - startTag.Length);
 
             return data;
         }

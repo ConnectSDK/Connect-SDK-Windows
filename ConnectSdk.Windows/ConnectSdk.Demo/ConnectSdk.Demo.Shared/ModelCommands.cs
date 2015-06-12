@@ -23,6 +23,12 @@ namespace ConnectSdk.Demo.Demo
         private Command nextCommand;
         private Command jumpCommand;
 
+
+        private Command launchWebAppCommand;
+        private Command joinWebAppCommand;
+        private Command sendMessageCommand;
+        private Command sendJsonCommand;
+
         public Command ShowFotoCommand
         {
             get { return showFotoCommand ?? (showFotoCommand = new Command(ShowFotoCommandExecute) { Enabled = selectedDevice.HasCapability(MediaPlayer.DisplayImage)}); }
@@ -81,7 +87,10 @@ namespace ConnectSdk.Demo.Demo
 
         public Command PlayListCommand
         {
-            get { return playListCommand ?? (playListCommand = new Command(PlayListCommandExecute) { Enabled = selectedDevice.HasCapability(MediaPlayer.PlayPlaylist) }); }
+            get { return playListCommand ?? (playListCommand = new Command(PlayListCommandExecute)
+            {
+                Enabled = selectedDevice.HasCapability(MediaPlayer.PlayPlaylist)
+            }); }
             set { playListCommand = value; }
         }
 
@@ -105,13 +114,29 @@ namespace ConnectSdk.Demo.Demo
 
 
 
-
-
-
-        public Command LaunchMediaPlayerCommand
+        public Command LaunchWebAppCommand
         {
-            get { return launchMediaPlayerCommand ?? (launchMediaPlayerCommand = new Command(LaunchMediaPlayerCommandExecute) { Enabled = selectedDevice.HasCapability(Launcher.Application) }); }
-            set { launchMediaPlayerCommand = value; }
+            get { return launchWebAppCommand ?? (launchWebAppCommand = new Command(LaunchWebAppCommandExecute) { Enabled = false }); }
+            set { launchWebAppCommand = value; }
+        }
+
+        public Command JoinWebAppCommand
+        {
+            get { return joinWebAppCommand ?? (joinWebAppCommand = new Command(JoinWebAppCommandExecute) { Enabled = false }); }
+            set { joinWebAppCommand = value; }
+        }
+
+
+        public Command SendMessageCommand
+        {
+            get { return sendMessageCommand ?? (sendMessageCommand = new Command(SendMessageCommandExecute) { Enabled = false }); }
+            set { sendMessageCommand = value; }
+        }
+
+        public Command SendJsonCommand
+        {
+            get { return sendJsonCommand ?? (sendJsonCommand = new Command(SendJsonCommandExecute) { Enabled = false }); }
+            set { sendJsonCommand = value; }
         }
 
 

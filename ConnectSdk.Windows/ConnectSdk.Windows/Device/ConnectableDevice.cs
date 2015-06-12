@@ -22,10 +22,13 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Windows.Data.Json;
+using ConnectSdk.Windows.Annotations;
 using ConnectSdk.Windows.Core;
 using ConnectSdk.Windows.Discovery;
 using ConnectSdk.Windows.Service;
@@ -41,7 +44,7 @@ namespace ConnectSdk.Windows.Device
     /// To be informed of any ready/pairing/disconnect messages from each of the DeviceService, you must set a listener.
     /// ConnectableDevice exposes capabilities that exist in the underlying DeviceServices such as TV Control, Media Player, Media Control, Volume Control, etc. These capabilities, when accessed through the ConnectableDevice, will be automatically chosen from the most suitable DeviceService by using that DeviceService's CapabilityPriorityLevel.
     /// </summary>
-    public class ConnectableDevice : IDeviceServiceListener
+    public class ConnectableDevice : IDeviceServiceListener, INotifyPropertyChanged
     {
         public static string KeyId = "id";
         public static string KeyLastIp = "lastKnownIPAddress";
@@ -68,6 +71,13 @@ namespace ConnectSdk.Windows.Device
             set { id = value; }
         }
 
+        public string ServiceNames
+        {
+            get
+            {
+                return (from s in services select s.Key).ToList().Aggregate((current, next) => current + ", " + next);
+            }
+        }
 
         public string IpAddress { get; set; }
         public string FriendlyName { get; set; }
@@ -138,6 +148,9 @@ namespace ConnectSdk.Windows.Device
                 listener.OnCapabilityUpdated(this, added, new List<string>());
 
             services.TryAdd(service.ServiceName, service);
+
+            //OnPropertyChanged("ServiceNames");
+            
         }
 
         /// <summary>
@@ -501,7 +514,14 @@ namespace ConnectSdk.Windows.Device
             {
                 var serviceObject = service.ToJsonObject();
 
-                jsonServices.Add(service.ServiceConfig.ServiceUuid, serviceObject);
+                try
+                {
+                    jsonServices.Add(service.ServiceConfig.ServiceUuid, serviceObject);
+                }
+                catch
+                {
+                    
+                }
             }
             deviceObject.Add(KeyServices, jsonServices);
 
@@ -580,5 +600,13 @@ namespace ConnectSdk.Windows.Device
 
         //    return count;
         //}
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        public virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

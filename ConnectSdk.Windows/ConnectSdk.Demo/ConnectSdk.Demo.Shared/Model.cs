@@ -21,6 +21,7 @@ namespace ConnectSdk.Demo.Demo
         private long currentPosition;
         private double volume;
         private bool canChangeVolume;
+        private string webAppResponseMessage;
 
         public ConnectableDevice SelectedDevice
         {
@@ -28,7 +29,7 @@ namespace ConnectSdk.Demo.Demo
             set
             {
                 selectedDevice = value;
-                SetControls();
+                
             }
         }
 
@@ -92,6 +93,12 @@ namespace ConnectSdk.Demo.Demo
         {
             get { return canChangeVolume; }
             set { canChangeVolume = value; OnPropertyChanged(); }
+        }
+
+        public string WebAppResponseMessage
+        {
+            get { return webAppResponseMessage; }
+            set { webAppResponseMessage = value; OnPropertyChanged(); }
         }
 
         public Model()

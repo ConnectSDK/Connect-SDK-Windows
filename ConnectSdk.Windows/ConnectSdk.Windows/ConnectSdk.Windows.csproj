@@ -61,6 +61,7 @@
     <Compile Include="Core\Upnp\Device.cs" />
     <Compile Include="Service\Capability\ICapabilityMethod.cs" />
     <Compile Include="Service\NetCast\NetcastVirtualKeycodes.cs" />
+    <Compile Include="Service\Upnp\DlnaHttpServer.cs" />
     <Compile Include="Wrappers\HttpClientWrapper.cs" />
     <Compile Include="Wrappers\DatagramSocketWrapper.cs" />
     <Compile Include="Discovery\Provider\ssdp\Icon.cs" />

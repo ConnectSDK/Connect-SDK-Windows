@@ -40,5 +40,13 @@ namespace ConnectSdk.Windows.Service.Capability.Listeners
                 Load = new ServiceCommandError(0, obj);
             }
         }
+
+        public static T GetValue<T>(object source) where T: class
+        {
+            var loadEventArgs = source as LoadEventArgs;
+            if (loadEventArgs != null) return loadEventArgs.Load.GetPayload() as T;
+
+            return null;
+        }
     }
 }
