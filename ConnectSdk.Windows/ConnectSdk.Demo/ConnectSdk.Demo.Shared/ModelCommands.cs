@@ -48,6 +48,10 @@ namespace ConnectSdk.Demo.Demo
         private Command appStoreCommand;
         private Command youTubeCommand;
         private Command startAppCommand;
+        private Command keyCommand;
+        private Command channelCommand;
+        private Command powerCommand;
+        private Command threeDCommand;
 
 
         public Command ShowFotoCommand
@@ -271,6 +275,30 @@ namespace ConnectSdk.Demo.Demo
         {
             get { return startAppCommand ?? (startAppCommand = new Command(StartApp) { Enabled = false }); }
             set { startAppCommand = value; }
+        }
+
+        public Command KeyCommand
+        {
+            get { return keyCommand ?? (keyCommand = new Command(KeyCommandExecute) { Enabled = false }); }
+            set { keyCommand = value; }
+        }
+
+        public Command ChannelCommand
+        {
+            get { return channelCommand ?? (channelCommand = new Command(ChannelCommandExecute) { Enabled = false }); }
+            set { channelCommand = value; }
+        }
+
+        public Command PowerCommand
+        {
+            get { return powerCommand ?? (powerCommand = new Command(PowerCommandExecute) { Enabled = false }); }
+            set { powerCommand = value; }
+        }
+
+        public Command ThreeDCommand
+        {
+            get { return threeDCommand ?? (threeDCommand = new Command(ThreeDCommandExecute) { Enabled = false }); }
+            set { threeDCommand = value; }
         }
     }
 }

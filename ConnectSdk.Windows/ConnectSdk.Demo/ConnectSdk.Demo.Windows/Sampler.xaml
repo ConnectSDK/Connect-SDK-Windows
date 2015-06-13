@@ -204,42 +204,90 @@
                         </StackPanel>
                     </DataTemplate>
                 </HubSection>
-                <HubSection Header="Apps">
+                <HubSection Header="Apps"  Background="#333333">
                     <DataTemplate>
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Button FontSize="20" Content="Browser" Command="{Binding GoogleCommand}" Width="120"></Button>
-                                <Button FontSize="20" Content="My Dial App" Command="{Binding MyDialAppCommand}" Width="120"></Button>
-                                <Button FontSize="20" Content="Show Toast" Command="{Binding ShowToastCommand}" Width="120"></Button>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition Height="*"></RowDefinition>
+                            </Grid.RowDefinitions>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button FontSize="20" Content="Browser" Command="{Binding GoogleCommand}" Width="120"></Button>
+                                    <Button FontSize="20" Content="My Dial App" Command="{Binding MyDialAppCommand}" Width="120"></Button>
+                                    <Button FontSize="20" Content="Show Toast" Command="{Binding ShowToastCommand}" Width="120"></Button>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button FontSize="20" Content="Netflix" Command="{Binding NetflixCommand}" Width="120"></Button>
+                                    <Button FontSize="20" Content="App Store" Command="{Binding AppStoreCommand}" Width="120"></Button>
+                                    <Button FontSize="20" Content="Youtube" Command="{Binding YouTubeCommand}" Width="120"></Button>
+                                </StackPanel>
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Button FontSize="20" Content="Netflix" Command="{Binding NetflixCommand}" Width="120"></Button>
-                                <Button FontSize="20" Content="App Store" Command="{Binding AppStoreCommand}" Width="120"></Button>
-                                <Button FontSize="20" Content="Youtube" Command="{Binding YouTubeCommand}" Width="120"></Button>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <ListBox Margin="3" ItemsSource="{Binding Path=AppsList}" VerticalAlignment="Stretch" SelectedItem="{Binding SelectedApp, Mode=TwoWay}" Style="{StaticResource ListBoxStyle1}" >
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding Path=Name}" TextWrapping="Wrap" FontSize="26" Style="{StaticResource TitleTextBlockStyle}" Foreground="White" />
-                                                <TextBlock Text="{Binding Path=Id}" TextWrapping="Wrap" Foreground="Silver" Style="{StaticResource SubtitleTextBlockStyle}" />
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                </ListBox>
-                            </StackPanel>
-                        </StackPanel>
+                            <ListBox Grid.Row="1" Margin="3" ItemsSource="{Binding Path=AppsList}" VerticalAlignment="Stretch" SelectedItem="{Binding SelectedApp, Mode=TwoWay}" Style="{StaticResource ListBoxStyle1}" >
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Path=Name}" TextWrapping="Wrap" FontSize="26" Style="{StaticResource TitleTextBlockStyle}" Foreground="White" />
+                                            <TextBlock Text="{Binding Path=Id}" TextWrapping="Wrap" Foreground="Silver" Style="{StaticResource SubtitleTextBlockStyle}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+
+                        </Grid>
                     </DataTemplate>
                 </HubSection>
                 <HubSection Header="Control">
                     <DataTemplate>
-                        <Grid/>
-                    </DataTemplate>
-                </HubSection>
-                <HubSection Header="TV">
-                    <DataTemplate>
-                        <Grid/>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                            </Grid.RowDefinitions>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button FontSize="20" Content="1" Command="{Binding KeyCommand}" CommandParameter="1" Width="120"></Button>
+                                    <Button FontSize="20" Content="2" Command="{Binding KeyCommand}" CommandParameter="2" Width="120"></Button>
+                                    <Button FontSize="20" Content="3" Command="{Binding KeyCommand}" CommandParameter="3" Width="120"></Button>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button FontSize="20" Content="4" Command="{Binding KeyCommand}" CommandParameter="4" Width="120"></Button>
+                                    <Button FontSize="20" Content="5" Command="{Binding KeyCommand}" CommandParameter="5" Width="120"></Button>
+                                    <Button FontSize="20" Content="6" Command="{Binding KeyCommand}" CommandParameter="6" Width="120"></Button>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button FontSize="20" Content="7" Command="{Binding KeyCommand}" CommandParameter="7" Width="120"></Button>
+                                    <Button FontSize="20" Content="8" Command="{Binding KeyCommand}" CommandParameter="8" Width="120"></Button>
+                                    <Button FontSize="20" Content="9" Command="{Binding KeyCommand}" CommandParameter="9" Width="120"></Button>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button FontSize="20" Content="-" Command="{Binding KeyCommand}" CommandParameter="-" Width="120"></Button>
+                                    <Button FontSize="20" Content="0" Command="{Binding KeyCommand}" CommandParameter="0" Width="120"></Button>
+                                    <Button FontSize="20" Content="Enter" Command="{Binding KeyCommand}" CommandParameter="Enter" Width="120"></Button>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button FontSize="20" Content="PowerOff" Command="{Binding PowerCommand}" Width="180"></Button>
+                                    <Button FontSize="20" Content="3D Mode" Command="{Binding ThreeDCommand}" Width="180"></Button>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock FontSize="20" Text="Channel" Width="100" VerticalAlignment="Center" Margin="10"></TextBlock>
+                                    <Button FontSize="20" Content="-" Command="{Binding ChannelCommand}" CommandParameter="ChDown" Width="120"></Button>
+                                    <Button FontSize="20" Content="+" Command="{Binding ChannelCommand}" CommandParameter="ChUp" Width="120"></Button>
+                                </StackPanel>
+                            </StackPanel>
+                            <ListBox Margin="3" Grid.Row="1" ItemsSource="{Binding Path=Channels}" VerticalAlignment="Stretch" SelectedItem="{Binding SelectedChannel, Mode=TwoWay}" Style="{StaticResource ListBoxStyle1}" >
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Path=Name}" TextWrapping="Wrap" FontSize="26" Style="{StaticResource TitleTextBlockStyle}" Foreground="White" />
+                                            <TextBlock Text="{Binding Path=Id}" TextWrapping="Wrap" Foreground="Silver" Style="{StaticResource SubtitleTextBlockStyle}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+
+                        </Grid>
+
                     </DataTemplate>
                 </HubSection>
                 <HubSection Header="System">

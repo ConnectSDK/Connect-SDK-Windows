@@ -29,10 +29,22 @@ namespace ConnectSdk.Windows.Core
     /// </summary>
     public class ChannelInfo
     {
+        private string name;
+
         /// <summary>
         /// Gets or sets the user-friendly name of the channel
         /// </summary>
-        public string Name { get; set; }
+        public string Name
+        {
+            get
+            {
+                return name;
+            }
+            set
+            {
+                name = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the TV's unique ID for the channel

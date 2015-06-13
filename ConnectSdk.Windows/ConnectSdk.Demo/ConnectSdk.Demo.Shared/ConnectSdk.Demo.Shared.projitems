@@ -25,6 +25,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Command.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DiscoveryManagerListener.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ModelCommandsImplementationKey.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ModelCommandsImplementationApps.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ModelCommandsImplementationControl.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ModelCommands.cs" />

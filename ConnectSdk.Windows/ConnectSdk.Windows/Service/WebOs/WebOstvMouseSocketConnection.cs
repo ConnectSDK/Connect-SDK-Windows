@@ -161,9 +161,13 @@ namespace ConnectSdk.Windows.Service.WebOs
                     || keyName.Equals("RIGHT")
                     || keyName.Equals("3D_MODE"))
                 {
-
                     SendSpecialKey(keyName);
                 }
+                else
+                {
+                    SendSpecialKey(keyName);
+                }
+
             }
         }
 

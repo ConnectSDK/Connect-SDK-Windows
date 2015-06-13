@@ -89,6 +89,7 @@ namespace ConnectSdk.Demo.Demo
             SetWebAppControls();
             SetControlControls();
             SetControlApps();
+            SetControlKeys();
 
             if (!isPlaying || !isPlayingImage)
                 DisableMedia();

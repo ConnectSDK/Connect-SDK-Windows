@@ -636,7 +636,7 @@ namespace ConnectSdk.Windows.Service
 
         public void LaunchBrowser(string url, ResponseListener listener)
         {
-            const string uri = "ssap://system.launcher/launch";
+            const string uri = "ssap://system.launcher/open";
             var payload = new JsonObject();
 
             var responseListener = new ResponseListener
@@ -1180,22 +1180,22 @@ namespace ConnectSdk.Windows.Service
 
             try
             {
-                if (!channelRawData.ContainsKey("channelName"))
+                if (channelRawData.ContainsKey("channelName"))
                     channelName = channelRawData.GetNamedString("channelName","");
 
-                if (!channelRawData.ContainsKey("channelId"))
+                if (channelRawData.ContainsKey("channelId"))
                     channelId = channelRawData.GetNamedString("channelId", "");
 
                 string channelNumber = channelRawData.GetNamedString("channelNumber", "");
 
                 int majorNumber;
-                if (!channelRawData.ContainsKey("majorNumber"))
+                if (channelRawData.ContainsKey("majorNumber"))
                     majorNumber = (int)channelRawData.GetNamedNumber("majorNumber");
                 else
                     majorNumber = ParseMajorNumber(channelNumber);
 
                 int minorNumber;
-                if (!channelRawData.ContainsKey("minorNumber"))
+                if (channelRawData.ContainsKey("minorNumber"))
                     minorNumber = (int)channelRawData.GetNamedNumber("minorNumber");
                 else
                     minorNumber = ParseMinorNumber(channelNumber);
@@ -1919,7 +1919,7 @@ namespace ConnectSdk.Windows.Service
                 case KeyCode.NUM_7:
                 case KeyCode.NUM_8:
                 case KeyCode.NUM_9:
-                    SendSpecialKey(keyCode.ToString(), pListener);
+                    SendSpecialKey(((int)keyCode).ToString(), pListener);
                     break;
                 case KeyCode.DASH:
                     SendSpecialKey("DASH", pListener);

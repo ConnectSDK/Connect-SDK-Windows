@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using ConnectSdk.Demo.Annotations;
@@ -22,6 +23,8 @@ namespace ConnectSdk.Demo.Demo
         private double volume;
         private bool canChangeVolume;
         private string webAppResponseMessage;
+        private ChannelInfo selectedChannel;
+        private List<ChannelInfo> channels;
 
         public ConnectableDevice SelectedDevice
         {
@@ -57,7 +60,11 @@ namespace ConnectSdk.Demo.Demo
 
         public IndependentList<AppInfo> Apps { get; set; }
 
-        public IndependentList<ChannelInfo> Channels { get; set; }
+        public List<ChannelInfo> Channels
+        {
+            get { return channels; }
+            set { channels = value; OnPropertyChanged();}
+        }
 
         public string Duration
         {
@@ -101,11 +108,17 @@ namespace ConnectSdk.Demo.Demo
             set { webAppResponseMessage = value; OnPropertyChanged(); }
         }
 
+        public ChannelInfo SelectedChannel
+        {
+            get { return selectedChannel; }
+            set { selectedChannel = value; OnPropertyChanged(); ChangeChannel(selectedChannel); }
+        }
+
         public Model()
         {
             DiscoverredDevices = new IndependentList<ConnectableDevice>();
             Apps = new IndependentList<AppInfo>();
-            Channels = new IndependentList<ChannelInfo>();
+            Channels = new List<ChannelInfo>();
             selectedDevice = new ConnectableDevice();
         }
 

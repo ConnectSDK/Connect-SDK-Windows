@@ -33,6 +33,7 @@ namespace ConnectSdk.Windows.Service.Capability
         public static string Back = "KeyControl.Back";
         public static string Home = "KeyControl.Home";
         public static string SendKey = "KeyControl.SendKey";
+        public static string KeyCode = "KeyControl.KeyCode";
 
         public static string[] Capabilities =
         {
@@ -43,7 +44,8 @@ namespace ConnectSdk.Windows.Service.Capability
             Ok,
             Back,
             Home,
-            SendKey
+            SendKey,
+            KeyCode
         };
     }
 

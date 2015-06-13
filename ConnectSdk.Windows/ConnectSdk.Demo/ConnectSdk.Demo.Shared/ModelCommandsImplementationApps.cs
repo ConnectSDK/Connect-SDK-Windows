@@ -205,7 +205,7 @@ namespace ConnectSdk.Demo.Demo
             else if (selectedDevice.GetServiceByName("Roku") != null)
                 appId = "13535";
 
-            launcher.LaunchNetflix(appId, listener);
+            launcher.LaunchAppStore(appId, listener);
         }
 
         private void YouTubeCommandExecute(object obj)
