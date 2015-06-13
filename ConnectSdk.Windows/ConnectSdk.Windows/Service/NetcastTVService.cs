@@ -1345,6 +1345,11 @@ namespace ConnectSdk.Windows.Service
             }
         }
 
+        public void GetExternalInputList(ResponseListener listener)
+        {
+            throw new NotImplementedException();
+        }
+
         public void SetExternalInput(ExternalInputInfo input, ResponseListener pListener)
         {
             // Do nothing - not Supported

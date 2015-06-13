@@ -1,5 +1,4 @@
 ﻿using ConnectSdk.Windows.Service.Capability;
-using ConnectSdk.Windows.Service.Sessions;
 
 namespace ConnectSdk.Demo.Demo
 {
@@ -17,7 +16,6 @@ namespace ConnectSdk.Demo.Demo
         private Command closeCommand;
 
 
-        private Command launchMediaPlayerCommand;
         private Command playListCommand;
         private Command previousCommand;
         private Command nextCommand;
@@ -52,6 +50,14 @@ namespace ConnectSdk.Demo.Demo
         private Command channelCommand;
         private Command powerCommand;
         private Command threeDCommand;
+        private Command playInputCommand;
+        private Command pauseInputCommand;
+        private Command stopInputCommand;
+        private Command rewindInputCommand;
+        private Command fastForwardInputCommand;
+        private Command inputCommand;
+        private Command volumeUpCommand;
+        private Command volumeDownCommand;
 
 
         public Command ShowFotoCommand
@@ -299,6 +305,54 @@ namespace ConnectSdk.Demo.Demo
         {
             get { return threeDCommand ?? (threeDCommand = new Command(ThreeDCommandExecute) { Enabled = false }); }
             set { threeDCommand = value; }
+        }
+
+        public Command PlayInputCommand
+        {
+            get { return playInputCommand ?? (playInputCommand = new Command(PlayInputCommandExecute) { Enabled = false }); }
+            set { playInputCommand = value; }
+        }
+
+        public Command PauseInputCommand
+        {
+            get { return pauseInputCommand ?? (pauseInputCommand = new Command(PauseInputCommandExecute) { Enabled = false }); }
+            set { pauseInputCommand = value; }
+        }
+
+        public Command StopInputCommand
+        {
+            get { return stopInputCommand ?? (stopInputCommand = new Command(StopInputCommandExecute) { Enabled = false }); }
+            set { stopInputCommand = value; }
+        }
+
+        public Command RewindInputCommand
+        {
+            get { return rewindInputCommand ?? (rewindInputCommand = new Command(RewindInputCommandExecute) { Enabled = false }); }
+            set { rewindInputCommand = value; }
+        }
+
+        public Command FastForwardInputCommand
+        {
+            get { return fastForwardInputCommand ?? (fastForwardInputCommand = new Command(FastForwardInputCommandExecute) { Enabled = false }); }
+            set { fastForwardInputCommand = value; }
+        }
+
+        public Command InputCommand
+        {
+            get { return inputCommand ?? (inputCommand = new Command(InputCommandExecute) { Enabled = false }); }
+            set { inputCommand = value; }
+        }
+
+        public Command VolumeUpCommand
+        {
+            get { return volumeUpCommand ?? (volumeUpCommand = new Command(VolumeUpCommandExecute) { Enabled = false }); }
+            set { volumeUpCommand = value; }
+        }
+
+        public Command VolumeDownCommand
+        {
+            get { return volumeDownCommand ?? (volumeDownCommand = new Command(VolumeDownCommandExecute) { Enabled = false }); }
+            set { volumeDownCommand = value; }
         }
     }
 }

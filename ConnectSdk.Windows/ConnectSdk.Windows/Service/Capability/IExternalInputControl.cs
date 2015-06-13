@@ -33,7 +33,7 @@ namespace ConnectSdk.Windows.Service.Capability
         void LaunchInputPicker(ResponseListener pListener);
         void CloseInputPicker(LaunchSession launchSessionm, ResponseListener pListener);
 
-        //void GetExternalInputList(ExternalInputListListener listener);
+        void GetExternalInputList(ResponseListener listener);
         void SetExternalInput(ExternalInputInfo input, ResponseListener pListener);
     }
 }

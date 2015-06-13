@@ -132,13 +132,13 @@
                                 <TextBlock Width="120" Text="{Binding Path=Duration}" HorizontalAlignment="Right" TextAlignment="Right" Padding="3"></TextBlock>
                             </StackPanel>
                             <StackPanel Orientation="Vertical">
-                                <Slider x:ConnectionId='3' Minimum="0" Maximum="{Binding Path=TotalDuration}" Value="{Binding Path=CurrentPosition}" Width="360"                                         />
+                                <Slider x:ConnectionId='4' Minimum="0" Maximum="{Binding Path=TotalDuration}" Value="{Binding Path=CurrentPosition}" Width="360"                                         />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Width="360" TextAlignment="Center" Padding="3">Volume</TextBlock>
                             </StackPanel>
                             <StackPanel Orientation="Vertical">
-                                <Slider x:ConnectionId='2' Minimum="0" Maximum="100" Value="{Binding Path=Volume}" Width="360" IsEnabled="{Binding Path=CanChangeVolume}"                                              />
+                                <Slider x:ConnectionId='3' Minimum="0" Maximum="100" Value="{Binding Path=Volume}" Width="360" IsEnabled="{Binding Path=CanChangeVolume}"                                              />
                             </StackPanel>
                         </StackPanel>
                     </DataTemplate>
@@ -184,7 +184,7 @@
                                 <Button FontSize="20" Content="Home" Command="{Binding HomeCommand}" Width="120"></Button>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <TextBox x:ConnectionId='1' Width="354" Margin="3" x:Name="InputTextBox"                                  ></TextBox>
+                                <TextBox x:ConnectionId='2' Width="354" Margin="3" x:Name="InputTextBox"                                  ></TextBox>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <Border x:Name="ScrollPad" Height="360" Width="360" Margin="2" ManipulationMode="All" BorderBrush="DarkGray" BorderThickness="2"  >
@@ -204,7 +204,7 @@
                         </StackPanel>
                     </DataTemplate>
                 </HubSection>
-                <HubSection Header="Apps"  Background="#333333">
+                <HubSection Header="Apps" Background="#333333">
                     <DataTemplate>
                         <Grid>
                             <Grid.RowDefinitions>
@@ -237,7 +237,7 @@
                         </Grid>
                     </DataTemplate>
                 </HubSection>
-                <HubSection Header="Control">
+                <HubSection Header="TV Control">
                     <DataTemplate>
                         <Grid>
                             <Grid.RowDefinitions>
@@ -285,14 +285,53 @@
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
                             </ListBox>
-
                         </Grid>
-
                     </DataTemplate>
                 </HubSection>
-                <HubSection Header="System">
+                <HubSection Header="System" Background="#333333">
                     <DataTemplate>
-                        <Grid/>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                            </Grid.RowDefinitions>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <StackPanel>
+                                        <TextBlock Text="Volume" FontSize="20" Margin="5"></TextBlock>
+                                        <Slider x:ConnectionId='1' Minimum="0" Maximum="100" VerticalAlignment="Center" Margin="5,10,5,0" Value="{Binding Path=Volume}" Width="255" IsEnabled="{Binding Path=CanChangeVolume}"                                              />
+                                    </StackPanel>
+                                    <StackPanel >
+                                        <CheckBox IsEnabled="{Binding Path=CanMute}" IsChecked="{Binding Path=IsMuted, Mode=TwoWay}">Mute</CheckBox>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button FontSize="20" Content="-" Command="{Binding VolumeDownCommand}" Width="45"></Button>
+                                            <Button FontSize="20" Content="+" Command="{Binding VolumeUpCommand}" Width="45"></Button>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button FontSize="20" Content="Play" Command="{Binding PlayCommand}" Width="120"></Button>
+                                    <Button FontSize="20" Content="Pause" Command="{Binding PauseCommand}" Width="120"></Button>
+                                    <Button FontSize="20" Content="Stop" Command="{Binding StopCommand}" Width="120"></Button>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button FontSize="20" Content="Rewind" Command="{Binding RewindCommand}" CommandParameter="7" Width="180"></Button>
+                                    <Button FontSize="20" Content="Fast Forward" Command="{Binding FastForwardCommand}" CommandParameter="8" Width="180"></Button>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button FontSize="20" Content="Input Picker" Margin="90,0,0,0" Command="{Binding InputCommand}" CommandParameter="-" Width="180"></Button>
+                                </StackPanel>
+                            </StackPanel>
+                            <ListBox Margin="3" Grid.Row="1" ItemsSource="{Binding Path=ExternalInputs}" VerticalAlignment="Stretch" SelectedItem="{Binding SelectedInput, Mode=TwoWay}" Style="{StaticResource ListBoxStyle1}" >
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Path=Id}" TextWrapping="Wrap" FontSize="26" Style="{StaticResource TitleTextBlockStyle}" Foreground="White" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
                     </DataTemplate>
                 </HubSection>
 

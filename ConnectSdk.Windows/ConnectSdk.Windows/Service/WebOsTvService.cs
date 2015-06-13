@@ -1576,6 +1576,28 @@ namespace ConnectSdk.Windows.Service
             request.Send();
         }
 
+        public void GetExternalInputList(ResponseListener listener)
+        {
+            const string uri = "ssap://tv/getExternalInputList";
+
+
+            var responseListener = new ResponseListener
+            (
+            loadEventArg =>
+            {
+                var res = LoadEventArgs.GetValue<JsonObject>(loadEventArg);
+                if (res != null)
+                {
+                    var devices = res.GetNamedArray("devices");
+                    Util.PostSuccess(listener, devices);
+                }
+            },
+            serviceCommandError => Util.PostError(listener, serviceCommandError));
+
+            var request = new ServiceCommand(this, uri, null, responseListener);
+            request.Send();
+        }
+
         #endregion
 
         #region Mouse Control

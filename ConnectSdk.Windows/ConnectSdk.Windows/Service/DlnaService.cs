@@ -1088,6 +1088,7 @@ namespace ConnectSdk.Windows.Service
                 MediaControl.Duration,
                 MediaControl.PlayState,
                 MediaControl.PlayStateSubscribe,
+                MediaControl.Next,
                 MediaControl.Previous,
                 PlaylistControl.Next,
                 PlaylistControl.Previous,

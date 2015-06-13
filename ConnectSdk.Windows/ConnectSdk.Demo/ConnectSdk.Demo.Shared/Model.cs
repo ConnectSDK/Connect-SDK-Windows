@@ -25,6 +25,10 @@ namespace ConnectSdk.Demo.Demo
         private string webAppResponseMessage;
         private ChannelInfo selectedChannel;
         private List<ChannelInfo> channels;
+        private bool canMute;
+        private bool isMuted;
+        private List<ExternalInputInfo> externalInputs;
+        private ExternalInputInfo selectedInput;
 
         public ConnectableDevice SelectedDevice
         {
@@ -112,6 +116,40 @@ namespace ConnectSdk.Demo.Demo
         {
             get { return selectedChannel; }
             set { selectedChannel = value; OnPropertyChanged(); ChangeChannel(selectedChannel); }
+        }
+
+        public bool CanMute
+        {
+            get { return canMute; }
+            set { canMute = value; OnPropertyChanged();}
+        }
+
+        public bool IsMuted
+        {
+            get { return isMuted; }
+            set
+            {
+                isMuted = value;
+                OnPropertyChanged();
+                SetMute(isMuted);
+            }
+        }
+
+        public List<ExternalInputInfo> ExternalInputs
+        {
+            get { return externalInputs; }
+            set { externalInputs = value; OnPropertyChanged();}
+        }
+
+        public ExternalInputInfo SelectedInput
+        {
+            get { return selectedInput; }
+            set
+            {
+                selectedInput = value;
+                OnPropertyChanged();
+                SetExternalInput(selectedInput);
+            }
         }
 
         public Model()

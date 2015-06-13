@@ -47,6 +47,21 @@ namespace ConnectSdk.Windows.Core
             return obj;
         }
 
+        public static ExternalInputInfo FromJson(string json)
+        {
+            var jobj = JsonObject.Parse(json);
+            var ei = new ExternalInputInfo
+            {
+                Id = jobj.GetNamedString("id", ""),
+                Name = jobj.GetNamedString("name", ""),
+                Connected = jobj.GetNamedBoolean("connected", false),
+                IconUrl = jobj.GetNamedString("icon", ""),
+                RawData = jobj
+            };
+
+            return ei;
+        }
+
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;

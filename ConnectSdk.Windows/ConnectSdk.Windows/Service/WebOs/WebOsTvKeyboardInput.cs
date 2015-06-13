@@ -166,7 +166,7 @@ namespace ConnectSdk.Windows.Service.WebOs
             (
                 loadEventArg =>
                 {
-                    var jsonObj = (JsonObject)loadEventArg;
+                    var jsonObj = LoadEventArgs.GetValue<JsonObject>(loadEventArg);
 
                     var keyboard = parseRawKeyboardData(jsonObj);
 
