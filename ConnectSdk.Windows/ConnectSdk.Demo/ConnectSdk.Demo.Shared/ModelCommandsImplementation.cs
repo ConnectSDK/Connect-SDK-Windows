@@ -2,7 +2,6 @@
 using Windows.UI.Core;
 using Windows.UI.Popups;
 using Windows.UI.Xaml;
-using ConnectSdk.Windows.Device;
 using ConnectSdk.Windows.Service;
 using ConnectSdk.Windows.Service.Capability;
 using ConnectSdk.Windows.Service.Capability.Listeners;
@@ -12,7 +11,6 @@ namespace ConnectSdk.Demo.Demo
 {
     public partial class Model
     {
-        private ConnectableDevice mTv;
         private ILauncher launcher;
         private IMediaPlayer mediaPlayer;
         private IMediaControl mediaControl;
@@ -35,6 +33,7 @@ namespace ConnectSdk.Demo.Demo
         private DispatcherTimer dispatcherTimer;
         private ResponseListener volumeListener;
         private long totalTimeDuration;
+        private Command manipulationTappedCommand;
 
         public void SetControls()
         {
@@ -88,6 +87,7 @@ namespace ConnectSdk.Demo.Demo
             }
 
             SetWebAppControls();
+            SetControlControls();
 
             if (!isPlaying || !isPlayingImage)
                 DisableMedia();

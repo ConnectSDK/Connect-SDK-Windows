@@ -8,6 +8,7 @@
     xmlns:common="using:ConnectSdk.Demo.Common"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:triggers="using:WinRT.Triggers"
     mc:Ignorable="d">
 
     <Page.Resources>
@@ -42,7 +43,7 @@
                         IsHitTestVisible="false" TextWrapping="NoWrap" VerticalAlignment="Bottom" Margin="0,0,30,40"/>
         </Grid>
         <Grid Grid.Row="1">
-            <Hub>
+            <Hub x:Name="HubControl">
                 <HubSection Header="Media" Width="450">
                     <DataTemplate>
                         <StackPanel>
@@ -83,7 +84,7 @@
                         </StackPanel>
                     </DataTemplate>
                 </HubSection>
-                <HubSection Header="Web App" Background="DimGray">
+                <HubSection Header="Web App" Background="#333333">
                     <DataTemplate>
                         <StackPanel>
                             <StackPanel Orientation="Horizontal">
@@ -107,7 +108,41 @@
                 </HubSection>
                 <HubSection Header="Control">
                     <DataTemplate>
-                        <Grid/>
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Border Width="120"></Border>
+                                <Button FontSize="20" Content="Up" Command="{Binding UpCommand}" Width="120"></Button>
+                                <Border Width="120"></Border>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Button FontSize="20" Content="Left" Command="{Binding LeftCommand}" Width="120"></Button>
+                                <Button FontSize="20" Content="Click" Command="{Binding ClickCommand}" Width="120"></Button>
+                                <Button FontSize="20" Content="Right" Command="{Binding RightCommand}" Width="120"></Button>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Button FontSize="20" Content="Back" Command="{Binding BackCommand}" Width="120"></Button>
+                                <Button FontSize="20" Content="Down" Command="{Binding DownCommand}" Width="120"></Button>
+                                <Button FontSize="20" Content="Home" Command="{Binding HomeCommand}" Width="120"></Button>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBox Width="354" Margin="3" x:Name="InputTextBox" KeyDown="InputTextBox_OnKeyDown" ></TextBox>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Border x:Name="ScrollPad" Height="360" Width="360" Margin="2" ManipulationMode="All" BorderBrush="DarkGray" BorderThickness="2"  >
+                                    <Border.Background>
+                                        <ImageBrush />
+                                    </Border.Background>
+                                    <triggers:Interactions.Triggers>
+                                        <triggers:EventTrigger EventName="ManipulationDelta">
+                                            <triggers:InvokeCommandAction Command="{Binding ManipulationDeltaCommand}" PassEventArgsToCommand="True"></triggers:InvokeCommandAction>
+                                        </triggers:EventTrigger>
+                                        <triggers:EventTrigger EventName="Tapped">
+                                            <triggers:InvokeCommandAction Command="{Binding ManipulationTappedCommand}" PassEventArgsToCommand="True"></triggers:InvokeCommandAction>
+                                        </triggers:EventTrigger>
+                                    </triggers:Interactions.Triggers>
+                                </Border>
+                            </StackPanel>                            
+                        </StackPanel>
                     </DataTemplate>
                 </HubSection>
                 <HubSection Header="Apps">

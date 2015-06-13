@@ -33,6 +33,16 @@ namespace ConnectSdk.Demo.Demo
         private Command pinWebAppCommand;
         private Command unPinWebAppCommand;
 
+        private Command upCommand;
+        private Command leftCommand;
+        private Command clickCommand;
+        private Command rightCommand;
+        private Command backCommand;
+        private Command downCommand;
+        private Command homeCommand;
+        private Command manipulationDeltaCommand;
+
+
         public Command ShowFotoCommand
         {
             get { return showFotoCommand ?? (showFotoCommand = new Command(ShowFotoCommandExecute) { Enabled = selectedDevice.HasCapability(MediaPlayer.DisplayImage)}); }
@@ -163,6 +173,55 @@ namespace ConnectSdk.Demo.Demo
         {
             get { return unPinWebAppCommand ?? (unPinWebAppCommand = new Command(UnPinWebAppCommandExecute) { Enabled = false }); }
             set { unPinWebAppCommand = value; }
+        }
+
+        public Command UpCommand
+        {
+            get { return upCommand ?? (upCommand = new Command(UpCommandExecute) { Enabled = false }); }
+            set { upCommand = value; }
+        }
+
+        public Command LeftCommand
+        {
+            get { return leftCommand ?? (leftCommand = new Command(LeftCommandExecute) { Enabled = false }); }
+            set { leftCommand = value; }
+        }
+        public Command ClickCommand
+        {
+            get { return clickCommand ?? (clickCommand = new Command(ClickCommandExecute) { Enabled = false }); }
+            set { clickCommand = value; }
+        }
+        public Command RightCommand
+        {
+            get { return rightCommand ?? (rightCommand = new Command(RightCommandExecute) { Enabled = false }); }
+            set { rightCommand = value; }
+        }
+        public Command BackCommand
+        {
+            get { return backCommand ?? (backCommand = new Command(BackCommandExecute) { Enabled = false }); }
+            set { backCommand = value; }
+        }
+        public Command DownCommand
+        {
+            get { return downCommand ?? (downCommand = new Command(DownCommandExecute) { Enabled = false }); }
+            set { downCommand = value; }
+        }
+        public Command HomeCommand
+        {
+            get { return homeCommand ?? (homeCommand = new Command(HomeCommandExecute) { Enabled = false }); }
+            set { homeCommand = value; }
+        }
+
+        public Command ManipulationDeltaCommand
+        {
+            get { return manipulationDeltaCommand ?? (manipulationDeltaCommand = new Command(ManipulationDeltaCommandExecute) { Enabled = false }); }
+            set { manipulationDeltaCommand = value; }
+        }
+
+        public Command ManipulationTappedCommand
+        {
+            get { return manipulationTappedCommand ?? (manipulationTappedCommand = new Command(ManipulationTappedCommandExecute) { Enabled = false }); }
+            set { manipulationTappedCommand = value; }
         }
     }
 }

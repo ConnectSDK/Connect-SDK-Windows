@@ -1,4 +1,5 @@
-﻿using ConnectSdk.Demo.Common;
+﻿using Windows.System;
+using ConnectSdk.Demo.Common;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -45,6 +46,7 @@ namespace ConnectSdk.Demo
             DataContext = model;
 
             model.SetControls();
+
         }
 
         private void RangeBase_OnValueChanged(object sender, RangeBaseValueChangedEventArgs e)
@@ -58,6 +60,17 @@ namespace ConnectSdk.Demo
             {
                 model.SetVolume(e.NewValue/100);
             }
+        }
+
+        private void InputTextBox_OnTextChanged(object sender, TextChangedEventArgs e)
+        {
+            
+        }
+
+        private void InputTextBox_OnKeyDown(object sender, KeyRoutedEventArgs e)
+        {
+            model.SendText(e.Key.ToString());
+            
         }
     }
 }
