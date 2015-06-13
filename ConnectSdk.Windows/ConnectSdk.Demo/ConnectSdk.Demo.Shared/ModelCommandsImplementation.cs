@@ -88,6 +88,7 @@ namespace ConnectSdk.Demo.Demo
 
             SetWebAppControls();
             SetControlControls();
+            SetControlApps();
 
             if (!isPlaying || !isPlayingImage)
                 DisableMedia();
@@ -434,34 +435,6 @@ namespace ConnectSdk.Demo.Demo
             mediaPlayer.PlayMedia(mediaUrl, mimeType, title, description, icon, false, listener);
         }
 
-
-        //private void LaunchMediaPlayerCommandExecute(object obj)
-        //{
-        //    var webostvService = (WebOstvService) selectedDevice.GetServiceByName(WebOstvService.Id);
-        //    const string webappname = "MediaPlayer";
-        //    var listener = new ResponseListener
-        //        (
-        //        loadEventArg =>
-        //        {
-        //            var v = loadEventArg as LoadEventArgs;
-        //            if (v != null)
-        //            {
-        //                var launchSession = v.Load.GetPayload() as WebOsWebAppSession;
-        //                if (launchSession != null) launchSession.Connect(null);
-        //            }
-        //        },
-        //        serviceCommandError =>
-        //        {
-        //            var msg =
-        //                new MessageDialog(
-        //                    "Something went wrong; The application could not be started. Press 'Close' to continue");
-        //            msg.ShowAsync();
-        //        }
-        //        );
-
-        //    webostvService.LaunchWebApp(webappname, listener);
-
-        //}
 
         private void PlayCommandExecute(object obj)
         {

@@ -132,13 +132,13 @@
                                 <TextBlock Width="120" Text="{Binding Path=Duration}" HorizontalAlignment="Right" TextAlignment="Right" Padding="3"></TextBlock>
                             </StackPanel>
                             <StackPanel Orientation="Vertical">
-                                <Slider Minimum="0" Maximum="{Binding Path=TotalDuration}" Value="{Binding Path=CurrentPosition}" Width="360" ValueChanged="RangeBase_OnValueChanged" />
+                                <Slider x:ConnectionId='3' Minimum="0" Maximum="{Binding Path=TotalDuration}" Value="{Binding Path=CurrentPosition}" Width="360"                                         />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Width="360" TextAlignment="Center" Padding="3">Volume</TextBlock>
                             </StackPanel>
                             <StackPanel Orientation="Vertical">
-                                <Slider Minimum="0" Maximum="100" Value="{Binding Path=Volume}" Width="360" IsEnabled="{Binding Path=CanChangeVolume}" ValueChanged="VolumeRangeBase_OnValueChanged"/>
+                                <Slider x:ConnectionId='2' Minimum="0" Maximum="100" Value="{Binding Path=Volume}" Width="360" IsEnabled="{Binding Path=CanChangeVolume}"                                              />
                             </StackPanel>
                         </StackPanel>
                     </DataTemplate>
@@ -184,7 +184,7 @@
                                 <Button FontSize="20" Content="Home" Command="{Binding HomeCommand}" Width="120"></Button>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <TextBox Width="354" Margin="3" x:Name="InputTextBox" KeyDown="InputTextBox_OnKeyDown" ></TextBox>
+                                <TextBox x:ConnectionId='1' Width="354" Margin="3" x:Name="InputTextBox"                                  ></TextBox>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <Border x:Name="ScrollPad" Height="360" Width="360" Margin="2" ManipulationMode="All" BorderBrush="DarkGray" BorderThickness="2"  >
@@ -253,3 +253,4 @@
         </Grid>
     </Grid>
 </Page>
+

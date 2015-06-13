@@ -41,6 +41,13 @@ namespace ConnectSdk.Demo.Demo
         private Command downCommand;
         private Command homeCommand;
         private Command manipulationDeltaCommand;
+        private Command googleCommand;
+        private Command myDialAppCommand;
+        private Command showToastCommand;
+        private Command netflixCommand;
+        private Command appStoreCommand;
+        private Command youTubeCommand;
+        private Command startAppCommand;
 
 
         public Command ShowFotoCommand
@@ -222,6 +229,48 @@ namespace ConnectSdk.Demo.Demo
         {
             get { return manipulationTappedCommand ?? (manipulationTappedCommand = new Command(ManipulationTappedCommandExecute) { Enabled = false }); }
             set { manipulationTappedCommand = value; }
+        }
+
+        public Command GoogleCommand
+        {
+            get { return googleCommand ?? (googleCommand = new Command(GoogleCommandExecute) { Enabled = false }); }
+            set { googleCommand = value; }
+        }
+
+        public Command MyDialAppCommand
+        {
+            get { return myDialAppCommand ?? (myDialAppCommand = new Command(MyDialAppCommandExecute) { Enabled = false }); }
+            set { myDialAppCommand = value; }
+        }
+
+        public Command ShowToastCommand
+        {
+            get { return showToastCommand ?? (showToastCommand = new Command(ShowToastCommandExecute) { Enabled = false }); }
+            set { showToastCommand = value; }
+        }
+
+        public Command NetflixCommand
+        {
+            get { return netflixCommand ?? (netflixCommand = new Command(NetflixCommandExecute) { Enabled = false }); }
+            set { netflixCommand = value; }
+        }
+
+        public Command AppStoreCommand
+        {
+            get { return appStoreCommand ?? (appStoreCommand = new Command(AppStoreCommandExecute) { Enabled = false }); }
+            set { appStoreCommand = value; }
+        }
+
+        public Command YouTubeCommand
+        {
+            get { return youTubeCommand ?? (youTubeCommand = new Command(YouTubeCommandExecute) { Enabled = false }); }
+            set { youTubeCommand = value; }
+        }
+
+        public Command StartAppCommand
+        {
+            get { return startAppCommand ?? (startAppCommand = new Command(StartApp) { Enabled = false }); }
+            set { startAppCommand = value; }
         }
     }
 }
