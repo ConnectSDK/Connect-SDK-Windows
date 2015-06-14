@@ -9,77 +9,30 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:triggers="using:WinRT.Triggers"
-    mc:Ignorable="d">
+    mc:Ignorable="d" RequestedTheme="Light">
 
     <Page.Resources>
         <!-- TODO: Delete this line if the key AppName is declared in App.xaml -->
         <x:String x:Key="AppName">Connect SDK</x:String>
-
-        <Style x:Key="ListBoxStyle1" TargetType="ListBox">
-            <Setter Property="Foreground" Value="{StaticResource ListBoxForegroundThemeBrush}"/>
-            <Setter Property="Background" Value="{StaticResource ListBoxBackgroundThemeBrush}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource ListBoxBorderThemeBrush}"/>
-            <Setter Property="BorderThickness" Value="{StaticResource ListBoxBorderThemeThickness}"/>
-            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
-            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
-            <Setter Property="ScrollViewer.HorizontalScrollMode" Value="Disabled"/>
-            <Setter Property="ScrollViewer.IsHorizontalRailEnabled" Value="True"/>
-            <Setter Property="ScrollViewer.VerticalScrollMode" Value="Enabled"/>
-            <Setter Property="ScrollViewer.IsVerticalRailEnabled" Value="True"/>
-            <Setter Property="ScrollViewer.ZoomMode" Value="Disabled"/>
-            <Setter Property="ScrollViewer.IsDeferredScrollingEnabled" Value="False"/>
-            <Setter Property="ScrollViewer.BringIntoViewOnFocusChange" Value="True"/>
-            <Setter Property="IsTabStop" Value="False"/>
-            <Setter Property="TabNavigation" Value="Once"/>
-            <Setter Property="FontFamily" Value="{StaticResource ContentControlThemeFontFamily}"/>
-            <Setter Property="FontSize" Value="{StaticResource ControlContentThemeFontSize}"/>
-            <Setter Property="ItemsPanel">
-                <Setter.Value>
-                    <ItemsPanelTemplate>
-                        <VirtualizingStackPanel/>
-                    </ItemsPanelTemplate>
-                </Setter.Value>
-            </Setter>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ListBox">
-                        <Border x:Name="LayoutRoot" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{StaticResource AppBarBackgroundThemeBrush}">
-                            <VisualStateManager.VisualStateGroups>
-                                <VisualStateGroup x:Name="CommonStates">
-                                    <VisualState x:Name="Normal"/>
-                                    <VisualState x:Name="Disabled">
-                                        <Storyboard>
-                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="BorderBrush" Storyboard.TargetName="LayoutRoot">
-                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{StaticResource ListBoxDisabledForegroundThemeBrush}"/>
-                                            </ObjectAnimationUsingKeyFrames>
-                                        </Storyboard>
-                                    </VisualState>
-                                </VisualStateGroup>
-                                <VisualStateGroup x:Name="FocusStates">
-                                    <VisualState x:Name="Focused">
-                                        <Storyboard>
-                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Background" Storyboard.TargetName="ScrollViewer">
-                                                <DiscreteObjectKeyFrame KeyTime="0" Value="Black"/>
-                                            </ObjectAnimationUsingKeyFrames>
-                                        </Storyboard>
-                                    </VisualState>
-                                    <VisualState x:Name="Unfocused"/>
-                                </VisualStateGroup>
-                            </VisualStateManager.VisualStateGroups>
-                            <ScrollViewer x:Name="ScrollViewer">
-                                <ItemsPresenter/>
-                            </ScrollViewer>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
+        <Style TargetType="Button">
+            <Setter Property="FontSize" Value="15"></Setter>
+            <Setter Property="FontWeight" Value="Light"></Setter>
+            <Setter Property="BorderThickness" Value="1"></Setter>
+        </Style>
+        <Style TargetType="TextBlock" x:Key="TitleTextBlockStyle1">
+            <Setter Property="FontSize" Value="15"></Setter>
+            <Setter Property="FontWeight" Value="Light"></Setter>
+        </Style>
+        <Style TargetType="TextBlock" x:Key="SubtitleTextBlockStyle1">
+            <Setter Property="FontSize" Value="15"></Setter>
+            <Setter Property="FontWeight" Value="Light"></Setter>
+            <Setter Property="Foreground" Value="DarkGray"></Setter>
+        </Style>
+        <Style TargetType="HubSection">
+            <Setter Property="VerticalContentAlignment" Value="Stretch"></Setter>
         </Style>
     </Page.Resources>
-    <!--
-        This grid acts as a root panel for the page that defines two rows:
-        * Row 0 contains the back button and page title
-        * Row 1 contains the rest of the page layout
-    -->
+
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.ChildrenTransitions>
             <TransitionCollection>
@@ -107,24 +60,24 @@
                     <DataTemplate>
                         <StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <Button FontSize="20" Content="Photo" Command="{Binding ShowFotoCommand}" Width="120"></Button>
-                                <Button FontSize="20" Content="Video" Command="{Binding PlayMediaCommand}" Width="120"></Button>
-                                <Button FontSize="20" Content="Audio" Command="{Binding PlayAudioCommand}" Width="120"></Button>
+                                <Button Content="Photo" Command="{Binding ShowFotoCommand}" Width="120"></Button>
+                                <Button Content="Video" Command="{Binding PlayMediaCommand}" Width="120"></Button>
+                                <Button Content="Audio" Command="{Binding PlayAudioCommand}" Width="120"></Button>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <Button FontSize="20" Content="Play" Command="{Binding PlayCommand}" Width="120"></Button>
-                                <Button FontSize="20" Content="Pause" Command="{Binding PauseCommand}" Width="120"></Button>
-                                <Button FontSize="20" Content="Stop" Command="{Binding StopCommand}" Width="120"></Button>
+                                <Button Content="Play" Command="{Binding PlayCommand}" Width="120"></Button>
+                                <Button Content="Pause" Command="{Binding PauseCommand}" Width="120"></Button>
+                                <Button Content="Stop" Command="{Binding StopCommand}" Width="120"></Button>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <Button FontSize="20" Content="Rewind" Command="{Binding RewindCommand}" Width="120"></Button>
-                                <Button FontSize="20" Content="F.Forward" Command="{Binding FastForwardCommand}" Width="120"></Button>
-                                <Button FontSize="20" Content="Close" Command="{Binding CloseCommand}" Width="120"></Button>
+                                <Button Content="Rewind" Command="{Binding RewindCommand}" Width="120"></Button>
+                                <Button Content="F.Forward" Command="{Binding FastForwardCommand}" Width="120"></Button>
+                                <Button Content="Close" Command="{Binding CloseCommand}" Width="120"></Button>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <Button FontSize="20" Content="Playlist" Command="{Binding PlayListCommand}" Width="120"></Button>
-                                <Button FontSize="20" Content="Previous" Command="{Binding PreviousCommand}" Width="120"></Button>
-                                <Button FontSize="20" Content="Next" Command="{Binding NextCommand}" Width="120"></Button>
+                                <Button Content="Playlist" Command="{Binding PlayListCommand}" Width="120"></Button>
+                                <Button Content="Previous" Command="{Binding PreviousCommand}" Width="120"></Button>
+                                <Button Content="Next" Command="{Binding NextCommand}" Width="120"></Button>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Width="120" Text="{Binding Path=Position}" HorizontalAlignment="Left" Padding="3"></TextBlock>
@@ -132,7 +85,7 @@
                                 <TextBlock Width="120" Text="{Binding Path=Duration}" HorizontalAlignment="Right" TextAlignment="Right" Padding="3"></TextBlock>
                             </StackPanel>
                             <StackPanel Orientation="Vertical">
-                                <Slider x:ConnectionId='4' Minimum="0" Maximum="{Binding Path=TotalDuration}" Value="{Binding Path=CurrentPosition}" Width="360"                                         />
+                                <Slider Minimum="0" Maximum="{Binding Path=TotalDuration}" Value="{Binding Path=CurrentPosition}" Width="360" IsEnabled="{Binding Path=HasPositionInfo}" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Width="360" TextAlignment="Center" Padding="3">Volume</TextBlock>
@@ -143,50 +96,57 @@
                         </StackPanel>
                     </DataTemplate>
                 </HubSection>
-                <HubSection Header="Web App" Background="#333333">
+                <HubSection Header="Web App" Background="#F2F2F2">
                     <DataTemplate>
                         <StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <Button FontSize="20" Content="Launch" Command="{Binding LaunchWebAppCommand}" Width="180"></Button>
-                                <Button FontSize="20" Content="Join" Command="{Binding JoinWebAppCommand}" Width="180"></Button>
+                                <Button Content="Launch" Command="{Binding LaunchWebAppCommand}" Width="180"></Button>
+                                <Button Content="Join" Command="{Binding JoinWebAppCommand}" Width="180"></Button>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <Button FontSize="20" Content="Send message" Command="{Binding SendMessageCommand}" Width="180"></Button>
-                                <Button FontSize="20" Content="Send JSON" Command="{Binding SendJsonCommand}" Width="180"></Button>
+                                <Button Content="Send message" Command="{Binding SendMessageCommand}" Width="180"></Button>
+                                <Button Content="Send JSON" Command="{Binding SendJsonCommand}" Width="180"></Button>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <Button FontSize="20" Content="Leave WebApp" Command="{Binding LeaveWebAppCommand}" Width="180"></Button>
-                                <Button FontSize="20" Content="Close WebApp" Command="{Binding CloseWebAppCommand}" Width="180"></Button>
+                                <Button Content="Leave WebApp" Command="{Binding LeaveWebAppCommand}" Width="180"></Button>
+                                <Button Content="Close WebApp" Command="{Binding CloseWebAppCommand}" Width="180"></Button>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <Button FontSize="20" Content="Pin WebApp" Command="{Binding PinWebAppCommand}" Width="180"></Button>
-                                <Button FontSize="20" Content="Unpin WebApp" Command="{Binding UnPinWebAppCommand}" Width="180"></Button>
+                                <Button Content="Pin WebApp" Command="{Binding PinWebAppCommand}" Width="180"></Button>
+                                <Button Content="Unpin WebApp" Command="{Binding UnPinWebAppCommand}" Width="180"></Button>
                             </StackPanel>
                         </StackPanel>
                     </DataTemplate>
                 </HubSection>
                 <HubSection Header="Control">
                     <DataTemplate>
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Border Width="120"></Border>
-                                <Button FontSize="20" Content="Up" Command="{Binding UpCommand}" Width="120"></Button>
-                                <Border Width="120"></Border>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition Height="*"></RowDefinition>
+                            </Grid.RowDefinitions>
+
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Width="120"></Border>
+                                    <Button Content="Up" Command="{Binding UpCommand}" Width="120"></Button>
+                                    <Border Width="120"></Border>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Content="Left" Command="{Binding LeftCommand}" Width="120"></Button>
+                                    <Button Content="Click" Command="{Binding ClickCommand}" Width="120"></Button>
+                                    <Button Content="Right" Command="{Binding RightCommand}" Width="120"></Button>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Content="Back" Command="{Binding BackCommand}" Width="120"></Button>
+                                    <Button Content="Down" Command="{Binding DownCommand}" Width="120"></Button>
+                                    <Button Content="Home" Command="{Binding HomeCommand}" Width="120"></Button>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBox x:ConnectionId='2' Width="354" Margin="3" x:Name="InputTextBox"                                  ></TextBox>
+                                </StackPanel>
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Button FontSize="20" Content="Left" Command="{Binding LeftCommand}" Width="120"></Button>
-                                <Button FontSize="20" Content="Click" Command="{Binding ClickCommand}" Width="120"></Button>
-                                <Button FontSize="20" Content="Right" Command="{Binding RightCommand}" Width="120"></Button>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Button FontSize="20" Content="Back" Command="{Binding BackCommand}" Width="120"></Button>
-                                <Button FontSize="20" Content="Down" Command="{Binding DownCommand}" Width="120"></Button>
-                                <Button FontSize="20" Content="Home" Command="{Binding HomeCommand}" Width="120"></Button>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBox x:ConnectionId='2' Width="354" Margin="3" x:Name="InputTextBox"                                  ></TextBox>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal">
+                            <StackPanel Grid.Row="1" Orientation="Horizontal">
                                 <Border x:Name="ScrollPad" Height="360" Width="360" Margin="2" ManipulationMode="All" BorderBrush="DarkGray" BorderThickness="2"  >
                                     <Border.Background>
                                         <ImageBrush />
@@ -201,10 +161,10 @@
                                     </triggers:Interactions.Triggers>
                                 </Border>
                             </StackPanel>
-                        </StackPanel>
+                        </Grid>
                     </DataTemplate>
                 </HubSection>
-                <HubSection Header="Apps" Background="#333333">
+                <HubSection Header="Apps" Background="#F2F2F2">
                     <DataTemplate>
                         <Grid>
                             <Grid.RowDefinitions>
@@ -213,22 +173,22 @@
                             </Grid.RowDefinitions>
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal">
-                                    <Button FontSize="20" Content="Browser" Command="{Binding GoogleCommand}" Width="120"></Button>
-                                    <Button FontSize="20" Content="My Dial App" Command="{Binding MyDialAppCommand}" Width="120"></Button>
-                                    <Button FontSize="20" Content="Show Toast" Command="{Binding ShowToastCommand}" Width="120"></Button>
+                                    <Button Content="Browser" Command="{Binding GoogleCommand}" Width="120"></Button>
+                                    <Button Content="My Dial App" Command="{Binding MyDialAppCommand}" Width="120"></Button>
+                                    <Button Content="Show Toast" Command="{Binding ShowToastCommand}" Width="120"></Button>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal">
-                                    <Button FontSize="20" Content="Netflix" Command="{Binding NetflixCommand}" Width="120"></Button>
-                                    <Button FontSize="20" Content="App Store" Command="{Binding AppStoreCommand}" Width="120"></Button>
-                                    <Button FontSize="20" Content="Youtube" Command="{Binding YouTubeCommand}" Width="120"></Button>
+                                    <Button Content="Netflix" Command="{Binding NetflixCommand}" Width="120"></Button>
+                                    <Button Content="App Store" Command="{Binding AppStoreCommand}" Width="120"></Button>
+                                    <Button Content="Youtube" Command="{Binding YouTubeCommand}" Width="120"></Button>
                                 </StackPanel>
                             </StackPanel>
-                            <ListBox Grid.Row="1" Margin="3" ItemsSource="{Binding Path=AppsList}" VerticalAlignment="Stretch" SelectedItem="{Binding SelectedApp, Mode=TwoWay}" Style="{StaticResource ListBoxStyle1}" >
+                            <ListBox Grid.Row="1" Margin="3" ItemsSource="{Binding Path=AppsList}" VerticalAlignment="Stretch" SelectedItem="{Binding SelectedApp, Mode=TwoWay}"  >
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <StackPanel>
-                                            <TextBlock Text="{Binding Path=Name}" TextWrapping="Wrap" FontSize="26" Style="{StaticResource TitleTextBlockStyle}" Foreground="White" />
-                                            <TextBlock Text="{Binding Path=Id}" TextWrapping="Wrap" Foreground="Silver" Style="{StaticResource SubtitleTextBlockStyle}" />
+                                            <TextBlock Text="{Binding Path=Name}" TextWrapping="Wrap" Style="{StaticResource TitleTextBlockStyle1}" />
+                                            <TextBlock Text="{Binding Path=Id}" TextWrapping="Wrap" Style="{StaticResource SubtitleTextBlockStyle1}" />
                                         </StackPanel>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
@@ -246,41 +206,41 @@
                             </Grid.RowDefinitions>
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal">
-                                    <Button FontSize="20" Content="1" Command="{Binding KeyCommand}" CommandParameter="1" Width="120"></Button>
-                                    <Button FontSize="20" Content="2" Command="{Binding KeyCommand}" CommandParameter="2" Width="120"></Button>
-                                    <Button FontSize="20" Content="3" Command="{Binding KeyCommand}" CommandParameter="3" Width="120"></Button>
+                                    <Button Content="1" Command="{Binding KeyCommand}" CommandParameter="1" Width="120"></Button>
+                                    <Button Content="2" Command="{Binding KeyCommand}" CommandParameter="2" Width="120"></Button>
+                                    <Button Content="3" Command="{Binding KeyCommand}" CommandParameter="3" Width="120"></Button>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal">
-                                    <Button FontSize="20" Content="4" Command="{Binding KeyCommand}" CommandParameter="4" Width="120"></Button>
-                                    <Button FontSize="20" Content="5" Command="{Binding KeyCommand}" CommandParameter="5" Width="120"></Button>
-                                    <Button FontSize="20" Content="6" Command="{Binding KeyCommand}" CommandParameter="6" Width="120"></Button>
+                                    <Button Content="4" Command="{Binding KeyCommand}" CommandParameter="4" Width="120"></Button>
+                                    <Button Content="5" Command="{Binding KeyCommand}" CommandParameter="5" Width="120"></Button>
+                                    <Button Content="6" Command="{Binding KeyCommand}" CommandParameter="6" Width="120"></Button>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal">
-                                    <Button FontSize="20" Content="7" Command="{Binding KeyCommand}" CommandParameter="7" Width="120"></Button>
-                                    <Button FontSize="20" Content="8" Command="{Binding KeyCommand}" CommandParameter="8" Width="120"></Button>
-                                    <Button FontSize="20" Content="9" Command="{Binding KeyCommand}" CommandParameter="9" Width="120"></Button>
+                                    <Button Content="7" Command="{Binding KeyCommand}" CommandParameter="7" Width="120"></Button>
+                                    <Button Content="8" Command="{Binding KeyCommand}" CommandParameter="8" Width="120"></Button>
+                                    <Button Content="9" Command="{Binding KeyCommand}" CommandParameter="9" Width="120"></Button>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal">
-                                    <Button FontSize="20" Content="-" Command="{Binding KeyCommand}" CommandParameter="-" Width="120"></Button>
-                                    <Button FontSize="20" Content="0" Command="{Binding KeyCommand}" CommandParameter="0" Width="120"></Button>
-                                    <Button FontSize="20" Content="Enter" Command="{Binding KeyCommand}" CommandParameter="Enter" Width="120"></Button>
+                                    <Button Content="-" Command="{Binding KeyCommand}" CommandParameter="-" Width="120"></Button>
+                                    <Button Content="0" Command="{Binding KeyCommand}" CommandParameter="0" Width="120"></Button>
+                                    <Button Content="Enter" Command="{Binding KeyCommand}" CommandParameter="Enter" Width="120"></Button>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal">
-                                    <Button FontSize="20" Content="PowerOff" Command="{Binding PowerCommand}" Width="180"></Button>
-                                    <Button FontSize="20" Content="3D Mode" Command="{Binding ThreeDCommand}" Width="180"></Button>
+                                    <Button Content="PowerOff" Command="{Binding PowerCommand}" Width="180"></Button>
+                                    <Button Content="3D Mode" Command="{Binding ThreeDCommand}" Width="180"></Button>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock FontSize="20" Text="Channel" Width="100" VerticalAlignment="Center" Margin="10"></TextBlock>
-                                    <Button FontSize="20" Content="-" Command="{Binding ChannelCommand}" CommandParameter="ChDown" Width="120"></Button>
-                                    <Button FontSize="20" Content="+" Command="{Binding ChannelCommand}" CommandParameter="ChUp" Width="120"></Button>
+                                    <TextBlock Text="Channel" Width="100" VerticalAlignment="Center" Margin="10"></TextBlock>
+                                    <Button Content="-" Command="{Binding ChannelCommand}" CommandParameter="ChDown" Width="120"></Button>
+                                    <Button Content="+" Command="{Binding ChannelCommand}" CommandParameter="ChUp" Width="120"></Button>
                                 </StackPanel>
                             </StackPanel>
-                            <ListBox Margin="3" Grid.Row="1" ItemsSource="{Binding Path=Channels}" VerticalAlignment="Stretch" SelectedItem="{Binding SelectedChannel, Mode=TwoWay}" Style="{StaticResource ListBoxStyle1}" >
+                            <ListBox Margin="3" Grid.Row="1" ItemsSource="{Binding Path=Channels}" VerticalAlignment="Stretch" SelectedItem="{Binding SelectedChannel, Mode=TwoWay}" >
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <StackPanel>
-                                            <TextBlock Text="{Binding Path=Name}" TextWrapping="Wrap" FontSize="26" Style="{StaticResource TitleTextBlockStyle}" Foreground="White" />
-                                            <TextBlock Text="{Binding Path=Id}" TextWrapping="Wrap" Foreground="Silver" Style="{StaticResource SubtitleTextBlockStyle}" />
+                                            <TextBlock Text="{Binding Path=Name}" TextWrapping="Wrap" Style="{StaticResource TitleTextBlockStyle1}"/>
+                                            <TextBlock Text="{Binding Path=Id}" TextWrapping="Wrap" Style="{StaticResource SubtitleTextBlockStyle1}" />
                                         </StackPanel>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
@@ -288,7 +248,7 @@
                         </Grid>
                     </DataTemplate>
                 </HubSection>
-                <HubSection Header="System" Background="#333333">
+                <HubSection Header="System" Background="#F2F2F2">
                     <DataTemplate>
                         <Grid>
                             <Grid.RowDefinitions>
@@ -298,35 +258,35 @@
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal">
                                     <StackPanel>
-                                        <TextBlock Text="Volume" FontSize="20" Margin="5"></TextBlock>
+                                        <TextBlock Text="Volume" Margin="5"></TextBlock>
                                         <Slider x:ConnectionId='1' Minimum="0" Maximum="100" VerticalAlignment="Center" Margin="5,10,5,0" Value="{Binding Path=Volume}" Width="255" IsEnabled="{Binding Path=CanChangeVolume}"                                              />
                                     </StackPanel>
                                     <StackPanel >
                                         <CheckBox IsEnabled="{Binding Path=CanMute}" IsChecked="{Binding Path=IsMuted, Mode=TwoWay}">Mute</CheckBox>
                                         <StackPanel Orientation="Horizontal">
-                                            <Button FontSize="20" Content="-" Command="{Binding VolumeDownCommand}" Width="45"></Button>
-                                            <Button FontSize="20" Content="+" Command="{Binding VolumeUpCommand}" Width="45"></Button>
+                                            <Button Content="-" Command="{Binding VolumeDownCommand}" Width="45"></Button>
+                                            <Button Content="+" Command="{Binding VolumeUpCommand}" Width="45"></Button>
                                         </StackPanel>
                                     </StackPanel>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal">
-                                    <Button FontSize="20" Content="Play" Command="{Binding PlayCommand}" Width="120"></Button>
-                                    <Button FontSize="20" Content="Pause" Command="{Binding PauseCommand}" Width="120"></Button>
-                                    <Button FontSize="20" Content="Stop" Command="{Binding StopCommand}" Width="120"></Button>
+                                    <Button Content="Play" Command="{Binding PlayCommand}" Width="120"></Button>
+                                    <Button Content="Pause" Command="{Binding PauseCommand}" Width="120"></Button>
+                                    <Button Content="Stop" Command="{Binding StopCommand}" Width="120"></Button>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal">
-                                    <Button FontSize="20" Content="Rewind" Command="{Binding RewindCommand}" CommandParameter="7" Width="180"></Button>
-                                    <Button FontSize="20" Content="Fast Forward" Command="{Binding FastForwardCommand}" CommandParameter="8" Width="180"></Button>
+                                    <Button Content="Rewind" Command="{Binding RewindCommand}" CommandParameter="7" Width="180"></Button>
+                                    <Button Content="Fast Forward" Command="{Binding FastForwardCommand}" CommandParameter="8" Width="180"></Button>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal">
-                                    <Button FontSize="20" Content="Input Picker" Margin="90,0,0,0" Command="{Binding InputCommand}" CommandParameter="-" Width="180"></Button>
+                                    <Button Content="Input Picker" Margin="90,0,0,0" Command="{Binding InputCommand}" CommandParameter="-" Width="180"></Button>
                                 </StackPanel>
                             </StackPanel>
-                            <ListBox Margin="3" Grid.Row="1" ItemsSource="{Binding Path=ExternalInputs}" VerticalAlignment="Stretch" SelectedItem="{Binding SelectedInput, Mode=TwoWay}" Style="{StaticResource ListBoxStyle1}" >
+                            <ListBox Margin="3" Grid.Row="1" ItemsSource="{Binding Path=ExternalInputs}" VerticalAlignment="Stretch" SelectedItem="{Binding SelectedInput, Mode=TwoWay}" >
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <StackPanel>
-                                            <TextBlock Text="{Binding Path=Id}" TextWrapping="Wrap" FontSize="26" Style="{StaticResource TitleTextBlockStyle}" Foreground="White" />
+                                            <TextBlock Text="{Binding Path=Id}" TextWrapping="Wrap" Style="{StaticResource TitleTextBlockStyle1}" />
                                         </StackPanel>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>

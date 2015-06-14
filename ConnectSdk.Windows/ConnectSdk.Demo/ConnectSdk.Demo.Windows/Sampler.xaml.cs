@@ -17,6 +17,7 @@ using Windows.UI.Xaml.Navigation;
 
 // The Basic Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234237
 using ConnectSdk.Demo.Demo;
+using ConnectSdk.Windows.Service.Capability;
 
 namespace ConnectSdk.Demo
 {
@@ -39,7 +40,7 @@ namespace ConnectSdk.Demo
 
         public Sampler()
         {
-            this.InitializeComponent();
+            InitializeComponent();
 
             model = App.ApplicationModel;
             InitializeComponent();
@@ -47,11 +48,16 @@ namespace ConnectSdk.Demo
 
             model.SetControls();
 
-        }
+            var dispatcherTimer = new DispatcherTimer();
+            dispatcherTimer.Tick += delegate
+            {
+                if (dispatcherTimer == null) return;
+                
+                model.GetVolume();
+            };
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 1);
+            dispatcherTimer.Start();
 
-        private void RangeBase_OnValueChanged(object sender, RangeBaseValueChangedEventArgs e)
-        {
-            
         }
 
         private void VolumeRangeBase_OnValueChanged(object sender, RangeBaseValueChangedEventArgs e)
@@ -60,11 +66,6 @@ namespace ConnectSdk.Demo
             {
                 model.SetVolume(e.NewValue/100);
             }
-        }
-
-        private void InputTextBox_OnTextChanged(object sender, TextChangedEventArgs e)
-        {
-            
         }
 
         private void InputTextBox_OnKeyDown(object sender, KeyRoutedEventArgs e)

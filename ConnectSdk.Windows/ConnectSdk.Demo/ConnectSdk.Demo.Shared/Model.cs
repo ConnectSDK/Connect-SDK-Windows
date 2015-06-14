@@ -29,6 +29,8 @@ namespace ConnectSdk.Demo.Demo
         private bool isMuted;
         private List<ExternalInputInfo> externalInputs;
         private ExternalInputInfo selectedInput;
+        private bool hasPositionInfo;
+
 
         public ConnectableDevice SelectedDevice
         {
@@ -150,6 +152,12 @@ namespace ConnectSdk.Demo.Demo
                 OnPropertyChanged();
                 SetExternalInput(selectedInput);
             }
+        }
+
+        public bool HasPositionInfo
+        {
+            get { return hasPositionInfo; }
+            set { hasPositionInfo = value; OnPropertyChanged();}
         }
 
         public Model()

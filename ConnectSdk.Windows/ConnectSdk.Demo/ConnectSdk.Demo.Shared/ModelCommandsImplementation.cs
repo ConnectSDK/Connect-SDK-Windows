@@ -74,5 +74,13 @@ namespace ConnectSdk.Demo.Demo
             SetControlSystem();
         }
 
+        public void GetVolume()
+        {
+            if (volumeControl != null && selectedDevice != null &&
+                selectedDevice.HasCapability(VolumeControl.VolumeGet) && volumeListener != null)
+                volumeControl.GetVolume(volumeListener);
+        }
+
     }
+
 }

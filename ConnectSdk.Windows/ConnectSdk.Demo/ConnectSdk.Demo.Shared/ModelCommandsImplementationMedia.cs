@@ -85,6 +85,7 @@ namespace ConnectSdk.Demo.Demo
                         App.MainDispatcher.RunAsync(CoreDispatcherPriority.High, () =>
                         {
                             Duration = string.Format("{0}:{1}:{2}", t.Minutes.ToString("D2"), t.Seconds.ToString("D2"), t.Milliseconds.ToString("D3"));
+                            HasPositionInfo = true;
                             TotalDuration = (long)d;
                         });
                     }
@@ -153,9 +154,9 @@ namespace ConnectSdk.Demo.Demo
                         selectedDevice.HasCapability(MediaControl.Position))
                         mediaControl.GetPosition(positionListener);
 
-                    if (volumeControl != null && selectedDevice != null &&
-                        selectedDevice.HasCapability(VolumeControl.VolumeGet))
-                        volumeControl.GetVolume(volumeListener);
+                    //if (volumeControl != null && selectedDevice != null &&
+                    //    selectedDevice.HasCapability(VolumeControl.VolumeGet))
+                    //    volumeControl.GetVolume(volumeListener);
 
                     if (mediaControl != null && selectedDevice != null
                         && selectedDevice.HasCapability(MediaControl.Duration)
@@ -186,6 +187,7 @@ namespace ConnectSdk.Demo.Demo
         {
             if (closeCommand != null)
                 closeCommand.Enabled = false;
+            HasPositionInfo = false;
             StopMedia();
         }
 
@@ -205,8 +207,11 @@ namespace ConnectSdk.Demo.Demo
                 Duration = "--:--:--";
                 Position = "--:--:--";
 
+                HasPositionInfo = false;
+
                 totalTimeDuration = -1;
             }
+            HasPositionInfo = false;
         }
 
         private void EnableMedia()
