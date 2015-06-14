@@ -33,7 +33,10 @@ namespace ConnectSdk.Demo.Demo
                     loadEventArg =>
                     {
                         var vm = LoadEventArgs.GetValueBool(loadEventArg);
-                        IsMuted = vm;
+                        App.MainDispatcher.RunAsync(CoreDispatcherPriority.High, () =>
+                        {
+                            IsMuted = vm;
+                        });
                     },
                     serviceCommandError =>
                     {

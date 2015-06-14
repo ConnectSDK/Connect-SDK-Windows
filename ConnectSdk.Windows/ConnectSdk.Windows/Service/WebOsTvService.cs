@@ -374,7 +374,7 @@ namespace ConnectSdk.Windows.Service
                 {
                     try
                     {
-                        var jsonObj = (JsonObject)loadEventArg;
+                        var jsonObj = LoadEventArgs.GetValue<JsonObject>(loadEventArg);
                         var isMute = jsonObj.GetNamedBoolean("mute");
                         Util.PostSuccess(listener, isMute);
                     }
@@ -435,14 +435,17 @@ namespace ConnectSdk.Windows.Service
 
             if (ps != null)
             {
-                try
+                if (((JsonObject) ps).ContainsKey("contentId"))
                 {
-                    contentId = ((JsonObject)ps).GetNamedString("contentId");
-                }
-                // ReSharper disable once EmptyGeneralCatchClause
-                catch
-                {
+                    try
+                    {
+                        contentId = ((JsonObject)ps).GetNamedString("contentId");
+                    }
+                    // ReSharper disable once EmptyGeneralCatchClause
+                    catch
+                    {
 
+                    }
                 }
             }
 
@@ -643,7 +646,7 @@ namespace ConnectSdk.Windows.Service
                 (
                 loadEventArg =>
                 {
-                    var obj = (JsonObject)loadEventArg;
+                    var obj = LoadEventArgs.GetValue<JsonObject>(loadEventArg);
                     var launchSession = new LaunchSession
                     {
                         Service = this,

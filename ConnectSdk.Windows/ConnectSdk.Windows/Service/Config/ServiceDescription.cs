@@ -118,7 +118,8 @@ namespace ConnectSdk.Windows.Service.Config
                 jsonObj.Add(KeyModelName, JsonValue.CreateStringValue(ModelName));
                 jsonObj.Add(KeyModelNumber, JsonValue.CreateStringValue(ModelNumber));
                 jsonObj.Add(KeyPort, JsonValue.CreateNumberValue(Port));
-                jsonObj.Add(KeyVersion, JsonValue.CreateStringValue(Version));
+                if (Version != null)
+                    jsonObj.Add(KeyVersion, JsonValue.CreateStringValue(Version));
                 jsonObj.Add(KeyServiceId, JsonValue.CreateStringValue(ServiceId));
             }
             // ReSharper disable once EmptyGeneralCatchClause

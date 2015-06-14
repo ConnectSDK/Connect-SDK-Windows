@@ -56,6 +56,7 @@
     <Compile Include="Core\MediaInfo.cs" />
     <Compile Include="Core\ProgramInfo.cs" />
     <Compile Include="Core\ProgramList.cs" />
+    <Compile Include="Core\StringCompressor.cs" />
     <Compile Include="Core\TextInputStatusInfo.cs" />
     <Compile Include="Core\TextInputType.cs" />
     <Compile Include="Core\Upnp\Device.cs" />

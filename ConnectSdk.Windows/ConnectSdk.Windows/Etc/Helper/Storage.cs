@@ -20,6 +20,7 @@
  */
  #endregion
 using System;
+using ConnectSdk.Windows.Core;
 
 namespace ConnectSdk.Windows.Etc.Helper
 {
@@ -57,7 +58,13 @@ namespace ConnectSdk.Windows.Etc.Helper
                 // Store the new value
                 try
                 {
-                    settings.LocalSettings.Values[key] = value;
+                    if (value is string)
+                    {
+                        var comppressed = StringCompressor.CompressString(value as string);
+                        settings.LocalSettings.Values[key] = comppressed;
+                    }
+                    else settings.LocalSettings.Values[key] = value;
+                    //settings.LocalSettings.Values[key] = value;
                 }
                 // ReSharper disable once EmptyGeneralCatchClause
                 catch
@@ -88,7 +95,14 @@ namespace ConnectSdk.Windows.Etc.Helper
             // If the key exists, retrieve the value.
             if (settings.LocalSettings.Values.ContainsKey(key))
             {
-                value = (T)settings.LocalSettings.Values[key];
+                //value = (T)settings.LocalSettings.Values[key];
+                if (typeof (T).Name == typeof (string).Name)
+                {
+                    var compressed = (string) settings.LocalSettings.Values[key];
+                    var uncompressed = StringCompressor.DecompressString(compressed);
+                    value = (T)Convert.ChangeType(uncompressed, typeof(T));
+                }
+                else value = (T)settings.LocalSettings.Values[key];
             }
             // Otherwise, use the default value.
             else

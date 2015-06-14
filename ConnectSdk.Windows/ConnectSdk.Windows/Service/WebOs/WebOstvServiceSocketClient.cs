@@ -264,7 +264,8 @@ namespace ConnectSdk.Windows.Service.WebOs
 
                 try
                 {
-                    request = Requests[id];
+                    if (Requests.ContainsKey(id))
+                        request = Requests[id];
                 }
                 // ReSharper disable once EmptyGeneralCatchClause
                 catch

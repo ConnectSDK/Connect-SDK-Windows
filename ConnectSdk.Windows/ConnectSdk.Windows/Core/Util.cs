@@ -116,34 +116,6 @@ namespace ConnectSdk.Windows.Core
             return data;
         }
 
-        //public static string ParseData(String response, String key)
-        //{
-        //    throw new NotImplementedException();
-        //    //if (isXmlEncoded(response)) {
-        //    //    response = Html.fromHtml(response).toString();
-        //    //}
-        //    //XmlPullParser parser = Xml.newPullParser();
-        //    //try {
-        //    //    parser.setInput(new StringReader(response));
-        //    //    int event;
-        //    //    boolean isFound = false;
-        //    //    do {
-        //    //        event = parser.next();
-        //    //        if (event == XmlPullParser.START_TAG) {
-        //    //            String tag = parser.getName();
-        //    //            if (key.equals(tag)) {
-        //    //                isFound = true;
-        //    //            }
-        //    //        } else if (event == XmlPullParser.TEXT && isFound) {
-        //    //            return parser.getText();
-        //    //        }
-        //    //    } while (event != XmlPullParser.END_DOCUMENT);
-        //    //} catch (Exception e) {
-        //    //    e.printStackTrace();
-        //    //}
-        //    return "";
-        //}
-
         public static long ConvertStrTimeFormatToLong(string strTime)
         {
             var tokens = strTime.Split(':');
