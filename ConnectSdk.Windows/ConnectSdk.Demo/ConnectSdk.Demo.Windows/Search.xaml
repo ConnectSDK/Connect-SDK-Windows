@@ -5,7 +5,7 @@
     xmlns:local="using:ConnectSdk.Demo"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:demo="using:ConnectSdk.Demo.Demo"
+    xmlns:demo="using:ConnectSdk.Demo.Demo" RequestedTheme="Light"
     mc:Ignorable="d">
 
     <Page.Resources>
@@ -14,7 +14,7 @@
         <x:String x:Key="ScreenName">Search</x:String>
         <demo:VisibilityConverter x:Key="VisibilityConverter"></demo:VisibilityConverter>
 
-        <Style x:Key="ListBoxStyle1" TargetType="ListBox">
+        <!--<Style x:Key="ListBoxStyle1" TargetType="ListBox">
             <Setter Property="Foreground" Value="{StaticResource ListBoxForegroundThemeBrush}"/>
             <Setter Property="Background" Value="{StaticResource ListBoxBackgroundThemeBrush}"/>
             <Setter Property="BorderBrush" Value="{StaticResource ListBoxBorderThemeBrush}"/>
@@ -72,7 +72,7 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-        </Style>
+        </Style>-->
     </Page.Resources>
 
     <!--
@@ -115,7 +115,7 @@
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Row="0" Grid.Column="0" Text="TVs found" Margin="12" Style="{StaticResource SubheaderTextBlockStyle}"></TextBlock>
             <Button Grid.Row="0" Grid.Column="1" Content="Send search packet" x:Name="RefreshButton" Click="RefreshButton_OnClick"></Button>
-            <ListBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="10" ItemsSource="{Binding Path=DiscoverredDevices}" HorizontalContentAlignment="Stretch" SelectionChanged="TvListBox_OnSelectionChanged" Style="{StaticResource ListBoxStyle1}" >
+            <ListBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="10" ItemsSource="{Binding Path=DiscoverredDevices}" HorizontalContentAlignment="Stretch" SelectionChanged="TvListBox_OnSelectionChanged" >
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Grid >
@@ -124,13 +124,13 @@
                                 <ColumnDefinition Width="*"></ColumnDefinition>
                             </Grid.ColumnDefinitions>
                             <StackPanel>
-                                <TextBlock Text="{Binding Path=FriendlyName}" TextWrapping="Wrap" FontSize="26" Grid.Row="0" Style="{StaticResource TitleTextBlockStyle}" Foreground="White" />
-                                <TextBlock Text="{Binding Path=ModelName}" TextWrapping="Wrap" Foreground="Silver" Style="{StaticResource SubtitleTextBlockStyle}" Grid.Row="1"/>
-                                <TextBlock Text="{Binding Path=IpAddress}" TextWrapping="Wrap" Foreground="Silver" Margin="0,0,0,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
-                                <TextBlock Text="{Binding Path=ServiceNames}" TextWrapping="Wrap" Foreground="Silver" Margin="0,0,0,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                                <TextBlock Text="{Binding Path=FriendlyName}" TextWrapping="Wrap" FontSize="26" Style="{StaticResource TitleTextBlockStyle}" Foreground="Black" />
+                                <TextBlock Text="{Binding Path=ModelName}" TextWrapping="Wrap" Foreground="Gray" Style="{StaticResource SubtitleTextBlockStyle}" Grid.Row="1"/>
+                                <TextBlock Text="{Binding Path=IpAddress}" TextWrapping="Wrap" Foreground="Gray" Margin="0,0,0,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                                <TextBlock Text="{Binding Path=ServiceNames}" TextWrapping="Wrap" Foreground="Gray" Margin="0,0,0,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
                             </StackPanel>
                             <StackPanel Grid.Row="0" Grid.Column="1" Margin="20,0,0,0">
-                                <TextBlock Text="Enter the key shown on the TV"  Visibility="{Binding Path=Services, Converter={StaticResource VisibilityConverter}, ConverterParameter=PairingKeyLabel}" Style="{StaticResource SubtitleTextBlockStyle}" Foreground="White" Margin="0,0,0,10"></TextBlock>
+                                <TextBlock Text="Enter the key shown on the TV"  Visibility="{Binding Path=Services, Converter={StaticResource VisibilityConverter}, ConverterParameter=PairingKeyLabel}" Style="{StaticResource SubtitleTextBlockStyle}" Foreground="Black" Margin="0,0,0,10"></TextBlock>
                                 <TextBox x:Name="PairingKeyTextBox" InputScope="Number" Visibility="{Binding Path=Services, Converter={StaticResource VisibilityConverter}, ConverterParameter=PairingKeyTextBox}"></TextBox>
                                 <Button x:Name="ShowKeyButton" Content="Show pairing key" Click="ShowKeyButton_OnClick" HorizontalAlignment="Left" FontSize="15" Visibility="{Binding Path=Services, Converter={StaticResource VisibilityConverter}, ConverterParameter=ShowKeyButton}" Margin="-2,0,0,0"/>
                                 <Button x:Name="PairOkButton" Content="Send Key" Click="PairOkButton_OnClick"  HorizontalAlignment="Left" FontSize="15" Visibility="{Binding Path=Services, Converter={StaticResource VisibilityConverter}, ConverterParameter=ConnectButton}" Margin="-2,0,0,0"/>

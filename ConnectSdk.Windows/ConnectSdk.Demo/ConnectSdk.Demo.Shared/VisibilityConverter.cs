@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Data;
 using ConnectSdk.Windows.Service;
@@ -12,8 +14,10 @@ namespace ConnectSdk.Demo.Demo
         public object Convert(object value, Type targetType, object parameter, string language)
         {
             var target = parameter as string;
-            var services = ForView.Unwrap<ObservableCollection<NetcastTvService>>(value);
-            var isNetcast = services != null;
+            var services = (List<DeviceService>)(value);
+            //var isNetcast = services != null;
+
+            var isNetcast = (from s in services where s is NetcastTvService select s).Any();
 
             switch (target)
             {

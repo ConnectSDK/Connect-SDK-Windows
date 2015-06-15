@@ -448,7 +448,7 @@ namespace ConnectSdk.Windows.Service
             (
                 loadEventArg =>
                 {
-                    var strObj = ((string)loadEventArg);
+                    var strObj = LoadEventArgs.GetValue<string>(loadEventArg);
 
                     var appId = new AppInfo(Util.DecToHex(strObj));
 
@@ -1865,6 +1865,8 @@ namespace ConnectSdk.Windows.Service
 
                 var payload = command.Payload;
 
+                if (command.HttpMethod == "request")
+                    command.HttpMethod = HttpMethod.Get.ToString();
                 var request = command.GetRequest();
                 request.Headers.Add(HttpMessage.USER_AGENT, HttpMessage.UDAP_USER_AGENT);
 

@@ -1079,7 +1079,7 @@ namespace ConnectSdk.Windows.Service
                 MediaPlayer.MetaDataTitle,
                 MediaPlayer.MetaDataMimeType,
                 MediaPlayer.MediaInfoGet,
-                MediaPlayer.MediaInfoSubscribe,
+                //MediaPlayer.MediaInfoSubscribe,
                 MediaControl.Play,
                 MediaControl.Pause,
                 MediaControl.Stop,
@@ -1087,7 +1087,7 @@ namespace ConnectSdk.Windows.Service
                 MediaControl.Position,
                 MediaControl.Duration,
                 MediaControl.PlayState,
-                MediaControl.PlayStateSubscribe,
+                //MediaControl.PlayStateSubscribe,
                 MediaControl.Next,
                 MediaControl.Previous,
                 PlaylistControl.Next,
@@ -1097,10 +1097,10 @@ namespace ConnectSdk.Windows.Service
                 VolumeControl.VolumeSet,
                 VolumeControl.VolumeGet,
                 VolumeControl.VolumeUpDown,
-                VolumeControl.VolumeSubscribe,
+                //VolumeControl.VolumeSubscribe,
                 VolumeControl.MuteGet,
                 VolumeControl.MuteSet,
-                VolumeControl.MuteSubscribe
+                //VolumeControl.MuteSubscribe
             };
 
             SetCapabilities(capabilities);
