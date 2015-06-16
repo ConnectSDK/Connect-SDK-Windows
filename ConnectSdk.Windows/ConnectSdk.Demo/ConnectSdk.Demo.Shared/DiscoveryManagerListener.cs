@@ -26,8 +26,7 @@ namespace ConnectSdk.Demo.Demo
                 {
                     App.ApplicationModel.AddDevice(device);
                 }
-                //    App.ApplicationModel.DiscoverredDevices.Add(device);
-            });
+             });
         }
 
         public void OnDeviceUpdated(DiscoveryManager manager, ConnectableDevice device)
@@ -41,13 +40,6 @@ namespace ConnectSdk.Demo.Demo
                     device.OnPropertyChanged("ServiceNames");
                 }
             });
-
-            ////force refresh
-            //if (App.ApplicationModel.DiscoverredDevices.Contains(device))
-            //{
-            //    App.ApplicationModel.DiscoverredDevices.Remove(device);
-            //    App.ApplicationModel.DiscoverredDevices.Add(device);
-            //}
         }
 
         public void OnDeviceRemoved(DiscoveryManager manager, ConnectableDevice device)

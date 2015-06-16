@@ -29,20 +29,48 @@ namespace ConnectSdk.Demo
         private ObservableDictionary defaultViewModel = new ObservableDictionary();
         private Model model;
 
-        public Sampler()
-        {
-            model = App.ApplicationModel;
-            InitializeComponent();
-            DataContext = model;
-        }
-
         /// <summary>
-        /// Gets the view model for this <see cref="Page"/>.
         /// This can be changed to a strongly typed view model.
         /// </summary>
         public ObservableDictionary DefaultViewModel
         {
             get { return this.defaultViewModel; }
+        }
+
+        public Sampler()
+        {
+            InitializeComponent();
+
+            model = App.ApplicationModel;
+            InitializeComponent();
+            DataContext = model;
+
+            model.SetControls();
+
+            var dispatcherTimer = new DispatcherTimer();
+            dispatcherTimer.Tick += delegate
+            {
+                if (dispatcherTimer == null) return;
+
+                model.GetVolume();
+            };
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 1);
+            dispatcherTimer.Start();
+
+        }
+
+        private void VolumeRangeBase_OnValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+        {
+            if (e.NewValue != model.Volume)
+            {
+                model.SetVolume(e.NewValue / 100);
+            }
+        }
+
+        private void InputTextBox_OnKeyDown(object sender, KeyRoutedEventArgs e)
+        {
+            model.SendText(e.Key.ToString());
+
         }
 
 

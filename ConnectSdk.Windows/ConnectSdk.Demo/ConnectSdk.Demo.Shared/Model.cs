@@ -34,7 +34,10 @@ namespace ConnectSdk.Demo.Demo
 
         public ConnectableDevice SelectedDevice
         {
-            get { return selectedDevice; }
+            get
+            {
+                return selectedDevice;
+            }
             set
             {
                 selectedDevice = value;
@@ -57,7 +60,10 @@ namespace ConnectSdk.Demo.Demo
 
         public IndependentList<ConnectableDevice> DiscoverredDevices
         {
-            get { return discoverredDevices; }
+            get
+            {
+                return discoverredDevices;
+            }
             set
             {
                 discoverredDevices = value;

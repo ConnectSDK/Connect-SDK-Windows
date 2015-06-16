@@ -50,6 +50,7 @@ namespace ConnectSdk.Demo
         private void TvListBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var device = ForView.Unwrap<ConnectableDevice>(e.AddedItems[0]);
+            if (device == null) return;
 
             App.ApplicationModel.SelectedDevice = device;
 
@@ -69,8 +70,11 @@ namespace ConnectSdk.Demo
             var senderButton = sender as Button;
             if (senderButton == null) return;
 
-            var devicet = ForView.Unwrap<ConnectableDevice>(senderButton.DataContext);
+            var devicet = (ConnectableDevice)(senderButton.DataContext);
             model.SelectedDevice = devicet;
+
+            if (devicet == null) return;
+
             var device = model.SelectedDevice;
             var netCastService = (NetcastTvService)device.GetServiceByName(NetcastTvService.Id);
             if (netCastService != null)
