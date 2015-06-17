@@ -5,6 +5,7 @@
     xmlns:local="using:ConnectSdk.Demo"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:triggers="using:WinRT.Triggers"
     mc:Ignorable="d"
     Background="White" RequestedTheme="Light">
 
@@ -132,14 +133,14 @@
                                 <Border.Background>
                                     <ImageBrush />
                                 </Border.Background>
-                                <!--<triggers:Interactions.Triggers>
-                                        <triggers:EventTrigger EventName="ManipulationDelta">
-                                            <triggers:InvokeCommandAction Command="{Binding ManipulationDeltaCommand}" PassEventArgsToCommand="True"></triggers:InvokeCommandAction>
-                                        </triggers:EventTrigger>
-                                        <triggers:EventTrigger EventName="Tapped">
-                                            <triggers:InvokeCommandAction Command="{Binding ManipulationTappedCommand}" PassEventArgsToCommand="True"></triggers:InvokeCommandAction>
-                                        </triggers:EventTrigger>
-                                    </triggers:Interactions.Triggers>-->
+                                <triggers:Interactions.Triggers>
+                                    <triggers:EventTrigger EventName="ManipulationDelta">
+                                        <triggers:InvokeCommandAction Command="{Binding ManipulationDeltaCommand}" PassEventArgsToCommand="True"></triggers:InvokeCommandAction>
+                                    </triggers:EventTrigger>
+                                    <triggers:EventTrigger EventName="Tapped">
+                                        <triggers:InvokeCommandAction Command="{Binding ManipulationTappedCommand}" PassEventArgsToCommand="True"></triggers:InvokeCommandAction>
+                                    </triggers:EventTrigger>
+                                </triggers:Interactions.Triggers>
                             </Border>
                         </StackPanel>
                     </Grid>

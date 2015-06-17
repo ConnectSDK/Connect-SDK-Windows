@@ -133,6 +133,9 @@
     <Reference Include="UpdateControls.XAML">
       <HintPath>..\..\packages\UpdateControls.2.3.1.0\lib\wpa81\UpdateControls.XAML.dll</HintPath>
     </Reference>
+    <Reference Include="WinRT.Triggers">
+      <HintPath>..\..\packages\WinRTTriggers.1.6.0\lib\winrt45\WinRT.Triggers.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
