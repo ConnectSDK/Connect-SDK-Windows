@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -30,7 +31,7 @@ namespace ConnectSdk.Demo.Demo
         private List<ExternalInputInfo> externalInputs;
         private ExternalInputInfo selectedInput;
         private bool hasPositionInfo;
-
+        public event EventHandler DeviceDisconnected;
 
         public ConnectableDevice SelectedDevice
         {
@@ -187,5 +188,14 @@ namespace ConnectSdk.Demo.Demo
         {
             discoverredDevices.Add(device);
         }
+
+        public virtual void OnDeviceDisconnected(EventArgs e)
+        {
+            this.Connected = false;
+            if (DeviceDisconnected != null)
+                DeviceDisconnected(this, e);
+        }
+
+        public bool Connected { get; set; }
     }
 }

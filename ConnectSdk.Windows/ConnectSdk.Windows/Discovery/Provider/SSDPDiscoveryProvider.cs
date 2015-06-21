@@ -35,7 +35,7 @@ namespace ConnectSdk.Windows.Discovery.Provider
     public class SsdpDiscoveryProvider : IDiscoveryProvider
     {
         private const int RescanInterval = 10000;
-        private const int RescanAttempts = 1;
+        private const int RescanAttempts = 3;
         private const int SsdpTimeout = RescanInterval * RescanAttempts;
 
         private readonly List<IDiscoveryProviderListener> serviceListeners;

@@ -37,6 +37,7 @@ namespace ConnectSdk.Demo
 
             listener.Paired += (sender, o) =>
             {
+                model.Connected = true;
                 model.SelectedDevice = new Independent<ConnectableDevice>(o as ConnectableDevice);
                 Dispatcher.RunAsync(CoreDispatcherPriority.High, () => Frame.Navigate(typeof(Sampler)));
             };
@@ -49,6 +50,8 @@ namespace ConnectSdk.Demo
 
         private void TvListBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (e.AddedItems.Count == 0) return;
+
             var device = ForView.Unwrap<ConnectableDevice>(e.AddedItems[0]);
             if (device == null) return;
 

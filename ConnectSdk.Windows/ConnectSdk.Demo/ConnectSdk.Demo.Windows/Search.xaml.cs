@@ -37,6 +37,7 @@ namespace ConnectSdk.Demo
 
             listener.Paired += (sender, o) =>
             {
+                model.Connected = true;
                 model.SelectedDevice = new Independent<ConnectableDevice>(o as ConnectableDevice);
                 Dispatcher.RunAsync(CoreDispatcherPriority.High, () => Frame.Navigate(typeof(Sampler)));
             };
@@ -49,6 +50,8 @@ namespace ConnectSdk.Demo
 
         private void TvListBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (e.AddedItems.Count == 0) return;
+            
             var device = ForView.Unwrap<ConnectableDevice>(e.AddedItems[0]);
             if (device == null) return;
 
@@ -119,7 +122,7 @@ namespace ConnectSdk.Demo
             model.SelectedDevice = null;
             model.DiscoverredDevices.Clear();
 
-            SearchTvs();
+                SearchTvs();
         }
 
         private void RefreshButton_OnClick(object sender, RoutedEventArgs e)
@@ -130,9 +133,12 @@ namespace ConnectSdk.Demo
         private void ShowKeyButton_OnClick(object sender, RoutedEventArgs e)
         {
             var senderButton = sender as Button;
-            var device = (ConnectableDevice)senderButton.DataContext;
-            var netCastService = (NetcastTvService)device.GetServiceByName(NetcastTvService.Id);
-            netCastService.ShowPairingKeyOnTv();
+            if (senderButton != null)
+            {
+                var device = (ConnectableDevice)senderButton.DataContext;
+                var netCastService = (NetcastTvService)device.GetServiceByName(NetcastTvService.Id);
+                netCastService.ShowPairingKeyOnTv();
+            }
         }
     }
 }

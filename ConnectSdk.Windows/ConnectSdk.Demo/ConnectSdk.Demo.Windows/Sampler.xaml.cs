@@ -1,42 +1,23 @@
-﻿using Windows.System;
-using ConnectSdk.Demo.Common;
+﻿// The Basic Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234237
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
-
-// The Basic Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234237
 using ConnectSdk.Demo.Demo;
-using ConnectSdk.Windows.Service.Capability;
+using ConnectSdk.Windows.Device;
+using ConnectSdk.Windows.Service.WebOs;
+using UpdateControls.Collections;
 
 namespace ConnectSdk.Demo
 {
     /// <summary>
-    /// A basic page that provides characteristics common to most applications.
+    ///     A basic page that provides characteristics common to most applications.
     /// </summary>
     public sealed partial class Sampler : Page
     {
-
-        private ObservableDictionary defaultViewModel = new ObservableDictionary();
-        private Model model;
-
-        /// <summary>
-        /// This can be changed to a strongly typed view model.
-        /// </summary>
-        public ObservableDictionary DefaultViewModel
-        {
-            get { return this.defaultViewModel; }
-        }
+        private readonly Model model;
+        private DispatcherTimer dispatcherTimer;
 
         public Sampler()
         {
@@ -45,19 +26,35 @@ namespace ConnectSdk.Demo
             model = App.ApplicationModel;
             InitializeComponent();
             DataContext = model;
+            model.DeviceDisconnected += model_DeviceDisconnected;
 
             model.SetControls();
 
-            var dispatcherTimer = new DispatcherTimer();
+            dispatcherTimer = new DispatcherTimer();
             dispatcherTimer.Tick += delegate
             {
                 if (dispatcherTimer == null) return;
-                
+
                 model.GetVolume();
             };
             dispatcherTimer.Interval = new TimeSpan(0, 0, 1);
             dispatcherTimer.Start();
+        }
 
+        private void model_DeviceDisconnected(object sender, EventArgs e)
+        {
+            if (dispatcherTimer != null)
+                dispatcherTimer.Stop();
+            dispatcherTimer = null;
+            model.SelectedDevice = null;
+            model.DiscoverredDevices.Clear();
+            model.DiscoverredDevices = new IndependentList<ConnectableDevice>();
+            foreach (var webOstvServiceSocketClient in WebOstvServiceSocketClient.SocketCache)
+            {
+                webOstvServiceSocketClient.Value.Disconnect();
+            }
+            WebOstvServiceSocketClient.SocketCache.Clear();
+            Frame.Navigate(typeof (Search));
         }
 
         private void VolumeRangeBase_OnValueChanged(object sender, RangeBaseValueChangedEventArgs e)
@@ -71,7 +68,18 @@ namespace ConnectSdk.Demo
         private void InputTextBox_OnKeyDown(object sender, KeyRoutedEventArgs e)
         {
             model.SendText(e.Key.ToString());
-            
+        }
+
+        private void DiconnectButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            //dispatcherTimer.Stop();
+            //dispatcherTimer = null;
+
+            model.SelectedDevice.Disconnect();
+
+
+            //model.SelectedDevice = null;
+            //Frame.Navigate(typeof(Search));
         }
     }
 }

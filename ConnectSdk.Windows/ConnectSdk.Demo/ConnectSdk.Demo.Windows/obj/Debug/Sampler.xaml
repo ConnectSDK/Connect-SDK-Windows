@@ -53,6 +53,7 @@
 
             <TextBlock x:Name="pageTitle" Text="{StaticResource AppName}" Style="{StaticResource HeaderTextBlockStyle}" Grid.Column="1" 
                         IsHitTestVisible="false" TextWrapping="NoWrap" VerticalAlignment="Bottom" Margin="0,0,30,40"/>
+            <Button x:ConnectionId='4' Grid.Column="1" HorizontalAlignment="Right" Content="Disconnect" x:Name="DiconnectButton"                                ></Button>
         </Grid>
         <Grid Grid.Row="1">
             <Hub x:Name="HubControl">

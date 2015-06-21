@@ -60,7 +60,11 @@ namespace ConnectSdk.Demo.Demo
 
         public void OnDeviceDisconnected(ConnectableDevice device)
         {
-            
+            App.MainDispatcher.RunAsync(CoreDispatcherPriority.High, () =>
+            {
+                if (App.ApplicationModel.Connected)
+                    App.ApplicationModel.OnDeviceDisconnected(EventArgs.Empty);
+            });
         }
 
         public void OnPairingRequired(ConnectableDevice device, DeviceService service, PairingType pairingType)

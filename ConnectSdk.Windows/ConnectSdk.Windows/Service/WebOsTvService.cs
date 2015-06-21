@@ -2130,8 +2130,7 @@ namespace ConnectSdk.Windows.Service
             }
 
 
-            var webAppSession = WebAppSessions[launchSession.AppId];
-            //launchSession.AppId = webAppSession.GetFullAppId();
+            var webAppSession = WebAppSessions.ContainsKey(launchSession.AppId) ? WebAppSessions[launchSession.AppId] : null;
 
             if (webAppSession != null && webAppSession.IsConnected())
             {
