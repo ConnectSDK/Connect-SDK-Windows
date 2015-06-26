@@ -19,7 +19,7 @@
  * limitations under the License.
  */
  #endregion
-using System.Text;
+using System.Text; 
 
 namespace ConnectSdk.Windows.Core.Upnp.Ssdp
 {
