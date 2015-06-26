@@ -1,10 +1,10 @@
 #region Copyright Notice
 /*
  * ConnectSdk.Windows
- * WebOstvServiceSocketClient.cs
+ * webostvservicesocketclient.cs
  * 
- * Copyright (c) 2015 LG Electronics.
- * Created by Sorin S. Serban on 16-4-2015,
+ * Copyright (c) 2015, https://github.com/sdaemon
+ * Created by Sorin S. Serban on 22-4-2015,
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#endregion
+ #endregion
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

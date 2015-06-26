@@ -1,10 +1,10 @@
 ﻿#region Copyright Notice
 /*
  * ConnectSdk.Windows
- * IPlayListControl.cs
+ * iplaylistcontrol.cs
  * 
- * Copyright (c) 2015 LG Electronics.
- * Created by Sorin S. Serban on 16-4-2015,
+ * Copyright (c) 2015, https://github.com/sdaemon
+ * Created by Sorin S. Serban on 22-4-2015,
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
