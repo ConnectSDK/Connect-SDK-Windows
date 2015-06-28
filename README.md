@@ -1,4 +1,4 @@
-# Connect-SDK-WinRT
+# Connect-SDK-Windows
 Connect SDK is an open source framework that connects your mobile apps with multiple TV platforms. Because most TV platforms support a variety of protocols, Connect SDK integrates and abstracts the discovery and connectivity between all supported protocols.
 
 For more information, visit our [website](http://www.connectsdk.com/).
@@ -19,7 +19,7 @@ For more information, visit our [website](http://www.connectsdk.com/).
 * Partnerships partners@connectsdk.com
 
 ##License
-Copyright (c) 2013-2014 LG Electronics.
+Copyright (c) 2015, [SDaemon](https://github.com/sdaemon).
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
