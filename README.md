@@ -6,17 +6,13 @@ For more information, visit our [website](http://www.connectsdk.com/).
 * [General information about Connect SDK](http://www.connectsdk.com/discover/)
 
 ##Including Connect SDK in your app
-* Clone the repository
-* Include the ConnectSDK.Windows project into your solution
-* Reference ConnectSDK.Windows from the project you want to use it
-* Look at the Connect-SDK-Windows-Sampler for an example on how to use it
+* Clone this repository
+* Include the ConnectSDK.Windows project into your solution by right clicking your solution name, select add existing project and selecting the ConnectSdk.Windows.csproj file
+* Reference ConnectSDK.Windows from the project you want to use it by right clicking the project name, choose add refference and select the ConnectSDK.Windows project)
+* Look at the [Connect-SDK-Windows-Sampler](https://github.com/ConnectSDK/Connect-SDK-Windows-Sampler) for an example on how to use it
 
 ##Contact
-* Twitter [@ConnectSDK](https://www.twitter.com/ConnectSDK)
-* Ask a question with the "tv" tag on [Stack Overflow](http://stackoverflow.com/tags/tv)
-* General Inquiries info@connectsdk.com
-* Developer Support support@connectsdk.com
-* Partnerships partners@connectsdk.com
+* Add any issues [here](https://github.com/ConnectSDK/Connect-SDK-Windows/issues)
 
 ##License
 Copyright (c) 2015, [SDaemon](https://github.com/sdaemon).
