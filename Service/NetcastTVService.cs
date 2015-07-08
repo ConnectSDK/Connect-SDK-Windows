@@ -32,6 +32,7 @@ using System.Xml.Serialization;
 using Windows.Data.Json;
 using Windows.Foundation;
 using ConnectSdk.Windows.Core;
+using ConnectSdk.Windows.Device;
 using ConnectSdk.Windows.Discovery;
 using ConnectSdk.Windows.Etc.Helper;
 using ConnectSdk.Windows.Service.Capability;
@@ -81,7 +82,7 @@ namespace ConnectSdk.Windows.Service
         };
 
         private readonly HttpClient httpClient;
-        private readonly DlnaService dlnaService;
+        private DlnaService dlnaService;
         private LaunchSession inputPickerSession;
         private readonly List<AppInfo> applications;
         private readonly List<IServiceSubscription> subscriptions;
@@ -170,8 +171,8 @@ namespace ConnectSdk.Windows.Service
         public NetcastTvService(ServiceDescription serviceDescription, ServiceConfig serviceConfig) :
             base(serviceDescription, serviceConfig)
         {
-            dlnaService = new DlnaService(serviceDescription, serviceConfig);
-
+            //dlnaService = new DlnaService(serviceDescription, serviceConfig);
+            
             if (serviceDescription != null && serviceDescription.Port != 8080)
                 serviceDescription.Port = 8080;
 
@@ -1195,9 +1196,9 @@ namespace ConnectSdk.Windows.Service
 
         public void SetVolume(float volume, ResponseListener listener)
         {
-            if (dlnaService != null)
+            if (GetDlnaService() != null)
             {
-                dlnaService.SetVolume(volume, listener);
+                GetDlnaService().SetVolume(volume, listener);
             }
             else
                 Util.PostError(listener, ServiceCommandError.NotSupported());
@@ -1241,8 +1242,13 @@ namespace ConnectSdk.Windows.Service
 
         public IServiceSubscription SubscribeVolume(ResponseListener listener)
         {
-            // Do nothing - not supported
-            Util.PostError(listener, ServiceCommandError.NotSupported());
+            if (GetDlnaService() != null)
+            {
+                return GetDlnaService().SubscribeVolume(listener);
+            }
+            else
+                // Do nothing - not supported
+                Util.PostError(listener, ServiceCommandError.NotSupported());
 
             return null;
         }
@@ -1373,24 +1379,24 @@ namespace ConnectSdk.Windows.Service
         public void DisplayImage(string url, string mimeType, string title, string description, string iconSrc,
             ResponseListener listener)
         {
-            if (dlnaService != null)
+            if (GetDlnaService() != null)
             {
-                dlnaService.DisplayImage(url, mimeType, title, description, iconSrc, listener);
+                GetDlnaService().DisplayImage(url, mimeType, title, description, iconSrc, listener);
             }
         }
 
         public void PlayMedia(string url, string mimeType, string title, string description, string iconSrc,
             bool shouldLoop, ResponseListener listener)
         {
-            if (dlnaService != null)
+            if (GetDlnaService() != null)
             {
-                dlnaService.PlayMedia(url, mimeType, title, description, iconSrc, shouldLoop, listener);
+                GetDlnaService().PlayMedia(url, mimeType, title, description, iconSrc, shouldLoop, listener);
             }
         }
 
         public void CloseMedia(LaunchSession launchSession, ResponseListener listener)
         {
-            if (dlnaService == null)
+            if (GetDlnaService() == null)
             {
                 Util.PostError(listener, new ServiceCommandError(0, null));
                 return;
@@ -1440,25 +1446,25 @@ namespace ConnectSdk.Windows.Service
 
         public void Seek(long position, ResponseListener listener)
         {
-            if (dlnaService != null)
+            if (GetDlnaService() != null)
             {
-                dlnaService.Seek(position, listener);
+                GetDlnaService().Seek(position, listener);
             }
         }
 
         public void GetDuration(ResponseListener listener)
         {
-            if (dlnaService != null)
+            if (GetDlnaService() != null)
             {
-                dlnaService.GetDuration(listener);
+                GetDlnaService().GetDuration(listener);
             }
         }
 
         public void GetPosition(ResponseListener listener)
         {
-            if (dlnaService != null)
+            if (GetDlnaService() != null)
             {
-                dlnaService.GetPosition(listener);
+                GetDlnaService().GetPosition(listener);
             }
         }
 
@@ -1909,9 +1915,9 @@ namespace ConnectSdk.Windows.Service
 
         public IServiceSubscription SubscribePlayState(ResponseListener listener)
         {
-            if (dlnaService != null)
+            if (GetDlnaService() != null)
             {
-                return dlnaService.SubscribePlayState(listener);
+                return GetDlnaService().SubscribePlayState(listener);
             }
             else Util.PostError(listener, ServiceCommandError.NotSupported());
             return null;
@@ -2002,5 +2008,60 @@ namespace ConnectSdk.Windows.Service
             }
             SetCapabilities(capabilities);
         }
+
+        public DlnaService GetDlnaService()
+        {
+            if (dlnaService == null)
+            {
+                DiscoveryManager discoveryManager = DiscoveryManager.GetInstance();
+                ConnectableDevice device = discoveryManager.GetAllDevices()[ServiceDescription.IpAddress];
+
+                if (device != null)
+                {
+                    DlnaService foundService = null;
+
+                    foreach (DeviceService service in device.Services)
+                    {
+                        if (service is DlnaService)
+                        {
+                            foundService = (DlnaService) service;
+                            break;
+                        }
+                    }
+
+                    dlnaService = foundService;
+                }
+            }
+
+            return dlnaService;
+        }
+
+        //public DialService GetDialService()
+        //{
+        //    if (dialService == null)
+        //    {
+        //        DiscoveryManager discoveryManager = DiscoveryManager.GetInstance();
+        //        ConnectableDevice device = discoveryManager.GetAllDevices()[ServiceDescription.IpAddress];
+
+        //        if (device != null)
+        //        {
+        //            DialService foundService = null;
+
+        //            foreach (DeviceService service in device.Services)
+        //            {
+        //                if (service is DialService)
+        //                {
+        //                    foundService = (DialService) service;
+        //                    break;
+        //                }
+        //            }
+
+        //            dlnaService = foundService;
+        //        }
+        //    }
+
+        //    return dlnaService;
+        //}
+
     }
 }

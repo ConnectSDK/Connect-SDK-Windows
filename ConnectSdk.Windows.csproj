@@ -61,6 +61,10 @@
     <Compile Include="Core\TextInputType.cs" />
     <Compile Include="Core\Upnp\Device.cs" />
     <Compile Include="Service\Capability\ICapabilityMethod.cs" />
+    <Compile Include="Service\Upnp\DlnaNotifyParser.cs" />
+    <Compile Include="Service\Upnp\HttpUrlConnectionClient.cs" />
+    <Compile Include="Service\Upnp\HttpConnection.cs" />
+    <Compile Include="Service\Upnp\CustomConnectionClient.cs" />
     <Compile Include="Service\NetCast\NetcastVirtualKeycodes.cs" />
     <Compile Include="Service\Upnp\DlnaHttpServer.cs" />
     <Compile Include="Wrappers\HttpClientWrapper.cs" />

@@ -83,8 +83,8 @@ namespace ConnectSdk.Windows.Core
             //TODO: check here for wireless to be active and throw exception when not
             var hnames = NetworkInformation.GetHostNames();
             return (from hostName in hnames 
-                    where hostName.IPInformation != null 
-                    where hostName.IPInformation.NetworkAdapter.IanaInterfaceType == 71 
+                    where hostName.IPInformation != null
+                    where (hostName.IPInformation.NetworkAdapter.IanaInterfaceType == 71 || hostName.IPInformation.NetworkAdapter.IanaInterfaceType == 6)
                     select hostName.CanonicalName).FirstOrDefault();
         }
 

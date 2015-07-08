@@ -18,27 +18,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- #endregion
+#endregion
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Xml;
-using Windows.Data.Html;
 using Windows.Data.Json;
-using Windows.Data.Xml.Dom;
-using Windows.Networking.Sockets;
-using Windows.Storage.Streams;
 using Windows.UI.Xaml;
-using Windows.UI.Xaml.Markup;
-using ConnectSdk.Windows.Annotations;
 using ConnectSdk.Windows.Core;
-using ConnectSdk.Windows.Core.Upnp.Ssdp;
 using ConnectSdk.Windows.Discovery;
 using ConnectSdk.Windows.Etc.Helper;
 using ConnectSdk.Windows.Service.Capability;
@@ -926,6 +917,10 @@ namespace ConnectSdk.Windows.Service
 
         public IServiceSubscription SubscribeVolume(ResponseListener listener)
         {
+            var request = new UrlServiceSubscription(this, "volume", null, null);
+            request.AddListener(listener);
+            AddSubscription(request);
+            return request;
             // winrt does not support server
             throw new NotSupportedException();
         }
@@ -1096,7 +1091,7 @@ namespace ConnectSdk.Windows.Service
                 VolumeControl.VolumeSet,
                 VolumeControl.VolumeGet,
                 VolumeControl.VolumeUpDown,
-                //VolumeControl.VolumeSubscribe,
+                VolumeControl.VolumeSubscribe,
                 VolumeControl.MuteGet,
                 VolumeControl.MuteSet,
                 //VolumeControl.MuteSubscribe
@@ -1233,336 +1228,136 @@ namespace ConnectSdk.Windows.Service
 
         public void SubscribeServices()
         {
-            //var myIpAddress = Util.GetLocalWirelessIp();
+            var myIpAddress = Util.GetLocalWirelessIp();
 
-            //var serviceList = ServiceDescription.ServiceList;
+            var serviceList = ServiceDescription.ServiceList;
 
-            //if (serviceList != null)
-            //{
-            //    foreach (var service in serviceList)
-            //    {
-            //        var eventSubUrl = MakeControlUrl("/", service.EventSubUrl);
-            //        if (eventSubUrl == null)
-            //            continue;
+            if (serviceList != null)
+            {
+                foreach (var service in serviceList)
+                {
+                    var eventSubUrl = MakeControlUrl("/", service.EventSubUrl);
+                    if (eventSubUrl == null)
+                        continue;
 
-            //        try
-            //        {
-            //            var connection = HttpConnection.NewSubscriptionInstance(
-            //                new Uri("http://" + ServiceDescription.IpAddress + ":" + ServiceDescription.Port + eventSubUrl));
-            //            connection.SetMethod(HttpConnection.Method.Subscribe);
-            //            connection.SetHeader("CALLBACK", "<http://" + myIpAddress + ":" + httpServer.Port + eventSubUrl + ">");
-            //            connection.SetHeader("NT", "upnp:event");
-            //            connection.SetHeader("TIMEOUT", "Second-" + Timeout);
-            //            connection.SetHeader("Connection", "close");
-            //            connection.SetHeader("Content-length", "0");
-            //            connection.SetHeader("USER-AGENT", "Android UPnp/1.1 ConnectSDK");
-            //            connection.Execute();
-            //            if (connection.GetResponseCode() == 200)
-            //            {
-            //                sidList.Add(service.ServiceType, connection.GetResponseHeader("SID"));
-            //            }
-            //        }
-            //        catch (Exception e)
-            //        {
-            //            throw;
-            //        }
-            //    }
-            //}
-            //ResubscribeServices();
+                    try
+                    {
+                        var connection = HttpConnection.NewSubscriptionInstance(
+                            new Uri("http://" + ServiceDescription.IpAddress + ":" + ServiceDescription.Port + eventSubUrl));
+                        connection.MethodType = HttpConnection.Method.SUBSCRIBE;
+                        connection.CallBack = "<http://" + myIpAddress + ":" + httpServer.Port + eventSubUrl + ">";
+                        connection.Nt = "upnp:event";
+                        connection.Timeout = "Second-" + Timeout;
+                        connection.Connection = "close";
+                        connection.ContentLength = "0";
+                        connection.UserAgent = "Android UPnp/1.1 ConnectSDK";
+
+                        var responseListener = new ResponseListener
+                        (
+                            loadEventArg =>
+                            {
+                                var responseCode = LoadEventArgs.GetValueInt(loadEventArg);
+                                if (responseCode == 200)
+                                {
+                                    if (sidList == null)
+                                        sidList = new Dictionary<string, string>();
+                                    sidList.Add(service.ServiceType, connection.GetResponseHeader("SID"));
+                                }
+
+                            },
+                            serviceCommandError =>
+                            {
+                            }
+                        );
+
+
+                        connection.Execute(responseListener);
+
+                    }
+                    catch (Exception e)
+                    {
+                        throw;
+                    }
+                }
+            }
+            ResubscribeServices();
         }
 
         public void ResubscribeServices()
         {
-            //resubscriptionTimer = new DispatcherTimer {Interval = TimeSpan.FromMilliseconds(Timeout/2*1000)};
-            //resubscriptionTimer.Tick += delegate
-            //{
-            //    var serviceList = ServiceDescription.ServiceList;
+            resubscriptionTimer = new DispatcherTimer {Interval = TimeSpan.FromMilliseconds(Timeout/2*1000)};
+            resubscriptionTimer.Tick += delegate
+            {
+                var serviceList = ServiceDescription.ServiceList;
 
-            //    if (serviceList != null)
-            //    {
-            //        foreach (var service in serviceList)
-            //        {
-            //            var eventSubUrl = MakeControlUrl("/", service.EventSubUrl);
-            //            if (eventSubUrl == null)
-            //            {
-            //                continue;
-            //            }
+                if (serviceList != null)
+                {
+                    foreach (var service in serviceList)
+                    {
+                        var eventSubUrl = MakeControlUrl("/", service.EventSubUrl);
+                        if (eventSubUrl == null)
+                        {
+                            continue;
+                        }
 
-            //            var sid = sidList[service.ServiceType];
-            //            try
-            //            {
-            //                var connection = HttpConnection.NewSubscriptionInstance(
-            //                    new Uri("http://" + ServiceDescription.IpAddress + ":" + ServiceDescription.Port +
-            //                            eventSubUrl));
-            //                connection.SetMethod(HttpConnection.Method.Subscribe);
-            //                connection.SetHeader("TIMEOUT", "Second-" + Timeout);
-            //                connection.SetHeader("SID", sid);
-            //                connection.Execute();
-            //            }
-            //            catch (Exception e)
-            //            {
-            //                throw;
-            //            }
-            //        }
-            //    }
-            //};
+                        var sid = sidList[service.ServiceType];
+                        try
+                        {
+                            var connection = HttpConnection.NewSubscriptionInstance(
+                                new Uri("http://" + ServiceDescription.IpAddress + ":" + ServiceDescription.Port +
+                                        eventSubUrl));
+                            connection.SetMethod(HttpConnection.Method.SUBSCRIBE);
+                            connection.SetHeader("TIMEOUT", "Second-" + Timeout);
+                            connection.SetHeader("SID", sid);
+                            connection.Execute(null);
+                        }
+                        catch (Exception e)
+                        {
+                            throw;
+                        }
+                    }
+                }
+            };
+            resubscriptionTimer.Start();
         }
 
         private DispatcherTimer resubscriptionTimer;
 
         public void UnsubscribeServices()
         {
-            //if (resubscriptionTimer != null)
-            //    resubscriptionTimer.Stop();
+            if (resubscriptionTimer != null)
+                resubscriptionTimer.Stop();
 
-            //var serviceList = ServiceDescription.ServiceList;
+            var serviceList = ServiceDescription.ServiceList;
 
-            //if (serviceList != null)
-            //{
-            //    foreach (var service in serviceList)
-            //    {
-            //        var eventSubUrl = MakeControlUrl("/", service.EventSubUrl);
-            //        if (eventSubUrl == null)
-            //            continue;
+            if (serviceList != null)
+            {
+                foreach (var service in serviceList)
+                {
+                    var eventSubUrl = MakeControlUrl("/", service.EventSubUrl);
+                    if (eventSubUrl == null)
+                        continue;
 
-            //        var sid = sidList[service.ServiceType];
-            //        try
-            //        {
-            //            var connection = HttpConnection.NewSubscriptionInstance(
-            //                new Uri("http://" + ServiceDescription.IpAddress + ":" + ServiceDescription.Port + eventSubUrl));
-            //            connection.SetMethod(HttpConnection.Method.Unsubscribe);
-            //            connection.SetHeader("SID", sid);
-            //            connection.Execute();
-            //            if (connection.GetResponseCode() == 200)
-            //            {
-            //                sidList.Remove(service.ServiceType);
-            //            }
-            //        }
-            //        catch (Exception)
-            //        {
+                    var sid = sidList[service.ServiceType];
+                    try
+                    {
+                        var connection = HttpConnection.NewSubscriptionInstance(
+                            new Uri("http://" + ServiceDescription.IpAddress + ":" + ServiceDescription.Port + eventSubUrl));
+                        connection.SetMethod(HttpConnection.Method.UNSUBSCRIBE);
+                        connection.SetHeader("SID", sid);
+                        connection.Execute(null);
+                        if (connection.GetResponseCode() == 200)
+                        {
+                            sidList.Remove(service.ServiceType);
+                        }
+                    }
+                    catch (Exception)
+                    {
 
-            //            throw;
-            //        }
-            //    }
-            //}
-        }
-    }
-
-    public abstract class HttpConnection
-    {
-        public enum Method
-        {
-            Get,
-            Post,
-            Put,
-            Delete,
-            Subscribe,
-            Unsubscribe
-        }
-
-        public static HttpConnection NewSubscriptionInstance(Uri uri)
-        {
-            return new CustomConnectionClient(uri);
-        }
-
-        public static HttpConnection NewInstace(Uri uri)
-        {
-            return new HttpUrlConnectionClient(uri);
-        }
-
-        public abstract void SetMethod(Method subscribe);
-        public abstract int GetResponseCode();
-
-        public abstract String GetResponseString();
-
-        public abstract void Execute();
-
-        public abstract void SetPayload(String payload);
-
-        public abstract void SetPayload(byte[] payload);
-
-        public abstract void SetHeader(String name, String value);
-
-        public abstract String GetResponseHeader(String name);
-
-    }
-
-    public class CustomConnectionClient : HttpConnection
-    {
-        private Uri uri;
-        private Method method;
-        private int code;
-        private string response;
-        private Dictionary<String, String> headers = new Dictionary<String, String>();
-        private string payload;
-
-        public CustomConnectionClient(Uri uri)
-        {
-            this.uri = uri;
-        }
-
-        public override void SetMethod(Method method)
-        {
-            this.method = method;
-        }
-
-        public override int GetResponseCode()
-        {
-            return code;
-        }
-
-        public override string GetResponseString()
-        {
-            return response;
-        }
-
-        public override void Execute()
-        {
-            //int port = uri.Port > 0 ? uri.Port : 80;
-            //using (var socket = new MessageWebSocket())
-            //{
-            //    socket.MessageReceived += (sender, args) =>
-            //        {
-            //            StringBuilder sb = new StringBuilder();
-            //            String line;
-            //            line = reader.readLine();
-            //            if (line != null)
-            //            {
-            //                String[] tokens = line.split(" ");
-            //                if (tokens.length > 2)
-            //                {
-            //                    code = Integer.parseInt(tokens[1]);
-            //                }
-            //            }
-
-            //            while (null != (line = reader.readLine()))
-            //            {
-            //                if (line.isEmpty())
-            //                {
-            //                    break;
-            //                }
-            //                String[] pair = line.split(":", 2);
-            //                if (pair != null && pair.length == 2)
-            //                {
-            //                    responseHeaders.put(pair[0].trim(), pair[1].trim());
-            //                }
-            //            }
-
-            //            while (null != (line = reader.readLine()))
-            //            {
-            //                sb.append(line);
-            //                sb.append("\r\n");
-            //            }
-            //            response = sb.toString();
-            //            socket.Close();
-            //        };
-            //    socket.Control.MessageType = SocketMessageType.Utf8;
-            //    socket.OutputStream.FlushAsync().GetResults();
-            //    var messageWriter = new DataWriter(socket.OutputStream);
-
-
-            //    var sb = new StringBuilder();
-            //    sb.Append(method.ToString());
-            //    sb.Append(" ");
-            //    sb.Append(uri.AbsolutePath);
-            //    sb.Append(string.IsNullOrEmpty(uri.Query) ? "" : "?" + uri.Query);
-            //    sb.Append(" HTTP/1.1\r\n");
-
-            //    sb.Append("Host:");
-            //    sb.Append(uri.Host);
-            //    sb.Append(":");
-            //    sb.Append(port);
-            //    sb.Append("\r\n");
-
-            //    foreach (var pair in headers)
-            //    {
-            //        sb.Append(pair.Key);
-            //        sb.Append(":");
-            //        sb.Append(pair.Value);
-            //        sb.Append("\r\n");
-            //    }
-            //    sb.Append("\r\n");
-
-            //    if (payload != null)
-            //        sb.Append(payload);
-
-            //    messageWriter.WriteString(sb.ToString());
-            //    messageWriter.StoreAsync();
-            //    Debug.WriteLine("{0} : {1} : {2}", DateTime.Now, "sent", sb);
-            //}
-
-
-            
-
-            
-        }
-
-        public override void SetPayload(string payload)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void SetPayload(byte[] payload)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void SetHeader(string name, string value)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override string GetResponseHeader(string name)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class HttpUrlConnectionClient : HttpConnection
-    {
-        public HttpUrlConnectionClient(object uri)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void SetMethod(Method subscribe)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override int GetResponseCode()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override string GetResponseString()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void Execute()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void SetPayload(string payload)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void SetPayload(byte[] payload)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void SetHeader(string name, string value)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override string GetResponseHeader(string name)
-        {
-            throw new NotImplementedException();
+                        throw;
+                    }
+                }
+            }
         }
     }
 }
