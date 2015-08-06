@@ -18,7 +18,7 @@ Look at the [Connect-SDK-Windows-Sampler](https://github.com/ConnectSDK/Connect-
 
 The basics are:
 * implement the IDiscoveryManagerListener (like [here](https://github.com/ConnectSDK/Connect-SDK-Windows-Sampler/blob/master/ConnectSdk.Demo/ConnectSdk.Demo.Shared/DiscoveryManagerListener.cs)) to be able to be notified when a device was discoverred, connected or disconnected
-* call to connect to the device (like [here](https://github.com/ConnectSDK/Connect-SDK-Windows-Sampler/blob/master/ConnectSdk.Demo/ConnectSdk.Demo.WindowsPhone/Search.xaml.cs)
+* call to connect to the device (like [here](https://github.com/ConnectSDK/Connect-SDK-Windows-Sampler/blob/master/ConnectSdk.Demo/ConnectSdk.Demo.WindowsPhone/Search.xaml.cs))
 * use the device object to interact with it
 
 ##Contact
